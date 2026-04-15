@@ -135,8 +135,7 @@ meta-hmi-app           # Application layer:
 - Picks tasks from `AGENTS.md` task queue — only tasks marked `[READY]`
 - Implements exactly as specified; does not deviate from architecture
 - Reports completion by updating task status to `[REVIEW]` in `AGENTS.md`
-- Creates a branch named `task/TASK-NNN-short-description` for every task
-- Never commits directly to `main` or `develop`
+- **Branching (mandatory):** creates and uses a branch named `task/TASK-NNN-short-description` for every task — never commit directly to `main` or `develop`; merge only after A1 marks `[DONE]`
 - Never modifies community Yocto layers
 - Never changes partition layout or RAUC key material
 - See `.cursor/rules/elevator-hmi.mdc` for full rules

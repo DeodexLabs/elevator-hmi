@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-001 reviewed and approved by A1)  
+**Last updated:** 2026-04-15 (TASK-002/003/004 in REVIEW on task branches)  
 
 ---
 
@@ -94,7 +94,7 @@ Note: This is a simplified WKS. The final A/B layout will be coordinated with RA
 ---
 
 ### TASK-004 — JD9365D kernel backport patch (Phase 1 prerequisite)
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Assigned to:** A2  
 **Phase:** 0 (prepared), applied in Phase 1  
 **Depends on:** TASK-001 ✓  
@@ -120,7 +120,11 @@ Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.9
 - A check note is added to `diary/PROGRESS.md` confirming backport compatibility
 
 **Output notes (A2 fills in):**
-> _pending_
+> - Branch: `task/TASK-004-jd9365d-kernel-backport`.
+> - Patch `0001-drm-panel-add-jadard-jd9365da-h3-driver-backport-6.1.99.patch`: adds `panel-jadard-jd9365da-h3.c`, `jadard,jd9365da-h3.yaml`, and Makefile/Kconfig hooks (source files from Linux **v6.2** via kernel.org `plain` URLs; patch generated against **gregkh/linux v6.1.99** tag `cac15753b8ceb505a3c646f83a86dccbab9e33a3`).
+> - `git apply --check` on clean v6.1.99 tree: **OK** (also verified on copy in workspace).
+> - `linux-rockchip_%.bbappend` skeleton applies patch via `SRC_URI`.
+> - **API sanity:** driver uses `drm_panel_init`, `drm_panel_of_backlight`, `mipi_dsi_*` DCS helpers — all present in v6.1.99 headers checked under `/tmp/linux-v6199` during preparation (no 6.2-only symbols spotted in a quick header grep).
 
 ---
 
