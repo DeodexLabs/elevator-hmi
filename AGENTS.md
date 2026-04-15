@@ -51,7 +51,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ### TASK-102 — [Phase 1] U-Boot eMMC boot recipe *(archived — [DONE] 2026-04-15)*
 **Status:** `[DONE]`  
-**Branch:** `task/TASK-102-uboot-emmc` (merge to `develop` after A1 commit in this session).  
+**Branch:** `task/TASK-102-uboot-emmc` (merged to `develop` 2026-04-15).  
 
 **Output notes (A2):** *(summary)* `u-boot-rockchip_%.bbappend` + **`elevator-hmi-emmc-boot.cfg`** Kconfig fragment; **`UBOOT_LOCALVERSION`**; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on **`lz4c`**. See branch history for full bullets.
 
