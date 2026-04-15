@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Elevator HMI — Boardcon EM3566 v3 reference + LMT101SX006C (JD9365) on MIPI-DSI0.
+ *
+ * Extends the Rockchip BSP baseline:
+ *   arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10-linux.dts
+ * from the linux-rockchip_6.1 kernel (SRCREV in meta-rockchip linux-rockchip_6.1.bb
+ * at the kas-pinned commit).
+ *
+ * Panel overlay: elevator-hmi-lmt101sx006c-panel.dtsi (replaces stock EVB
+ * simple-panel-dsi child under &dsi0).
+ */
+
+/dts-v1/;
+
+#include "rk3566-evb2-lp4x-v10-linux.dts"
+#include "elevator-hmi-lmt101sx006c-panel.dtsi"

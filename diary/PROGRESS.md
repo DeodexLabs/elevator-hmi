@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-15 — TASK-104: A2 verification + commit on task branch (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Verification (against TASK-104 spec)
+- **meta-hmi-platform only:** machine `elevator-hmi-em3566.conf`, board DTS include chain, panel `.dtsi` on **`&dsi0`** with BSP phandles, `linux-rockchip_%.bbappend` `SRC_URI`, `kas/elevator-hmi.yml` machine — matches task report.  
+- **Community layers:** no `meta-rockchip` / `meta-qt6` / `meta-rauc` diffs in working tree.  
+- **Smoke:** not green on review host (no `lz4c`); documented in `AGENTS.md` TASK-104 output notes.  
+- **Hygiene:** fixed wrong script path in TASK-103 note (`scripts/setup-build-host.sh`).
+
+### Git
+- Committed all TASK-104 changes on **`task/TASK-104-boardcon-machine-dts`** for A1 review (`[REVIEW]` unchanged until A1 sets `[DONE]` / `[REWORK]`).
+
+---
+
 ## 2026-04-15 — Git: TASK-101 commits + merge to `develop` + push (A1)
 
 **Agent:** A1  
@@ -47,6 +63,20 @@
 ### Next actions
 - A2: branch `task/TASK-104-boardcon-machine-dts` (or similar), implement TASK-104 when BSP path is known.  
 - Owner: commit/merge TASK-101 branch after verifying git state; EM3566 v3 + LMT101 bench for BLK-006.
+
+---
+
+## 2026-04-15 — TASK-104: Boardcon EM3566 machine + LMT101 on DSI0 (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- Added **`meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf`** (`require rockchip-rk3566-evb.conf`, `KERNEL_DEVICETREE = rockchip/elevator-hmi-boardcon-em3566-v3.dtb`).  
+- Added **`elevator-hmi-boardcon-em3566-v3.dts`** including **`rk3566-evb2-lp4x-v10-linux.dts`** + rewrote **`elevator-hmi-lmt101sx006c-panel.dtsi`** as **`&dsi0`** overlay: `/delete-node/` stock EVB `panel@0` and `ports/port@1`, jadard `panel@0`, phandles **`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`** (from pinned `linux-rockchip_6.1` BSP DTS at `SRCREV ea9e2a93…`).  
+- **`kas/elevator-hmi.yml`:** default `machine: elevator-hmi-em3566`. **`linux-rockchip_%.bbappend`:** `SRC_URI` for new `.dts`.  
+- **Smoke:** `kas build … --target virtual/kernel` failed on this host — missing **`lz4c`** (`HOSTTOOLS`); document install + re-run.  
+- **Branch:** `task/TASK-104-boardcon-machine-dts`.
 
 ---
 

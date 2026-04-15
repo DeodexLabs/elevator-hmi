@@ -77,7 +77,8 @@ Full narrative: [`diary/BLOCKERS.md`](../../diary/BLOCKERS.md) **BLK-001** (clos
 
 | Topic | Location |
 |------|----------|
-| Panel DTS fragment + kernel patches | [`meta-hmi-platform/recipes-kernel/linux/files/`](../../meta-hmi-platform/recipes-kernel/linux/files/) |
+| Panel DTS fragment + Boardcon machine DTS + kernel patches | [`meta-hmi-platform/recipes-kernel/linux/files/`](../../meta-hmi-platform/recipes-kernel/linux/files/) (`elevator-hmi-boardcon-em3566-v3.dts`, `elevator-hmi-lmt101sx006c-panel.dtsi`) |
+| Yocto machine (`MACHINE`) | [`meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf`](../../meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf) |
 | Kernel bbappend | `meta-hmi-platform/recipes-kernel/linux/linux-rockchip_%.bbappend` (repo root relative) |
 | Task queue | [`AGENTS.md`](../../AGENTS.md) |
 | Blockers | [`diary/BLOCKERS.md`](../../diary/BLOCKERS.md) |

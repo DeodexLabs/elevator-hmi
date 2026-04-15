@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (EM3566 v3 dev kit on hand; TASK-102/103 → `[READY]`)  
+**Last updated:** 2026-04-15 (TASK-104 → `[REVIEW]`; TASK-102/103 `[READY]`)  
 
 ---
 
@@ -36,12 +36,12 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **`[READY]`** tasks **TASK-104**, **TASK-102**, **TASK-103`** — pick **one** at a time per protocol; suggested order **104 → 102 → 103** (DTS/kernel path, then U-Boot eMMC, then minimal image).
+**A2 queue:** **TASK-104** `[REVIEW]` — **TASK-102**, **TASK-103`** **`[READY]`** — pick **one** active task at a time; suggested next **102 → 103** after A1 closes 104.
 
 ---
 
 ### TASK-104 — [Phase 1] Boardcon EM3566 machine DTS — integrate LMT101 panel fragment
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Phase:** 1  
 **Depends on:** TASK-101 ✓, TASK-001 ✓, TASK-002 ✓ (build host packages + kas), pinned `meta-rockchip` tree available locally so the correct **`rk3566-*.dts` / machine** path can be identified **without guessing**  
 
@@ -53,6 +53,18 @@ Tasks are sorted by dependency order. Do not reorder.
 - **Smoke:** `kas build` / `bitbake virtual/kernel` (or at minimum `bitbake linux-rockchip -c compile`) succeeds on a host that completed TASK-002. Log command + result in task output notes.  
 
 **Acceptance:** Panel fragment included; DT compiles; kernel recipe builds; output notes list files touched and any BSP label renames.
+
+**Output notes (A2):**  
+- **BSP baseline (no guess):** `meta-rockchip` @ `5218d6330f5c49724650e63902e569c909df0889` — `rockchip-rk3566-evb` uses `KERNEL_DEVICETREE = "rockchip/rk3566-evb2-lp4x-v10-linux.dtb"`. Kernel `SRCREV` = `ea9e2a9344bfe7f1130dee8100173b6cb95445d2` (`linux-rockchip_6.1.bb`). Inspected `rk3566-evb2-lp4x-v10.dtsi`, `rk3568-evb.dtsi`, `rk356x.dtsi` from that tree: MIPI host is **`&dsi0`**, stock panel is **`panel@0`** under `&dsi0` with **`ports/port@1`** for `dsi_out_panel` ↔ `panel_in_dsi`. TASK-101 fragment incorrectly used **`&dsi`**; replaced with **`&dsi0`** and merge-safe **`/delete-node/`** on stock `panel@0` and `ports/port@1`, then new jadard `panel@0` + `port@1`.  
+- **Phandles aligned to BSP:** `vdd-supply = <&vcc3v3_lcd0_n>;`, `vccio-supply = <&vcca_1v8>;`, `backlight = <&backlight>;` (from `rk3566-evb2-lp4x-v10.dtsi` + `rk3568-evb.dtsi`). No `reset-gpios` (BLK-006).  
+- **New files:** `meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf` (`require rockchip-rk3566-evb.conf`, `KERNEL_DEVICETREE` override); `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-boardcon-em3566-v3.dts` (`#include "rk3566-evb2-lp4x-v10-linux.dts"` + panel dtsi); rewrote `elevator-hmi-lmt101sx006c-panel.dtsi` as **`&dsi0`** overlay only.  
+- **`linux-rockchip_%.bbappend`:** `SRC_URI += file://elevator-hmi-boardcon-em3566-v3.dts`.  
+- **`kas/elevator-hmi.yml`:** `machine: elevator-hmi-em3566`.  
+- **Docs:** `README.md`, `library/EM3566/README.md` — machine string updated / cross-links.  
+- **Smoke:** Ran `kas build kas/elevator-hmi.yml --target virtual/kernel` — **failed before BitBake**: host missing **`lz4c`** in `PATH` (kas HOSTTOOLS). Install `lz4` / host deps per TASK-002 script, then re-run `kas build kas/elevator-hmi.yml --target virtual/kernel` on a prepared host; **DTB compile not executed in this session**.  
+- **Branch:** `task/TASK-104-boardcon-machine-dts`.  
+- **Caveat:** Assumes Boardcon EM3566 v3 MIPI LCD is on **DSI0** like RK3566 EVB2 reference; if vendor routes the FPC to **DSI1**, switch overlay to `&dsi1` and mirror `dsi1_panel` / route patterns from the same BSP files.  
+- **Pre-commit verification:** Working tree matches these notes; no edits under `meta-rockchip/` (community layer read-only). Review host: **`lz4c` absent from PATH** — kernel smoke still pending; run **`scripts/setup-build-host.sh`** (TASK-002), then re-run `kas build kas/elevator-hmi.yml --target virtual/kernel`.
 
 ---
 
@@ -68,7 +80,7 @@ Tasks are sorted by dependency order. Do not reorder.
 **Phase:** 1  
 **Depends on:** TASK-001 ✓, TASK-002 ✓ (build host script + deps installed on the machine used for `kas`/`bitbake`), **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
 
-**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance (or TASK-104); if the host is not yet exercised, run **`scripts/yocto-build-host-setup.sh`** (TASK-002) before claiming `[REVIEW]`.
+**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance (or TASK-104); if the host is not yet exercised, run **`scripts/setup-build-host.sh`** (TASK-002) before claiming `[REVIEW]`.
 
 ---
 

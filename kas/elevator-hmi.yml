@@ -12,7 +12,7 @@
 header:
   version: 21
 
-machine: rockchip-rk3566-evb
+machine: elevator-hmi-em3566
 distro: poky
 target: core-image-minimal
 
