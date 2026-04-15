@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-104 `[DONE]`; TASK-102/103 `[READY]` — next for A2)  
+**Last updated:** 2026-04-15 (TASK-102 `[DONE]`; TASK-103 `[READY]` — next for A2)  
 
 ---
 
@@ -36,14 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **`[READY]`** — **TASK-102**, **TASK-103** (pick **one** at a time; suggested **102 → 103**). **`git checkout develop && git pull`** before the next task branch.
-
----
-
-### TASK-102 — [Phase 1] U-Boot eMMC boot recipe
-**Status:** `[READY]`  
-**Phase:** 1  
-**Depends on:** TASK-001 ✓, **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
+**A2 queue:** **TASK-103** **`[READY]`** only — **`git checkout develop && git pull`** before **`task/TASK-103-…`** branch.
 
 ---
 
@@ -52,7 +45,23 @@ Tasks are sorted by dependency order. Do not reorder.
 **Phase:** 1  
 **Depends on:** TASK-001 ✓, TASK-002 ✓ (build host script + deps installed on the machine used for `kas`/`bitbake`), **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
 
-**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance; if the host is not yet exercised, run **`scripts/setup-build-host.sh`** (TASK-002) before claiming `[REVIEW]`. **Follow-up:** on a TASK-002–prepared host, run **`kas build kas/elevator-hmi.yml --target virtual/kernel`** to close the kernel smoke gap left at TASK-104 sign-off (host `lz4c`).
+**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance; if the host is not yet exercised, run **`scripts/setup-build-host.sh`** (TASK-002) before claiming `[REVIEW]`. **Follow-up:** on a TASK-002–prepared host, run **`kas build kas/elevator-hmi.yml --target virtual/kernel`** and **`--target u-boot`** to close smoke gaps from TASK-104 / TASK-102 sign-off (host `lz4c`).
+
+---
+
+### TASK-102 — [Phase 1] U-Boot eMMC boot recipe *(archived — [DONE] 2026-04-15)*
+**Status:** `[DONE]`  
+**Branch:** `task/TASK-102-uboot-emmc` (merge to `develop` after A1 commit in this session).  
+
+**Output notes (A2):** *(summary)* `u-boot-rockchip_%.bbappend` + **`elevator-hmi-emmc-boot.cfg`** Kconfig fragment; **`UBOOT_LOCALVERSION`**; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on **`lz4c`**. See branch history for full bullets.
+
+**A1 review notes (2026-04-15):**  
+- **PASS:** All changes under **`meta-hmi-platform`**; **`u-boot-rockchip_%.bbappend`** uses Scarthgap **`SRC_URI:append`** / **`FILESEXTRAPATHS:prepend`**; no **`meta-rockchip`** edits; Rockchip **`make.sh`** / SPL flow untouched.  
+- **PASS:** **`elevator-hmi-emmc-boot.cfg`** is a standard Poky **`*.cfg`** fragment; **`u-boot.inc`** pulls **`u-boot-configure.inc`**, which runs **`merge_config.sh`** after **`${UBOOT_MACHINE}`** (`rk3568_defconfig` per **`rockchip-rk3566-evb`**) — mechanism is correct for Scarthgap. Fragment is **documenting / idempotent** vs vendor defconfig (acceptable).  
+- **PASS:** **`UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`** aids traceability on serial / binaries.  
+- **PASS:** Machine comment ties **mmcblk0** to WIC / TASK-003 narrative without changing partition layout.  
+- **Deferred acceptance:** **`kas build … --target u-boot`** did not reach BitBake on review host (**`lz4c`**). Same as TASK-104 — confirm on TASK-002 host or as part of **TASK-103**.  
+- **Caveat:** Raw-mode / GPT options must still match **actual SPL + image layout** after first flash; validate on **EM3566 v3** when images exist.
 
 ---
 
@@ -100,6 +109,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
 | TASK-101 | LMT101 / JD9365 DSI fragment + optional-reset kernel patch (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
 
 ---
 
