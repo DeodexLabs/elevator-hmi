@@ -1,0 +1,97 @@
+---
+alwaysApply: true
+---
+
+---
+alwaysApply: true
+---
+## Project Identity (summary — full details in CLAUDE.md)
+
+- Hardware: Compulab CM3566 (RK3566) + LMT101SX006C display (JD9365D, 4-lane MIPI-DSI)
+- OS: Yocto Scarthgap 5.0 LTS
+- Kernel: Linux 6.1.99 Rockchip vendor fork + JD9365D backport
+- UI: Qt 6.8 LTS, QML only, EGLFS backend
+- Media: GStreamer + gst-plugins-rockchip, zero-copy H.264/H.265
+- OTA: RAUC A/B, signed bundles
+- Protocol: Abstraction layer — CAN-FD (MCP2518FD SPI) or RS-485 Modbus RTU
+
+---
+
+## Hard Rules
+
+These are not guidelines. Violations require a full revert.
+
+1. **Never modify community layers.** `meta-rockchip`, `meta-qt6`, `meta-rauc` are read-only. All modifications go in `meta-hmi-platform` or `meta-hmi-app`.
+
+2. **Never use floating layer references.** All external layers must be pinned to a specific commit SHASUM or tag in the kas manifest. No branch names alone.
+
+3. **Never change partition layout without explicit A1 task spec.** The WKS file defines the eMMC partition layout. It cannot be changed without a new TASK spec from A1 that documents the rationale.
+
+4. **Never place UI code in C++.** All UI is QML. C++ exposes `Q_PROPERTY` and signals. No widget code, no `QLabel`, no `QMainWindow`.
+
+5. **Never include CAN or Modbus headers in the Qt application.** The Protocol Abstraction Layer (PAL) daemon handles all protocol details. The application communicates with PAL only via IPC (D-Bus or Unix socket).
+
+6. **Never add a package manager to the production image.** No `apt`, no `pip`, no `npm` in the production rootfs recipe.
+
+7. **Do not propose architecture changes.** If you believe a spec is wrong, stop, add a note to `diary/BLOCKERS.md`, and wait for A1 review. Do not unilaterally change approach.
+
+---
+
+## Yocto Recipe Rules
+
+- All recipes: Scarthgap-compatible syntax only
+- Kernel patches: named `NNNN-description.patch`, applied via `SRC_URI`, never edited inline
+- Custom layers must have `layer.conf` with correct `BBFILE_COLLECTIONS`, `BBFILE_PATTERN`, `LAYERVERSION`, and `LAYERDEPENDS`
+- No `DISTRO_FEATURES_remove` — use `DISTRO_FEATURES:remove` (Scarthgap colon syntax)
+- `IMAGE_INSTALL:append` not `IMAGE_INSTALL_append`
+
+---
+
+## Commit Format
+
+```
+[phaseN][component] short description of what and why
+```
+
+Examples:
+- `[phase0][kas] pin meta-rockchip to commit a1b2c3d`
+- `[phase1][kernel] add JD9365D panel driver backport patch`
+- `[phase1][dts] add LMT101 panel node to RK3566 DTS`
+
+---
+
+## Task Completion Protocol
+
+When you finish a task:
+1. Set task status in `AGENTS.md` from `[IN PROGRESS]` to `[REVIEW]`.
+2. Fill in the "Output notes" field in the task block with:
+   - Files created or modified
+   - Any deviations from spec (with justification)
+   - Any new risks or issues discovered
+3. Do NOT mark it `[DONE]` — that is A1's job after review.
+
+---
+
+## When You Are Uncertain
+
+- Check `CLAUDE.md` first.
+- Check the relevant vendor doc in `docs/vendor/` (or project root PDFs).
+- If still uncertain: **stop**. Add a note to `diary/BLOCKERS.md` as a question for A1.
+- Do not guess on hardware-specific values (timing parameters, GPIO numbers, register values). Always cite the source document.
+
+---
+
+## Reference Documents
+
+Located in project root:
+
+| File | Use for |
+|---|---|
+| `cm3566_hardware_manual_v3202501.pdf` | GPIO, pinout, display connector routing |
+| `LMT101SX006C_SPEC.pdf` | Panel timing, power sequence, backlight spec |
+| `RK3566_Brief_Datasheet.pdf` | SoC features overview |
+| `Rockchip_RK3568_TRM_Part1_V1_3-20220930P.pdf` | Register-level reference (RK3566 shares most) |
+| `SKD41_ENGTR.pdf` | Elevator controller protocol |
+| `ACM_REFERENCE_MANUAL_TR.pdf` | Elevator controller ACM protocol |
+| `roadmap-v1.md` | Full phase deliverables |
+| `platform-decisions-v1.md` | ADR-001 — all technology decisions |

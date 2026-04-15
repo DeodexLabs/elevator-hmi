@@ -1,0 +1,72 @@
+# Elevator HMI — kas workspace manifest (Phase 0)
+# All external layers are pinned to full SHAs (no floating branches).
+# Ref names below are documentation only; BitBake uses `commit` exclusively.
+#
+# Pinned references (as of manifest creation, 2026-04-15):
+#   poky                 yocto-5.0.16  (Scarthgap / Yocto 5.0 LTS)
+#   meta-openembedded    refs/heads/scarthgap  (required by meta-rockchip; not optional)
+#   meta-rockchip        refs/heads/scarthgap
+#   meta-qt6             refs/heads/lts-6.8.7  (Qt 6.8 LTS; LAYERSERIES includes scarthgap)
+#   meta-rauc            refs/heads/scarthgap
+
+header:
+  version: 21
+
+machine: rockchip-rk3566-evb
+distro: poky
+target: core-image-minimal
+
+repos:
+  poky:
+    url: https://git.yoctoproject.org/poky
+    commit: 1d54d1c4736a114e1cecbe85a0306e3814d5ce70
+    layers:
+      meta:
+        prio: 99
+      meta-poky:
+        prio: 98
+      meta-yocto-bsp:
+        prio: 97
+
+  meta-openembedded:
+    url: https://github.com/openembedded/meta-openembedded
+    commit: 5124ac4a658899158f4a7a2ddf1d2ca931ec7d0e
+    layers:
+      meta-oe:
+        prio: 90
+      meta-python:
+        prio: 89
+
+  meta-rockchip:
+    url: https://github.com/JeffyCN/meta-rockchip
+    commit: 5218d6330f5c49724650e63902e569c909df0889
+    layers:
+      .:
+        prio: 85
+
+  meta-qt6:
+    url: https://code.qt.io/yocto/meta-qt6
+    commit: 443684a06b504b94cc85b51b5c70cdb0a87b7e5f
+    layers:
+      .:
+        prio: 80
+
+  meta-rauc:
+    url: https://github.com/rauc/meta-rauc
+    commit: d63878f20eba7a85ecf53566e7a3377e78bb46ac
+    layers:
+      .:
+        prio: 75
+
+  meta-hmi-platform:
+    # Paths are relative to KAS_WORK_DIR (repo root when you `kas build` from there)
+    path: meta-hmi-platform
+    layers:
+      .:
+        prio: 70
+
+  meta-hmi-app:
+    path: meta-hmi-app
+    layers:
+      .:
+        prio: 65

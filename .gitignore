@@ -19,11 +19,29 @@ build/*.log
 
 # ------------------------------------------------------------
 # Library — vendor PDFs and reference documents
-# PDFs are large binaries — NOT tracked in Git.
-# Generated .md conversions (scripts/convert-library.sh) ARE tracked.
+# PDFs and other vendor binaries are NOT tracked in Git.
+# Only generated .md conversions (scripts/convert-library.sh) ARE tracked.
+# Image/Source/Tools directories from vendor USB drops are excluded.
 # ------------------------------------------------------------
-library/**/*.pdf
-library/**/*.PDF
+
+# Exclude everything in library/ by default...
+library/**
+
+# ...then allow directory traversal into EM3566 so git can find .md files
+!library/EM3566/
+!library/EM3566/**/
+
+# ...and allow .md files specifically
+!library/EM3566/**/*.md
+
+# Re-ignore large binary directories (vendor firmware images and source — 70 GB+)
+# These were unignored by the ** rule above; explicitly re-exclude them.
+library/EM3566/Linux6.1/Image/
+library/EM3566/Linux6.1/Source/
+library/EM3566/Android14/Image/
+library/EM3566/Android14/Source/
+library/EM3566/Tools/
+
 # Windows artifact from USB drive copy — never track
 library/System Volume Information/
 
