@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Elevator HMI — LMT101SX006C (JD9365DA-H3) on RK3566 MIPI-DSI.
+ *
+ * Documentation used (in-repo):
+ * - library/EM3566/Usermanual/EM3566_hardware_manual.md §2.8 CON1: VCC3V3_LCD
+ *   (pins 5–6), LCD_PWREN_H (pin 13), LCD_BL_PWM (pin 14).
+ * - library/EM3566/Schematic/em3566_v3sch.md (CON1 net names).
+ *
+ * Machine / carrier DTS must supply regulator and backlight phandles
+ * (names below match common Rockchip BSP conventions — adjust to match
+ * Boardcon EM3566 Linux device tree).
+ *
+ * If the BSP already has &dsi { ports { port@0 { ... VOP ... }}}; merge
+ * the panel@0 node and add port@1 next to port@0 instead of duplicating a
+ * second top-level "ports" property (Device Tree merges two &dsi { ports }
+ * blocks incorrectly for some compilers).
+ *
+ * reset-gpios: optional after kernel patch 0002; add once JD9365 XRES is
+ * traced to a GPIO (see diary/BLOCKERS.md BLK-006).
+ */
+
+&dsi {
+	status = "okay";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	panel-lmt101: panel@0 {
+		compatible = "elevator-hmi,lmt101sx006c", "jadard,jd9365da-h3";
+		reg = <0>;
+		vdd-supply = <&vcc3v3_lcd>;
+		vccio-supply = <&vcc_1v8>;
+		backlight = <&backlight>;
+
+		port {
+			panel_in_dsi: endpoint {
+				remote-endpoint = <&dsi_out_panel>;
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+};

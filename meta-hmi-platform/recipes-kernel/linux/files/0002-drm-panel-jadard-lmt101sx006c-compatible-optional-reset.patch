@@ -1,0 +1,100 @@
+diff --git a/Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml b/Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml
+index c06902e4f..62b69110c 100644
+--- a/Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml
++++ b/Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml
+@@ -17,6 +17,7 @@ properties:
+     items:
+       - enum:
+           - chongzhou,cz101b4001
++          - elevator-hmi,lmt101sx006c
+       - const: jadard,jd9365da-h3
+ 
+   reg: true
+@@ -27,7 +28,11 @@ properties:
+   vccio-supply:
+     description: supply regulator for VCCIO, usually 1.8V
+ 
+-  reset-gpios: true
++  reset-gpios:
++    description: >
++      Optional panel / bridge reset line (JD9365 XRES). Omit when the
++      carrier hard-wires reset or the module self-resets after power rails
++      stabilize (document in board DTS comments).
+ 
+   backlight: true
+ 
+@@ -38,7 +43,6 @@ required:
+   - reg
+   - vdd-supply
+   - vccio-supply
+-  - reset-gpios
+ 
+ additionalProperties: false
+ 
+diff --git a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+index 48c1702a8..c2c983733 100644
+--- a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
++++ b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+@@ -110,14 +110,19 @@ static int jadard_prepare(struct drm_panel *panel)
+ 	if (ret)
+ 		return ret;
+ 
+-	gpiod_set_value(jadard->reset, 1);
+-	msleep(5);
+-
+-	gpiod_set_value(jadard->reset, 0);
+-	msleep(10);
+-
+-	gpiod_set_value(jadard->reset, 1);
+-	msleep(120);
++	if (jadard->reset) {
++		gpiod_set_value(jadard->reset, 1);
++		msleep(5);
++
++		gpiod_set_value(jadard->reset, 0);
++		msleep(10);
++
++		gpiod_set_value(jadard->reset, 1);
++		msleep(120);
++	} else {
++		/* Allow rail ramp when XRES is not under software control. */
++		msleep(135);
++	}
+ 
+ 	return 0;
+ }
+@@ -126,8 +131,10 @@ static int jadard_unprepare(struct drm_panel *panel)
+ {
+ 	struct jadard *jadard = panel_to_jadard(panel);
+ 
+-	gpiod_set_value(jadard->reset, 1);
+-	msleep(120);
++	if (jadard->reset) {
++		gpiod_set_value(jadard->reset, 1);
++		msleep(120);
++	}
+ 
+ 	regulator_disable(jadard->vdd);
+ 	regulator_disable(jadard->vccio);
+@@ -405,11 +412,9 @@ static int jadard_dsi_probe(struct mipi_dsi_device *dsi)
+ 	dsi->format = desc->format;
+ 	dsi->lanes = desc->lanes;
+ 
+-	jadard->reset = devm_gpiod_get(dev, "reset", GPIOD_OUT_LOW);
+-	if (IS_ERR(jadard->reset)) {
+-		DRM_DEV_ERROR(&dsi->dev, "failed to get our reset GPIO\n");
++	jadard->reset = devm_gpiod_get_optional(dev, "reset", GPIOD_OUT_LOW);
++	if (IS_ERR(jadard->reset))
+ 		return PTR_ERR(jadard->reset);
+-	}
+ 
+ 	jadard->vdd = devm_regulator_get(dev, "vdd");
+ 	if (IS_ERR(jadard->vdd)) {
+@@ -452,6 +457,7 @@ static void jadard_dsi_remove(struct mipi_dsi_device *dsi)
+ }
+ 
+ static const struct of_device_id jadard_of_match[] = {
++	{ .compatible = "elevator-hmi,lmt101sx006c", .data = &cz101b4001_desc },
+ 	{ .compatible = "chongzhou,cz101b4001", .data = &cz101b4001_desc },
+ 	{ /* sentinel */ }
+ };
