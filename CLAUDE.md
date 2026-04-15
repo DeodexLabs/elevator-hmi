@@ -56,7 +56,7 @@
 - [x] Backlight boost IC — **deferred** (constant backlight acceptable for now; see BLK-003)
 - [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
 - [ ] LMT101SX006C panel ordered
-- [ ] `bitbake core-image-minimal` for RK3566 passes clean — blocked on panel availability + first full build/boot cycle (**TASK-103**); not BLK-001/002
+- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** passes clean on TASK-002 host — recipe integration **TASK-103 DONE** 2026-04-15; full build + boot still pending proper host + **LMT101** / image flash; not BLK-001/002
 
 ---
 
