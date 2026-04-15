@@ -4,6 +4,101 @@
 
 ---
 
+## 2026-04-15 — EM3566 v3 dev kit on hand; TASK-102/103 unblocked (A1 / owner)
+
+**Agent:** A1 (state update — owner input)  
+**Phase:** 1  
+
+### Recorded
+- Owner confirms **Boardcon EM3566 v3** (**CM3566**) dev kit **on hand**.  
+- **`AGENTS.md`:** **TASK-102** and **TASK-103** set to **`[READY]`**; phase gate note updated; suggested A2 order **TASK-104 → TASK-102 → TASK-103**.  
+- **`CLAUDE.md`:** Phase checklist — dev kit item checked **on hand**; `bitbake core-image-minimal` line clarified (panel + TASK-103 path).
+
+---
+
+## 2026-04-15 — TASK-101 reviewed [DONE]; TASK-104 queued; BLK-005 closed (A1)
+
+**Agent:** A1 (Claude Code)  
+**Phase:** 0 / Phase 1 prep  
+
+### Actions taken
+- **TASK-101** (branch `task/TASK-101-lmt101-dts`): A1 code review — **APPROVED → `[DONE]`**.  
+  - **0002** patch: optional `reset-gpios`, `devm_gpiod_get_optional`, null-safe `prepare`/`unprepare`, 135 ms rail-delay path — matches **BLK-006** rationale; applies after **0001**.  
+  - **`elevator-hmi-lmt101sx006c-panel.dtsi`:** `&dsi` / panel graph + merge guidance for existing `ports`; documents phandle placeholders.  
+  - **`linux-rockchip_%.bbappend`:** Scarthgap `SRC_URI` / `KERNEL_CONFIG:append`; no community-layer edits.  
+  - **Caveat recorded:** `elevator-hmi,lmt101sx006c` uses `cz101b4001_desc` until LMT101-specific timings are validated on silicon.  
+  - **Reminder:** Commit `0002`, `.dtsi`, and `bbappend` on the task branch before owner merges to `main`/`develop` (working tree had uncommitted artifacts at review time).  
+- **`AGENTS.md`:** TASK-101 marked done; **TASK-104** `[READY]` — Boardcon machine DTS + `KERNEL_DEVICETREE` + kas/bitbake kernel smoke (spec in queue). TASK-102/103 remain blocked on dev kit + validated build.  
+- **`CLAUDE.md`:** Phase 0 checklist — TASK-101 completion + TASK-104 pointer.  
+- **`diary/BLOCKERS.md`:** **BLK-005** closed as *not in project scope* (OV13850). **BLK-006** remains open until bench.
+
+### Next actions
+- A2: branch `task/TASK-104-boardcon-machine-dts` (or similar), implement TASK-104 when BSP path is known.  
+- Owner: commit/merge TASK-101 branch after verifying git state; EM3566 v3 + LMT101 bench for BLK-006.
+
+---
+
+## 2026-04-15 — `library/EM3566/README.md` (lab + compliance index)
+
+**Agent:** A2  
+**Phase:** 0 / 1  
+
+Added [`library/EM3566/README.md`](../library/EM3566/README.md): folder map, **EM3566 v3 + LMT101 / MIPI LCD** bring-up steps tied to **BLK-006**, in-repo doc pointers, and **owner-only** product/compliance notes (**R-01** / closed **BLK-001**, dev kit vs production carrier).
+
+---
+
+## 2026-04-15 — TASK-101: LMT101 / JD9365 DSI fragment + kernel follow-up patch (A2)
+
+**Agent:** A2 (Composer)  
+**Phase:** 1 prep  
+
+### Summary
+- Picked up **TASK-101** (DTS for JD9365 / LMT101SX006C). Delivered reference **`elevator-hmi-lmt101sx006c-panel.dtsi`** under `meta-hmi-platform/recipes-kernel/linux/files/` and **`0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch`** (product `compatible`, optional `reset-gpios` in binding + `devm_gpiod_get_optional` in driver).  
+- **Rationale:** EM3566 CON1 / in-tree schematic do not document **JD9365 XRES** → **RK3566 GPIO**; **BLK-006** opened. Patch 0002 avoids inventing a reset line while still allowing a valid DT node.  
+- Extended **`linux-rockchip_%.bbappend`** with patch 0002, dtsi in `SRC_URI`, and `CONFIG_DRM_PANEL_JADARD_JD9365DA_H3=y`.  
+- **Follow-up:** Boardcon machine DTS must `#include` the fragment (or merge `&dsi` content), align regulator/backlight labels, resolve `ports` merge if VOP `port@0` already exists; bench-validate on EM3566 v3 + LMT101.  
+- Work on git branch **`task/TASK-101-lmt101-dts`**.
+
+---
+
+## 2026-04-16 — Interim SoM link: UART serial console (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0 / 1 prep  
+
+### Decision captured
+- While **elevator fieldbus** (RS-485 / CAN-FD) stays **deferred** (BLK-004), **Phase 0/1 “communication” to the SoM** is **UART serial** from a **host PC** to the board (**EM3566 v3** debug / UART headers per `library/EM3566/`) for **boot trace, image behaviour, systemd, RAUC**, and early logging.
+- `CLAUDE.md` §1 **Protocol** row and §8 **PAL** bullets updated; **BLK-004** addendum in `diary/BLOCKERS.md`. Typical Rockchip BSP console **115200 8N1** noted as “confirm in BSP” — not a hardware spec from unverified GPIO numbers.
+
+---
+
+## 2026-04-16 — Reference hardware: EM3566 v3 carrier + MIPI LCD connector (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0 / 1 prep  
+
+### Recorded in repo
+- **Boardcon EM3566 v3** documented as the **reference development kit / carrier** for CM3566 (sources: `library/EM3566/` schematic, manuals, block diagram).
+- Expert / board summary incorporated: multiple display paths (HDMI, LVDS, **MIPI LCD**, eDP, BT656); **LMT101 bench wiring** → **EM3566 v3 `MIPI LCD`** connector; underlying signals remain SoM **muxed LVDS/MIPI TX** (also routed to optional LVDS OUT).
+- `CLAUDE.md` identity table + R-02; `diary/BLOCKERS.md` BLK-002 addendum; `AGENTS.md` gate note; **TASK-101** set to **`[READY]`** (R-02 mitigated; dependency is dev kit + panel in hand).
+
+---
+
+## 2026-04-15 — BLK-001–004 closed from owner/vendor inputs (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0  
+
+### Blocker resolutions (see `diary/BLOCKERS.md`)
+- **BLK-001 / R-01:** Vendor confirms CM3566 **operated 4 h @ −20°C ±2°C** in reliability testing; datasheet **recommended** range remains **0°C–70°C** — closed as **mitigated with documented caveat** (formal acceptance before production still advised).
+- **BLK-002 / R-02:** Hardware manual: display lanes on SoM are **MIPI-DSI / LVDS multiplexed** (pins 25–34); FPC is on **carrier** — not “MIPI-only” at module. Closed with action: **carrier must select MIPI-DSI** for LMT101; schematic review on target carrier before layout lock.
+- **BLK-003:** Backlight boost IC pick **deferred** — constant backlight acceptable for current LCD path.
+- **BLK-004:** RS-485 vs CAN-FD **deferred** — no comms PHY planning for now; `CLAUDE.md` identity + PAL notes updated.
+
+`CLAUDE.md` §2 checklist, §6 risks, and `AGENTS.md` Phase 0 gate note updated. **BLK-005** (OV13850 PDF) remains open, low severity.
+
+---
+
 ## 2026-04-15 — TASK-002/003/004 reviewed and merged — Phase 0 A2 queue complete (A1)
 
 **Agent:** A1 (Claude Code / product lead)  
