@@ -26,6 +26,8 @@
 
 **Rule:** A2 must read `CLAUDE.md` fully before starting any task.
 
+**Reminder (A2 — branching):** For every task, create and work only on a branch named `task/TASK-NNN-short-description` (example: `task/TASK-003-partition-wks`). Do not commit directly to `main` or `develop`. Merge only after A1 sets the task to `[DONE]`.
+
 ---
 
 ## Task Queue
@@ -35,7 +37,7 @@ Tasks are sorted by dependency order. Do not reorder.
 ---
 
 ### TASK-002 — Yocto build host setup script
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Assigned to:** A2  
 **Phase:** 0  
 **Depends on:** TASK-001 ✓  
@@ -54,7 +56,10 @@ Create a reproducible build host setup script for Ubuntu 22.04 LTS.
 - After running, `kas --version` and `bitbake --version` both work
 
 **Output notes (A2 fills in):**
-> _pending_
+> - Branch: `task/TASK-002-yocto-build-host`.
+> - Added `scripts/setup-build-host.sh` (Ubuntu **22.04 only**, `set -euo pipefail`, enables `universe`, installs listed Scarthgap host packages + `software-properties-common`, `pip install --user kas`, verifies `kas --version`, shallow-caches `poky` `yocto-5.0.16` under `${XDG_CACHE_HOME:-$HOME/.cache}/elevator-hmi` and sources `oe-init-build-env` in a temp dir to verify `bitbake --version`).
+> - Added `scripts/README.md` (usage and PATH note).
+> - `sudo` required for `apt-get`; script not executed on this agent host (Ubuntu 24.04).
 
 ---
 
