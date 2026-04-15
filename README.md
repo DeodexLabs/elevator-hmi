@@ -6,7 +6,7 @@ Yocto (Scarthgap) workspace for the elevator car HMI — Compulab CM3566 (RK3566
 
 - **Disk:** tens of GB free (downloads, sstate, and build output).
 - **Tools:** Python 3, Git, and [kas](https://kas.readthedocs.io/) (for example `pip install kas` in a virtualenv, or your distro package).
-- **Host packages:** Scarthgap expects standard Yocto host utilities (including `lz4c` from `liblz4-tool` on Debian/Ubuntu). A scripted install is defined in **TASK-002** (`scripts/setup-build-host.sh`).
+- **Host packages:** Scarthgap expects standard Yocto host utilities (including `lz4c` from `liblz4-tool` on Debian/Ubuntu). A scripted install is defined in **TASK-002** (`scripts/setup-build-host.sh` — **Ubuntu 22.04 or 24.04 LTS**).
 
 ## Building with kas
 
@@ -27,7 +27,7 @@ kas dump kas/elevator-hmi.yml
 kas shell kas/elevator-hmi.yml
 ```
 
-The default image target is `core-image-minimal` with `MACHINE = elevator-hmi-em3566` (Boardcon EM3566 v3 bring-up; `conf/machine/elevator-hmi-em3566.conf` in `meta-hmi-platform` requires `rockchip-rk3566-evb` from `meta-rockchip` and overrides `KERNEL_DEVICETREE` only). U-Boot uses **`u-boot-rockchip_%.bbappend`** in `meta-hmi-platform` for an eMMC-oriented Kconfig fragment (TASK-102).
+The default image target is `core-image-minimal` with `MACHINE = elevator-hmi-em3566` (Boardcon EM3566 v3 bring-up; `conf/machine/elevator-hmi-em3566.conf` in `meta-hmi-platform` requires `rockchip-rk3566-evb` from `meta-rockchip` and overrides `KERNEL_DEVICETREE` only). U-Boot uses **`u-boot-rockchip.bbappend`** in `meta-hmi-platform` for an eMMC-oriented Kconfig fragment (TASK-102).
 
 ## Layers in this manifest
 

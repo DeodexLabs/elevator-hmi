@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-105/107 `[DONE]`; TASK-106 blocked on LMT101)  
+**Last updated:** 2026-04-15 (session close: TASK-002 Noble/`libegl1-mesa` split + TASK-105 smoke **`u-boot-rockchip`** + bbappend rename on `develop`; TASK-106 still blocked on LMT101)  
 
 ---
 
@@ -35,8 +35,8 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **`[BLOCKED]`** — **TASK-106** only (LMT101 on MIPI LCD for **BLK-006** / DSI validation). Next **`[READY]`** tasks: **A1** adds (e.g. RAUC skeleton spec, Qt image) when scoped. **`git checkout develop && git pull`** before the next task branch.
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
+**A2 queue:** **`[BLOCKED]`** — **TASK-106** only (LMT101 on MIPI LCD for **BLK-006** / DSI validation). **Follow-up (no new task ID):** on **TASK-002** host (**22.04** or **24.04**), run **`./scripts/kas-build-task-105.sh`** to completion and append green **log tails** + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (deferred acceptance from TASK-105 — script + U-Boot wiring fixed **2026-04-15**). Next **`[READY]`** tasks: **A1** adds (e.g. RAUC skeleton spec, Qt image) when scoped. **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
@@ -71,13 +71,13 @@ Tasks are sorted by dependency order. Do not reorder.
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-105-107-lab-handoff` (merged to `develop` 2026-04-15).  
 
-**Output notes (A2):** *(summary)* **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; three **`kas build`** runs; HOSTTOOLS **`lz4c`** failure on Ubuntu **24.04** agent host; failure tails + expected deploy dir documented.
+**Output notes (A2):** *(summary)* **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; three **`kas build`** runs; HOSTTOOLS **`lz4c`** failure on agent host without full **`setup-build-host.sh`** (missing **`liblz4-tool`**, not an Ubuntu **24.04** limitation); failure tails + expected deploy dir documented.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** **`scripts/kas-build-task-105.sh`** uses **`set -euo pipefail`**, repo-root **`cd`**, ordered **`u-boot`** → **`virtual/kernel`** → **`core-image-minimal`**, **`tee`** to **`build-logs/`** — matches TASK-105 intent.  
-- **PASS:** **`scripts/README.md`** documents prerequisites (22.04 / **`setup-build-host.sh`** / **`lz4c`**).  
+- **PASS:** **`scripts/kas-build-task-105.sh`** uses **`set -euo pipefail`**, repo-root **`cd`**, ordered **`u-boot-rockchip`** → **`virtual/kernel`** → **`core-image-minimal`**, **`tee`** to **`build-logs/`** — matches TASK-105 intent (**`u-boot-rockchip`** post-**2026-04-15** fix for Rockchip bootloader provider).  
+- **PASS:** **`scripts/README.md`** documents prerequisites (Ubuntu **22.04** or **24.04** / **`setup-build-host.sh`** / **`lz4c`**).  
 - **PASS:** No community-layer edits.  
-- **Deferred acceptance (explicit in spec):** **Green full image `exit 0`** remains for **TASK-002 Ubuntu 22.04** host — re-run **`./scripts/kas-build-task-105.sh`** there and append success log tails + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (or a follow-on diary entry); not a recipe **REWORK**.
+- **Deferred acceptance (explicit in spec):** **Green full image `exit 0`** on a host with **`setup-build-host.sh`** applied (**Ubuntu 22.04 or 24.04 LTS**) — re-run **`./scripts/kas-build-task-105.sh`** and append success log tails + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (or a follow-on diary entry); not a recipe **REWORK**.
 
 ---
 
@@ -102,14 +102,14 @@ Tasks are sorted by dependency order. Do not reorder.
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-102-uboot-emmc` (merged to `develop` 2026-04-15).  
 
-**Output notes (A2):** *(summary)* `u-boot-rockchip_%.bbappend` + **`elevator-hmi-emmc-boot.cfg`** Kconfig fragment; **`UBOOT_LOCALVERSION`**; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on **`lz4c`**. See branch history for full bullets.
+**Output notes (A2):** *(summary)* `u-boot-rockchip.bbappend` + **`elevator-hmi-emmc-boot.cfg`** Kconfig fragment; **`UBOOT_LOCALVERSION`**; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on **`lz4c`**. See branch history for full bullets.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** All changes under **`meta-hmi-platform`**; **`u-boot-rockchip_%.bbappend`** uses Scarthgap **`SRC_URI:append`** / **`FILESEXTRAPATHS:prepend`**; no **`meta-rockchip`** edits; Rockchip **`make.sh`** / SPL flow untouched.  
+- **PASS:** All changes under **`meta-hmi-platform`**; **`u-boot-rockchip.bbappend`** uses Scarthgap **`SRC_URI:append`** / **`FILESEXTRAPATHS:prepend`**; no **`meta-rockchip`** edits; Rockchip **`make.sh`** / SPL flow untouched.  
 - **PASS:** **`elevator-hmi-emmc-boot.cfg`** is a standard Poky **`*.cfg`** fragment; **`u-boot.inc`** pulls **`u-boot-configure.inc`**, which runs **`merge_config.sh`** after **`${UBOOT_MACHINE}`** (`rk3568_defconfig` per **`rockchip-rk3566-evb`**) — mechanism is correct for Scarthgap. Fragment is **documenting / idempotent** vs vendor defconfig (acceptable).  
 - **PASS:** **`UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`** aids traceability on serial / binaries.  
 - **PASS:** Machine comment ties **mmcblk0** to WIC / TASK-003 narrative without changing partition layout.  
-- **Deferred acceptance:** **`kas build … --target u-boot`** did not reach BitBake on review host (**`lz4c`**). Same as TASK-104 — confirm on TASK-002 host or as part of **TASK-103**.  
+- **Deferred acceptance:** **`kas build … --target u-boot-rockchip`** did not reach BitBake on review host (**`lz4c`**). Same as TASK-104 — confirm on TASK-002 host or as part of **TASK-103**.  
 - **Caveat:** Raw-mode / GPT options must still match **actual SPL + image layout** after first flash; validate on **EM3566 v3** when images exist.
 
 ---
@@ -152,7 +152,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | Task | Description | Completed |
 |---|---|---|
 | TASK-001 | kas manifest + layer skeletons (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-002 | Ubuntu 22.04 build host setup script (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-002 | Ubuntu 22.04/24.04 build host setup script (A2 impl, A1 reviewed; 24.04 allowed in script 2026-04-15) | 2026-04-15 |
 | TASK-003 | eMMC partition layout WKS file (A2 impl, A1 reviewed — A1 fixed duplicate WICVARS) | 2026-04-15 |
 | TASK-004 | JD9365D panel driver backport patch 6.2→6.1.99 (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
@@ -160,7 +160,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending 22.04 host) | 2026-04-15 |
+| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending TASK-002 host) | 2026-04-15 |
 | TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
 
 ---

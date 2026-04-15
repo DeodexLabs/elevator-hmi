@@ -48,7 +48,7 @@
 - [x] R-03: JD9365D backport patch prepared (panel-jadard-jd9365da-h3.c from Linux 6.2→6.1.99) — TASK-004 DONE 2026-04-15
 - [x] Phase 1 prep (kernel/DTS in tree): LMT101SX006C DSI fragment (`elevator-hmi-lmt101sx006c-panel.dtsi`) + optional `reset-gpios` follow-up patch on JD9365 driver/binding — **TASK-101 DONE** 2026-04-15  
 - [x] Phase 1 machine + panel integration: **`elevator-hmi-em3566`** machine, board DTS + **`&dsi0`** LMT101 overlay, kas default machine — **TASK-104 DONE** 2026-04-15 (kernel **`kas build virtual/kernel`** smoke: confirm on TASK-002 host — `lz4c` / HOSTTOOLS)  
-- [x] Phase 1 U-Boot eMMC bring-up fragment: **`u-boot-rockchip_%.bbappend`** + **`elevator-hmi-emmc-boot.cfg`**, **`UBOOT_LOCALVERSION`** — **TASK-102 DONE** 2026-04-15 (`kas build … u-boot` smoke: confirm on TASK-002 host)
+- [x] Phase 1 U-Boot eMMC bring-up fragment: **`u-boot-rockchip.bbappend`** + **`elevator-hmi-emmc-boot.cfg`**, **`UBOOT_LOCALVERSION`** — **TASK-102 DONE** 2026-04-15 (`kas build … u-boot` smoke: confirm on TASK-002 host)
 - [x] R-01: CM3566 −20°C — vendor: **4 h @ −20°C test passed**; datasheet **recommended** op still **0°C–70°C** — **accepted with documented caveat** (see `diary/BLOCKERS.md` BLK-001)
 - [x] R-02: MIPI vs LVDS — SoM **DSI/LVDS mux** (pins 25–34). **EM3566 v3** carrier exposes a dedicated **MIPI LCD** connector (same muxed TX bus also branches to optional **LVDS OUT**); use **MIPI LCD** + DT/strap for **MIPI-DSI** with LMT101 (see `diary/BLOCKERS.md` BLK-002); custom production carrier still needs its own review
 - [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
@@ -56,7 +56,7 @@
 - [x] Backlight boost IC — **deferred** (constant backlight acceptable for now; see BLK-003)
 - [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
 - [ ] LMT101SX006C panel ordered
-- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** passes clean on TASK-002 host — recipe integration **TASK-103 DONE** 2026-04-15; **TASK-105** helper script + logs **DONE** 2026-04-15 — run **`./scripts/kas-build-task-105.sh`** on **22.04** and record green output in **`diary/PROGRESS.md`**; full boot + **LMT101** / image flash still pending; not BLK-001/002  
+- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** passes clean on TASK-002 host — recipe integration **TASK-103 DONE** 2026-04-15; **TASK-105** helper script + logs **DONE** 2026-04-15 — run **`./scripts/kas-build-task-105.sh`** on **Ubuntu 22.04 or 24.04 LTS** (after **`setup-build-host.sh`**) and record green output in **`diary/PROGRESS.md`**; full boot + **LMT101** / image flash still pending; not BLK-001/002  
 - [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15
 
 ---

@@ -21,6 +21,15 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 
 ## Closed Blockers
 
+### BLK-007 — Ubuntu 24.04 (Noble): `libegl1-mesa` missing from apt (TASK-002 host script)
+**Opened:** 2026-04-15 — **Closed:** 2026-04-15  
+**Severity was:** LOW (host setup friction, not product silicon)  
+**Resolution:**  
+On **Noble**, **`libegl1-mesa`** was removed from the archive in favour of the GLVND split (**`libegl1`** + **`libegl-mesa0`**). **`scripts/setup-build-host.sh`** now selects EGL packages by **`VERSION_ID`** (**22.04:** **`libegl1-mesa`**; **24.04:** **`libegl1`** + **`libegl-mesa0`**). **`mesa-common-dev`** unchanged.  
+**Tracked in:** `scripts/setup-build-host.sh`, `diary/PROGRESS.md` session notes.
+
+---
+
 ### BLK-005 — OmniVision OV13850 datasheet failed PDF-to-Markdown conversion
 **Opened:** 2026-04-15 — **Closed:** 2026-04-15  
 **Severity was:** LOW  

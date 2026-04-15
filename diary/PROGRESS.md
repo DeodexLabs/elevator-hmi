@@ -4,6 +4,62 @@
 
 ---
 
+## 2026-04-15 — Session end summary (A2)
+
+**Agent:** A2  
+**Phase:** 0 / 1  
+
+### Host / TASK-002
+- **Ubuntu 24.04.4 LTS** (`schone`) confirmed as lab build host; repo text and **`scripts/setup-build-host.sh`** now allow **`VERSION_ID`** **22.04** or **24.04** with the same Scarthgap-oriented package list.
+- **Noble package drift:** **`libegl1-mesa`** is not in Ubuntu **24.04** archives → script installs **`libegl1`** + **`libegl-mesa0`** on **24.04**, keeps **`libegl1-mesa`** on **22.04**.
+- **`setup-build-host.sh`** run completed on owner host; **`command -v lz4c`** → **`/usr/bin/lz4c`**; **`kas --version`** → **5.2** (HOSTTOOLS / **`lz4c`** path unblocked).
+
+### Kas smoke / TASK-105 / TASK-102
+- **`kas dump kas/elevator-hmi.yml`**: **exit 0** (machine **`elevator-hmi-em3566`**, pinned layers).
+- **Recipe append fix:** **`u-boot-rockchip_%.bbappend`** did not bind to **`u-boot-rockchip.bb`** → renamed **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`**.
+- **Smoke target fix:** Rockchip **`PREFERRED_PROVIDER_virtual/bootloader = u-boot-rockchip`** — **`scripts/kas-build-task-105.sh`**, **`docs/BRINGUP-CHECKLIST.md`**, **`scripts/README.md`** now use **`--target u-boot-rockchip`** and tee **`build-logs/u-boot-rockchip.log`** (not **`u-boot`**).
+- **Still open for this host:** let **`kas build … --target u-boot-rockchip`** / full **`./scripts/kas-build-task-105.sh`** finish; then append **exit 0** evidence + **`ls -la build/tmp/deploy/images/elevator-hmi-em3566/`** (expect **`.wic`** after **`core-image-minimal`**) to a new diary line when done.
+
+### Repo / diary / coordination
+- **`README.md`**, **`CLAUDE.md`**, **`AGENTS.md`**, **`diary/BLOCKERS.md`** (new closed **BLK-007**) updated in this session.
+- **Git:** session changes committed with **`[diary] 2026-04-15 session summary`**.
+
+---
+
+## 2026-04-15 — Phase B (TASK-105): `kas dump` OK; smoke script + U-Boot bbappend fixes (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+**Host:** Ubuntu 24.04.4 LTS (`schone`), **`lz4c`** + **`kas 5.2`** after **`setup-build-host.sh`**.
+
+### Done
+- **B1 / B2:** Repo root **`/home/sener/Projects/elevator-hmi`**; **`kas dump kas/elevator-hmi.yml`** exit **0** (machine **`elevator-hmi-em3566`**, layers as manifest).
+- **B3 blockers fixed (repo):**
+  1. **`u-boot-rockchip_%.bbappend`** did not apply to **`u-boot-rockchip.bb`** (unversioned recipe filename) → renamed to **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`**.
+  2. **`kas build --target u-boot`** invalid when **`PREFERRED_PROVIDER_virtual/bootloader = u-boot-rockchip`** → **`scripts/kas-build-task-105.sh`**, **`docs/BRINGUP-CHECKLIST.md`**, **`scripts/README.md`** now use **`--target u-boot-rockchip`** and log **`build-logs/u-boot-rockchip.log`**.
+- **Docs:** **`README.md`**, **`CLAUDE.md`**, **`AGENTS.md`**, **`diary/PROGRESS.md`** references updated from **`u-boot-rockchip_%.bbappend`** to **`u-boot-rockchip.bbappend`**.
+
+### In progress / next
+- **`kas build kas/elevator-hmi.yml --target u-boot-rockchip`** was started to validate fixes (log: **`build-logs/u-boot-rockchip-smoke.log`**); first-from-scratch graph ~**1082** tasks — expect a long run. When it finishes, run **`./scripts/kas-build-task-105.sh`** for the full **u-boot-rockchip → virtual/kernel → core-image-minimal** sequence.
+- **B4:** **`.wic`** appears under **`build/tmp/deploy/images/elevator-hmi-em3566/`** only after **`core-image-minimal`** succeeds — append **`ls -la`** of that dir + final log tail here when green.
+
+---
+
+## 2026-04-15 — Build host guidance: Ubuntu 24.04 LTS + script allow-list (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- Owner PC is **Ubuntu 24.04.4 LTS** with Yocto/poky minimal builds; repo copy still read as **22.04-only** after TASK-002.
+- **`scripts/setup-build-host.sh`**: **`VERSION_ID`** may be **22.04** or **24.04** (same package list). **`lz4c`** / **HOSTTOOLS** failure on the earlier agent run was **missing `liblz4-tool`**, not an OS ceiling.
+- Docs updated: **`README.md`**, **`scripts/README.md`**, **`docs/BRINGUP-CHECKLIST.md`**, **`CLAUDE.md`**, **`AGENTS.md`** (TASK-105 archive clarification), **`scripts/kas-build-task-105.sh`** header comment.
+
+### Next
+- On **24.04**: run **`./scripts/setup-build-host.sh`** once if deps are not pinned, then **`./scripts/kas-build-task-105.sh`**; append green **`exit 0`** + deploy listing to this diary when available.
+
+---
+
 ## 2026-04-15 — TASK-105 / TASK-107 A1 review [DONE], merge to `develop` (A1)
 
 **Agent:** A1  
@@ -116,7 +172,7 @@
 **Phase:** 1  
 
 ### Summary
-- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip_%.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC / GPT / DW MMC / raw-partition options (aligned with vendor `rk3568_defconfig` at `SRCREV a93658f8…`); `UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`.  
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC / GPT / DW MMC / raw-partition options (aligned with vendor `rk3568_defconfig` at `SRCREV a93658f8…`); `UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`.  
 - **`elevator-hmi-em3566.conf`** — comments on eMMC bring-up, WIC, inherited `rk3568_defconfig`.  
 - **Smoke:** `kas build kas/elevator-hmi.yml --target u-boot` — **failed** before BitBake (**`lz4c`** / HOSTTOOLS on review host).  
 - **Branch:** `task/TASK-102-uboot-emmc`.
@@ -216,7 +272,7 @@
 **Phase:** 1  
 
 ### Summary
-- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip_%.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC/GPT/raw-partition options aligned with vendor **`rk3568_defconfig`**; **`UBOOT_LOCALVERSION`**.  
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC/GPT/raw-partition options aligned with vendor **`rk3568_defconfig`**; **`UBOOT_LOCALVERSION`**.  
 - **`elevator-hmi-em3566.conf`** — eMMC / WIC / U-Boot inheritance comments.  
 - **`kas build … --target u-boot`:** blocked on host **`lz4c`** (TASK-002 host setup).  
 - **Branch:** `task/TASK-102-uboot-emmc`.

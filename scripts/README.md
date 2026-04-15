@@ -2,12 +2,12 @@
 
 ## `setup-build-host.sh`
 
-Prepares an **Ubuntu 22.04 LTS** machine for Yocto Scarthgap builds (kas, BitBake host dependencies, lz4, SDL for QEMU menus, and related tools).
+Prepares an **Ubuntu 22.04 or 24.04 LTS** machine for Yocto Scarthgap builds (kas, BitBake host dependencies, lz4, SDL for QEMU menus, and related tools).
 
 Requirements:
 
 - sudo for `apt-get`
-- Run on Ubuntu **22.04** only (the script exits with an error on other releases).
+- Run on Ubuntu **22.04** or **24.04** LTS (`/etc/os-release` `VERSION_ID` — other releases exit with an error).
 
 Usage:
 
@@ -25,11 +25,11 @@ Project images are built via kas from the repository root — see the root `READ
 
 ## `kas-build-task-105.sh`
 
-Runs **TASK-105** kas smoke targets in order (**`u-boot`**, **`virtual/kernel`**, default **`core-image-minimal`**) and tees stdout/stderr into **`build-logs/`** (gitignored).
+Runs **TASK-105** kas smoke targets in order (**`u-boot-rockchip`**, **`virtual/kernel`**, default **`core-image-minimal`**) and tees stdout/stderr into **`build-logs/`** (gitignored).
 
 Requirements:
 
-- Same host prep as **`setup-build-host.sh`** (Ubuntu **22.04**; **`lz4c`** on **`PATH`**).
+- Same host prep as **`setup-build-host.sh`** (Ubuntu **22.04** or **24.04**; **`liblz4-tool`** so **`lz4c`** is on **`PATH`** for BitBake **HOSTTOOLS**).
 - Run from anywhere; the script **`cd`**s to the repository root.
 
 Usage:

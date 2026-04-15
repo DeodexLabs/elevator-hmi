@@ -6,8 +6,8 @@ Canonical lab checklist for **Boardcon EM3566 v3** + project **`kas`** workspace
 
 ## 1. Build host (TASK-002)
 
-- Use **Ubuntu 22.04 LTS** (the supported profile for [`scripts/setup-build-host.sh`](../scripts/setup-build-host.sh)).
-- Run **`./scripts/setup-build-host.sh`** once (requires `sudo` for `apt-get`). This installs Scarthgap host deps including **`lz4c`** (`liblz4-tool`), without which BitBake stops immediately (`HOSTTOOLS`).
+- Use **Ubuntu 22.04 or 24.04 LTS** — both are allowed by [`scripts/setup-build-host.sh`](../scripts/setup-build-host.sh) (TASK-002 originally validated **22.04**; **24.04** uses the same package set in this repo).
+- Run **`./scripts/setup-build-host.sh`** once (requires `sudo` for `apt-get`). This installs Scarthgap host deps including **`lz4c`** (`liblz4-tool`), without which BitBake stops immediately (`HOSTTOOLS`). If you skip the script, install at least **`liblz4-tool`** before **`kas build`**.
 - Ensure **`kas`** is on **`PATH`** (for example `pip install --user kas` → add `~/.local/bin` to **`PATH`**).
 - From the **repository root** (so `KAS_WORK_DIR` is the project root), run builds — see [`README.md`](../README.md).
 
@@ -23,7 +23,7 @@ Smoke sequence (same as **TASK-105**; optional one-shot script **`./scripts/kas-
 cd /path/to/elevator-hmi
 mkdir -p build-logs
 
-kas build kas/elevator-hmi.yml --target u-boot 2>&1 | tee build-logs/u-boot.log
+kas build kas/elevator-hmi.yml --target u-boot-rockchip 2>&1 | tee build-logs/u-boot-rockchip.log
 kas build kas/elevator-hmi.yml --target virtual/kernel 2>&1 | tee build-logs/virtual-kernel.log
 kas build kas/elevator-hmi.yml 2>&1 | tee build-logs/core-image-minimal.log
 ```
