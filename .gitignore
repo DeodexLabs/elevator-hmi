@@ -1,0 +1,103 @@
+# ============================================================
+# Elevator HMI — .gitignore
+# ============================================================
+
+# ------------------------------------------------------------
+# Yocto build artefacts (never commit — they are gigabytes)
+# ------------------------------------------------------------
+build/tmp/
+build/tmp-glibc/
+build/downloads/
+build/sstate-cache/
+build/cache/
+build/conf/
+build/bitbake.lock
+build/*.log
+
+# BitBake task logs
+*.bb_log
+
+# ------------------------------------------------------------
+# Library — vendor PDFs and reference documents
+# PDFs are large binaries — NOT tracked in Git.
+# Generated .md conversions (scripts/convert-library.sh) ARE tracked.
+# ------------------------------------------------------------
+library/**/*.pdf
+library/**/*.PDF
+# Windows artifact from USB drive copy — never track
+library/System Volume Information/
+
+# ------------------------------------------------------------
+# kas workspace directories (kas fetches these at build time)
+# ------------------------------------------------------------
+kas-build/
+.kas-*
+
+# Layer source directories fetched by kas (not our code)
+# Exception: meta-hmi-platform and meta-hmi-app ARE tracked
+poky/
+meta-rockchip/
+meta-qt6/
+meta-rauc/
+meta-openembedded/
+
+# ------------------------------------------------------------
+# Python
+# ------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# ------------------------------------------------------------
+# Editor and IDE
+# ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ------------------------------------------------------------
+# Build outputs (application, not Yocto)
+# ------------------------------------------------------------
+build-qt/
+*.o
+*.a
+*.so
+*.so.*
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# ------------------------------------------------------------
+# RAUC signing keys — NEVER commit private keys
+# ------------------------------------------------------------
+*.pem
+*.key
+*.p12
+certs/private/
+
+# ------------------------------------------------------------
+# OTA bundles (large, ephemeral)
+# ------------------------------------------------------------
+*.raucb
+
+# ------------------------------------------------------------
+# Logs and temporary files
+# ------------------------------------------------------------
+*.log
+*.tmp
+*.bak
+.tmp/
+
+# ------------------------------------------------------------
+# CI / test artefacts
+# ------------------------------------------------------------
+coverage/
+test-results/
