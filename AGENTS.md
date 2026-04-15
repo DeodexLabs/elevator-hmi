@@ -59,7 +59,7 @@ Create a reproducible build host setup script for Ubuntu 22.04 LTS.
 ---
 
 ### TASK-003 — Partition layout (WKS file)
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Assigned to:** A2  
 **Phase:** 0  
 **Depends on:** TASK-001 ✓  
@@ -89,7 +89,10 @@ Note: This is a simplified WKS. The final A/B layout will be coordinated with RA
 - Added to `meta-hmi-platform/conf/layer.conf` as a WICVARS source
 
 **Output notes (A2 fills in):**
-> _pending_
+> - Branch: `task/TASK-003-partition-wks`.
+> - Added `meta-hmi-platform/wic/elevator-hmi-emmc.wks.in` with partition layout per spec and RAUC Phase 2 comments.
+> - `meta-hmi-platform/conf/layer.conf`: `WICVARS:append` + `ELEVATOR_HMI_EMMC_WKS` pointing at the `.wks.in` file.
+> - Kickstart syntax validated with poky `wic.ksparser.KickStart` (`PYTHONPATH=poky/scripts/lib`) — `wic ls` on a built `.wic` image was not run (no image built in this step).
 
 ---
 

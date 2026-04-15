@@ -1,0 +1,17 @@
+# Elevator HMI — eMMC layout (Phase 0 factory image)
+#
+# Total device capacity assumed: 16 GB. Sizes below are a simplified layout
+# for bring-up. Slot B is reserved empty at factory for a future RAUC slot B
+# rootfs; Phase 2 will align kernel/rootfs A/B slots, RAUC bundle metadata, and
+# `/data` retention policy with the RAUC slot scheme in CLAUDE.md (do not change
+# partition geometry here without an A1 task spec).
+#
+# boot: U-Boot + SPL payload area (vfat) — size matches project bootstrap plan
+# rootfs_a: active root (ext4)
+# rootfs_b: second root slot (ext4), unpopulated at factory — RAUC target slot
+# data: persistent partition (ext4) — never erased by OTA in production design
+
+part /boot --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4 --size 64M
+part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label rootfs_a --align 4 --size 2048M
+part --ondisk mmcblk0 --fstype=ext4 --label rootfs_b --align 4 --size 2048M
+part /data --source rootfs --ondisk mmcblk0 --fstype=ext4 --label data --align 4 --size 4096M
