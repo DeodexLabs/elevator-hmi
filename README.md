@@ -27,7 +27,7 @@ kas dump kas/elevator-hmi.yml
 kas shell kas/elevator-hmi.yml
 ```
 
-The default image target is `core-image-minimal` with `MACHINE = rockchip-rk3566-evb` (RK3566 EVB machine from `meta-rockchip`). A CM3566-specific machine can be added later in `meta-hmi-platform`.
+The default image target is `core-image-minimal` with `MACHINE = elevator-hmi-em3566` (Boardcon EM3566 v3 bring-up; `conf/machine/elevator-hmi-em3566.conf` in `meta-hmi-platform` requires `rockchip-rk3566-evb` from `meta-rockchip` and overrides `KERNEL_DEVICETREE` only).
 
 ## Layers in this manifest
 

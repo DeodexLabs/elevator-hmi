@@ -46,7 +46,8 @@
 - [x] Build host setup script created — TASK-002 DONE 2026-04-15
 - [x] eMMC partition layout (WKS file) created — TASK-003 DONE 2026-04-15
 - [x] R-03: JD9365D backport patch prepared (panel-jadard-jd9365da-h3.c from Linux 6.2→6.1.99) — TASK-004 DONE 2026-04-15
-- [x] Phase 1 prep (kernel/DTS in tree): LMT101SX006C DSI fragment (`elevator-hmi-lmt101sx006c-panel.dtsi`) + optional `reset-gpios` follow-up patch on JD9365 driver/binding — **TASK-101 DONE** 2026-04-15; machine integration → **TASK-104** `[READY]`
+- [x] Phase 1 prep (kernel/DTS in tree): LMT101SX006C DSI fragment (`elevator-hmi-lmt101sx006c-panel.dtsi`) + optional `reset-gpios` follow-up patch on JD9365 driver/binding — **TASK-101 DONE** 2026-04-15  
+- [x] Phase 1 machine + panel integration: **`elevator-hmi-em3566`** machine, board DTS + **`&dsi0`** LMT101 overlay, kas default machine — **TASK-104 DONE** 2026-04-15 (kernel **`kas build virtual/kernel`** smoke: confirm on TASK-002 host — `lz4c` / HOSTTOOLS)
 - [x] R-01: CM3566 −20°C — vendor: **4 h @ −20°C test passed**; datasheet **recommended** op still **0°C–70°C** — **accepted with documented caveat** (see `diary/BLOCKERS.md` BLK-001)
 - [x] R-02: MIPI vs LVDS — SoM **DSI/LVDS mux** (pins 25–34). **EM3566 v3** carrier exposes a dedicated **MIPI LCD** connector (same muxed TX bus also branches to optional **LVDS OUT**); use **MIPI LCD** + DT/strap for **MIPI-DSI** with LMT101 (see `diary/BLOCKERS.md` BLK-002); custom production carrier still needs its own review
 - [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
