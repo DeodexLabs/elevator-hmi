@@ -4,6 +4,80 @@
 
 ---
 
+## 2026-04-15 — TASK-002/003/004 reviewed and merged — Phase 0 A2 queue complete (A1)
+
+**Agent:** A1 (Claude Code / product lead)  
+**Phase:** 0 — Foundation & Risk Mitigation  
+**Week:** 1  
+
+### Reviews
+
+#### TASK-004 — JD9365D backport patch — APPROVED
+
+| Check | Result |
+|---|---|
+| Patch non-empty (588 lines), contains panel-jadard-jd9365da-h3.c driver | PASS |
+| DT binding YAML (jadard,jd9365da-h3.yaml) included | PASS |
+| Makefile + Kconfig hunks present | PASS |
+| No 6.2+ specific APIs (`drm_panel_init`, `drm_panel_of_backlight`, `mipi_dsi_*` DCS helpers — all in 6.1.99) | PASS |
+| `FILESEXTRAPATHS:prepend` uses colon syntax | PASS |
+| `SRC_URI +=` appends patch with correct filename | PASS |
+| A2 confirmed `git apply --check` on clean 6.1.99 tree: OK | PASS |
+
+**Backport compatibility note:** Driver uses only standard DRM panel and MIPI DSI APIs present in 6.1.99. No 6.2-specific symbols identified. R-03 closed.
+
+#### TASK-003 — WKS partition layout — APPROVED (with A1 fix)
+
+| Check | Result |
+|---|---|
+| Boot (64M vfat), rootfs_a (2048M), rootfs_b (2048M), data (4096M) | PASS |
+| Total 8256M (~8.06 GB) within 16 GB eMMC | PASS |
+| A/B RAUC intent documented in comments | PASS |
+| `WICVARS:append` colon syntax, `ELEVATOR_HMI_EMMC_WKS` defined | PASS |
+| **Duplicate WICVARS block in layer.conf** | FIXED by A1 before merge |
+
+A1 removed duplicate `WICVARS:append` + `ELEVATOR_HMI_EMMC_WKS` block that appeared twice in `layer.conf` (copy-paste error). Committed fix on branch before merge.
+
+#### TASK-002 — Build host setup script — APPROVED
+
+| Check | Result |
+|---|---|
+| `set -euo pipefail` at top | PASS |
+| Ubuntu 22.04 version check via `/etc/os-release`, clear error on wrong version | PASS |
+| `liblz4-tool` in package list | PASS |
+| `kas` installed (apt universe + pip upgrade fallback), verified with `kas --version` | PASS |
+| `bitbake --version` verified via shallow poky clone + `oe-init-build-env` | PASS |
+| Idempotent: apt `-y`, poky clone guard, pip `--upgrade` | PASS |
+| `scripts/README.md` documents usage and PATH note | PASS |
+
+### Phase 0 queue state
+
+| Task | Status |
+|---|---|
+| TASK-001 | `[DONE]` |
+| TASK-002 | `[DONE]` |
+| TASK-003 | `[DONE]` |
+| TASK-004 | `[DONE]` |
+| TASK-005 | `[DONE]` |
+| TASK-101/102/103 | `[BLOCKED]` — human action required |
+
+**All A2 Phase 0 tasks are complete.** Phase 0 gate is now blocked only on human-action items.
+
+### Phase 0 gate — remaining human actions
+
+- **BLK-001** (HIGH): Contact CM3566 vendor — confirm −20°C operating temp or decide on enclosure heater
+- **BLK-002** (HIGH): Confirm MIPI-DSI routing on CM3566 carrier board display connector
+- **BLK-003** (MEDIUM): Select backlight boost IC from candidates (TPS61187, RT4813, MP3309)
+- **BLK-004** (MEDIUM): Decide protocol interface: RS-485 only vs RS-485 + CAN-FD
+
+Phase 1 (BSP bring-up) cannot begin until BLK-001 and BLK-002 are resolved.
+
+### Next actions
+- Project owner: contact CM3566 vendor on BLK-001 and BLK-002 — these are the critical path items
+- No new A2 tasks until Phase 1 gate opens
+
+---
+
 ## 2026-04-15 — TASK-002, TASK-003, TASK-004 (A2, separate branches)
 
 **Agent:** A2 (Composer2 / Cursor)  
