@@ -23,6 +23,21 @@ Afterwards:
 
 Project images are built via kas from the repository root — see the root `README.md`.
 
+## `kas-build-task-105.sh`
+
+Runs **TASK-105** kas smoke targets in order (**`u-boot`**, **`virtual/kernel`**, default **`core-image-minimal`**) and tees stdout/stderr into **`build-logs/`** (gitignored).
+
+Requirements:
+
+- Same host prep as **`setup-build-host.sh`** (Ubuntu **22.04**; **`lz4c`** on **`PATH`**).
+- Run from anywhere; the script **`cd`**s to the repository root.
+
+Usage:
+
+```bash
+./scripts/kas-build-task-105.sh
+```
+
 ## `convert-library.sh`
 
 Vendor PDF → Markdown conversion helper (see script header for usage).

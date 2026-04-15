@@ -56,7 +56,8 @@
 - [x] Backlight boost IC — **deferred** (constant backlight acceptable for now; see BLK-003)
 - [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
 - [ ] LMT101SX006C panel ordered
-- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** passes clean on TASK-002 host — recipe integration **TASK-103 DONE** 2026-04-15; full build + boot still pending proper host + **LMT101** / image flash; not BLK-001/002
+- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** passes clean on TASK-002 host — recipe integration **TASK-103 DONE** 2026-04-15; **TASK-105** helper script + logs **DONE** 2026-04-15 — run **`./scripts/kas-build-task-105.sh`** on **22.04** and record green output in **`diary/PROGRESS.md`**; full boot + **LMT101** / image flash still pending; not BLK-001/002  
+- [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15
 
 ---
 
