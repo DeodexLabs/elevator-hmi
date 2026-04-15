@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-15 — Git remote initialized, all branches pushed
+
+**Agent:** A1 (Claude Code)
+**Phase:** 0 — Foundation
+
+### Actions taken
+- Replaced passphrase-protected `id_ed25519` with new passphrase-free ed25519 key (comment: deodexlabs@gmail.com)
+- New public key registered to DeodexLabs GitHub account
+- Remote origin added: `git@github.com:DeodexLabs/elevator-hmi.git`
+- All branches pushed: `main`, `develop`, `cursor/phase0-workspace-scaffolding`
+- SSH connectivity confirmed: `Hi DeodexLabs!`
+
+### Remote URL
+git@github.com:DeodexLabs/elevator-hmi.git
+
+### SSH public key fingerprint
+SHA256:58mjShl6zipVVJLIfQZb7HF/RF6C0Id3h4azKh9iJmk (ED25519, no passphrase)
+
+### Branch protection
+Manual setup required — go to github.com/DeodexLabs/elevator-hmi → Settings → Branches → Add rule for `main`: require PR, no direct pushes.
+
+### Next actions
+- A2 (Composer2): pick up TASK-002 (build host setup script), TASK-003 (WKS partition file), TASK-004 (JD9365D backport patch)
+- Human: close R-01 and R-02 via vendor contact (see BLOCKERS.md)
+- Human: set branch protection on main
+
+---
+
 ## 2026-04-15 — TASK-005: Vendor PDF library converted to Markdown (A1)
 
 **Agent:** A1 (Claude Code / product lead)  
