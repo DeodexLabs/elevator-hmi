@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-005 added)  
+**Last updated:** 2026-04-15 (TASK-001 reviewed and approved by A1)  
 
 ---
 
@@ -34,66 +34,11 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-005 — Convert vendor PDF library to Markdown
-**Status:** `[DONE]`  
-**Assigned to:** A1  
-**Phase:** 0  
-**Depends on:** Library PDFs present in `library/`  
-
-**Description:**  
-Convert all vendor PDFs in `library/` (recursive) to Markdown using `markitdown[pdf]`. Generated `.md` files are tracked in Git; PDFs are gitignored.
-
-**Deliverables:**
-- `scripts/convert-library.sh` — recursive, handles subdirectory structure, installs `markitdown[pdf]`
-- `library/EM3566/**/*.md` — 44 Markdown files generated (co-located with PDFs)
-- `.gitignore` updated: `library/**/*.pdf` excluded, `.md` files tracked
-
-**Output notes (A1):**
-> Ran 2026-04-15. 44/45 converted OK. 1 failure: `Sensor_OV13850-G04A_OmniVision_Specification(V1.1).pdf` (scanned/image-only). Documented as BLK-005 (LOW severity — camera sensor not used in project). Root cause of initial 45/45 failure: `markitdown` installed without `[pdf]` extras; fixed in script.
-
----
-
-### TASK-001 — Initialize Git repository and kas manifest
-**Status:** `[REVIEW]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** —  
-
-**Description:**  
-Initialize the project Git repository structure using `kas` as the Yocto workspace manager.
-
-**Deliverables:**
-- `kas/elevator-hmi.yml` — kas manifest pinning all layers to exact commit hashes
-- Layers to include:
-  - `poky` — Scarthgap branch (pin to latest stable tag)
-  - `meta-rockchip` — pin to latest commit compatible with Scarthgap
-  - `meta-qt6` — pin to latest Scarthgap-compatible commit
-  - `meta-rauc` — pin to latest Scarthgap-compatible commit
-- Empty layer skeletons created:
-  - `meta-hmi-platform/` with correct `layer.conf`
-  - `meta-hmi-app/` with correct `layer.conf`
-- `README.md` at repo root explaining how to run `kas build`
-
-**Acceptance criteria:**
-- `kas build kas/elevator-hmi.yml` resolves all layers without error (dry run is acceptable if build host not configured)
-- Both custom layers parse without BitBake syntax errors
-- All external layer SHASUMs are pinned (no floating branches)
-
-**Output notes (A2 fills in):**
-> - Added `kas/elevator-hmi.yml` (format header 21, kas 5.x) with **pinned SHAs**: poky `yocto-5.0.16` (`1d54d1c4736a114e1cecbe85a0306e3814d5ce70`), `meta-openembedded` scarthgap (`5124ac4a658899158f4a7a2ddf1d2ca931ec7d0e`), `meta-rockchip` scarthgap (`5218d6330f5c49724650e63902e569c909df0889`), `meta-qt6` `lts-6.8.7` (`443684a06b504b94cc85b51b5c70cdb0a87b7e5f`), `meta-rauc` scarthgap (`d63878f20eba7a85ecf53566e7a3377e78bb46ac`). **meta-openembedded** is included because `meta-rockchip` upstream depends on `meta-oe` (documented in manifest comments and root README).
-> - `meta-hmi-platform` and `meta-hmi-app`: `conf/layer.conf` (Scarthgap-compatible), plus minimal **sentinel** `.bb` recipes under `recipes-core/sentinel/` so BitBake can parse the layers before real recipes exist.
-> - `README.md`: how to run `kas build` / `kas dump`, `KAS_WORK_DIR` note, layer table.
-> - Verified: `kas dump kas/elevator-hmi.yml` exits 0; `kas shell kas/elevator-hmi.yml --skip setup_environ` checks out repos and writes `build/conf/bblayers.conf` with **poky → meta-oe → BSP → Qt → RAUC → HMI** order (kas layer `prio` values, max 99 per schema).
-> - Full `bitbake-layers show-layers` not executed on this host: missing `lz4c` (expected once TASK-002 host packages are installed). Not a manifest defect.
-> - `.gitignore`: ignore `build/conf/` (kas-generated `bblayers.conf` / `local.conf`).
-
----
-
 ### TASK-002 — Yocto build host setup script
 **Status:** `[READY]`  
 **Assigned to:** A2  
 **Phase:** 0  
-**Depends on:** TASK-001  
+**Depends on:** TASK-001 ✓  
 
 **Description:**  
 Create a reproducible build host setup script for Ubuntu 22.04 LTS.
@@ -117,7 +62,7 @@ Create a reproducible build host setup script for Ubuntu 22.04 LTS.
 **Status:** `[READY]`  
 **Assigned to:** A2  
 **Phase:** 0  
-**Depends on:** TASK-001  
+**Depends on:** TASK-001 ✓  
 
 **Description:**  
 Create the Yocto WKS (Wic Kickstart) partition layout file in `meta-hmi-platform`.
@@ -152,7 +97,7 @@ Note: This is a simplified WKS. The final A/B layout will be coordinated with RA
 **Status:** `[READY]`  
 **Assigned to:** A2  
 **Phase:** 0 (prepared), applied in Phase 1  
-**Depends on:** TASK-001  
+**Depends on:** TASK-001 ✓  
 
 **Description:**  
 Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.99. This is a Phase 0 deliverable (preparation only) per roadmap item 1.3.
@@ -201,6 +146,7 @@ Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.9
 
 | Task | Description | Completed |
 |---|---|---|
+| TASK-001 | kas manifest + layer skeletons (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
 
 ---
@@ -213,3 +159,5 @@ Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.9
 - Never change the partition layout without a new task spec from A1.
 - Code style: shell scripts use `set -euo pipefail`. Python uses type hints.
 - Commit format: `[phaseN][component] short description` — e.g., `[phase0][kas] pin layer SHASUMs`
+- **Branch naming:** create a branch named `task/TASK-NNN-short-description` for every task. Never commit directly to `main` or `develop`.
+- Merge to `develop` only after A1 sets status to `[DONE]`.

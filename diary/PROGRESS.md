@@ -4,6 +4,50 @@
 
 ---
 
+## 2026-04-15 — TASK-001 reviewed [DONE], queue advanced (A1)
+
+**Agent:** A1 (Claude Code / product lead)  
+**Phase:** 0 — Foundation & Risk Mitigation  
+**Week:** 1  
+
+### TASK-001 Review — APPROVED
+
+Reviewed `kas/elevator-hmi.yml`, both `layer.conf` files, sentinel recipes, README, and `.gitignore`.
+
+| Check | Result |
+|---|---|
+| All 5 external SHAs are 40-char (no floating branches) | PASS |
+| meta-openembedded present (required by meta-rockchip) | PASS |
+| `LAYERSERIES_COMPAT = "scarthgap"` in both layers | PASS |
+| `machine: rockchip-rk3566-evb` (correct RK3566 target) | PASS |
+| `build/conf/` in `.gitignore` | PASS |
+| `kas dump kas/elevator-hmi.yml` exits 0 — kas 5.2 verified all repos at pinned commits | PASS |
+
+No separate task branch existed (A2 committed on cursor branch, already in develop/main). No merge needed. TASK-001 → `[DONE]`.
+
+Note: A branch naming rule added to AGENTS.md — A2 must use `task/TASK-NNN-*` branches going forward.
+
+### TASK-005 — Already complete
+44/45 PDFs converted (run in prior session). All `.md` files committed and pushed. See prior diary entry.
+
+### Queue state after this session
+| Task | Status |
+|---|---|
+| TASK-001 | `[DONE]` |
+| TASK-002 | `[READY]` — A2 can pick up |
+| TASK-003 | `[READY]` — A2 can pick up (independent of TASK-002) |
+| TASK-004 | `[READY]` — A2 can pick up (independent) |
+| TASK-005 | `[DONE]` |
+
+TASK-002 and TASK-004 are independent — A2 may work them sequentially in any order.
+
+### Next actions
+- A2: pick up TASK-002 (build host script), TASK-003 (WKS file), or TASK-004 (JD9365D patch) — one at a time
+- Human: contact CM3566 vendor on BLK-001 (R-01 temp) and BLK-002 (R-02 MIPI routing)
+- Human: set branch protection on main at github.com/DeodexLabs/elevator-hmi
+
+---
+
 ## 2026-04-15 — Git remote initialized, all branches pushed
 
 **Agent:** A1 (Claude Code)
@@ -12,8 +56,9 @@
 ### Actions taken
 - Replaced passphrase-protected `id_ed25519` with new passphrase-free ed25519 key (comment: deodexlabs@gmail.com)
 - New public key registered to DeodexLabs GitHub account
-- Remote origin added: `git@github.com:DeodexLabs/elevator-hmi.git`
-- All branches pushed: `main`, `develop`, `cursor/phase0-workspace-scaffolding`
+- Remote `origin` added: `git@github.com:DeodexLabs/elevator-hmi.git`
+- All branches pushed: `main`, `develop`
+- Stray `cursor/phase0-workspace-scaffolding` branch deleted; wrong author `Your Name <you@example.com>` rewritten via filter-branch
 - SSH connectivity confirmed: `Hi DeodexLabs!`
 
 ### Remote URL
@@ -21,14 +66,6 @@ git@github.com:DeodexLabs/elevator-hmi.git
 
 ### SSH public key fingerprint
 SHA256:58mjShl6zipVVJLIfQZb7HF/RF6C0Id3h4azKh9iJmk (ED25519, no passphrase)
-
-### Branch protection
-Manual setup required — go to github.com/DeodexLabs/elevator-hmi → Settings → Branches → Add rule for `main`: require PR, no direct pushes.
-
-### Next actions
-- A2 (Composer2): pick up TASK-002 (build host setup script), TASK-003 (WKS partition file), TASK-004 (JD9365D backport patch)
-- Human: close R-01 and R-02 via vendor contact (see BLOCKERS.md)
-- Human: set branch protection on main
 
 ---
 

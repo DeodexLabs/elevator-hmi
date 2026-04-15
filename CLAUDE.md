@@ -1,189 +1,204 @@
-# AGENTS.md — Multi-Agent Coordination Protocol
+# CLAUDE.md — Elevator HMI Project Master Context
 
-**Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15  
+**Read this file fully at the start of every session before taking any action.**
+**Update `diary/PROGRESS.md` at the end of every session.**
 
 ---
 
-## Agent Roster
+## 1. Project Identity
 
-| ID | Agent | Tool | Role |
+| Field | Value |
+|---|---|
+| Product | Elevator Car HMI System |
+| Target market | Turkey and regional markets |
+| Production volume | 500–1,000 units/year |
+| SoM | Compulab CM3566 (RK3566, 2 GB LPDDR4, 16 GB eMMC) |
+| Display | LMT101SX006C — 10.1" portrait, 800×1280, 4-lane MIPI-DSI, JD9365D driver IC |
+| Build system | Yocto Scarthgap 5.0 LTS |
+| Kernel | Linux 6.1.99 (Rockchip vendor fork) + JD9365D backport |
+| UI | Qt 6.8 LTS — QML only, EGLFS backend, Mali-G52 GPU |
+| Media | GStreamer + gst-plugins-rockchip (zero-copy VPU, H.264/H.265) |
+| OTA | RAUC A/B partitioning, signed bundles |
+| Protocol | Abstraction layer — CAN-FD (MCP2518FD SPI) or RS-485 Modbus RTU |
+| Watchdog | Two-tier: systemd WDT + RK3566 hardware WDT |
+| Operation | 24/7 unattended, industrial −20°C to +60°C (pending risk R-01) |
+| Field life target | 5+ years |
+
+---
+
+## 2. Current Phase Status
+
+> **Update this section when phase changes.**
+
+| Field | Value |
+|---|---|
+| **Active phase** | Phase 0 — Foundation & Risk Mitigation |
+| **Phase weeks** | Weeks 1–3 |
+| **Phase gate** | All risks resolved or accepted. Hardware ordered. Dev environment operational. |
+| **Current week** | Week 1 |
+| **Blocking risks** | R-01 (temperature), R-02 (MIPI-DSI routing) — must close before Phase 1 |
+
+### Phase 0 Checklist
+
+- [x] Git repo structure initialized (kas manifest) — TASK-001 DONE 2026-04-15
+- [x] Vendor PDF library converted to Markdown — TASK-005 DONE 2026-04-15
+- [ ] R-01: CM3566 min temp confirmed with vendor (need −20°C or heater decision)
+- [ ] R-02: MIPI-DSI routing confirmed on CM3566 carrier board display connector
+- [ ] R-03: JD9365D backport patch prepared and tested (panel-jadard-jd9365da-h3.c from Linux 6.2) — TASK-004 in queue
+- [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
+- [ ] Protocol interface decided: RS-485 only vs RS-485 + CAN-FD expansion
+- [ ] Backlight boost IC selected (candidates: TPS61187, RT4813, MP3309)
+- [ ] CM3566 dev kit ordered
+- [ ] LMT101SX006C panel ordered
+- [ ] `bitbake core-image-minimal` for RK3566 passes clean — TASK-002/003 in queue
+
+---
+
+## 3. Technology Decisions (ADR-001 — Non-negotiable)
+
+These decisions are final. Do not propose alternatives without a new ADR entry.
+
+| Component | Decision | Reason summary |
+|---|---|---|
+| OS/Build | Yocto Scarthgap 5.0 LTS | Reproducible, minimal, RAUC-compatible, 5yr LTS |
+| Kernel | Linux 6.1.99 Rockchip fork | VPU/GPU maturity; mainline deferred to Phase 2 review |
+| Qt | Qt 6.8 LTS | Qt 6.5 EOL April 2026; EGLFS, no Wayland/X11 overhead |
+| Media | GStreamer + gst-plugins-rockchip | Zero-copy VPU decode mandatory for 24/7 thermal budget |
+| OTA | RAUC A/B | Signed, rollback-capable, Yocto native |
+| Android 14 | REJECTED | Wrong model, slow boot, no RAUC, poor Qt integration |
+| Debian Buildroot | REJECTED | Non-reproducible, no A/B OTA, runtime apt is liability |
+| Kirkstone | REJECTED | EOL April 2025 |
+| Qt 6.5 | REJECTED | EOL April 2026 |
+
+---
+
+## 4. Yocto Layer Architecture
+
+```
+meta-rockchip          # Community BSP. NEVER modified. Pinned to a commit hash.
+meta-qt6               # Community Qt 6. NEVER modified. Pinned to a commit hash.
+meta-rauc              # Community RAUC. NEVER modified. Pinned to a commit hash.
+meta-hmi-platform      # Project BSP extensions:
+                       #   - Kernel recipe with JD9365D backport patch
+                       #   - Backlight driver recipe
+                       #   - Partition layout (.wks file)
+                       #   - systemd unit files for platform services
+meta-hmi-app           # Application layer:
+                       #   - Qt 6.8 QML application recipe
+                       #   - GStreamer pipeline configuration
+                       #   - Protocol abstraction service (PAL daemon) recipe
+                       #   - RAUC bundle recipe
+```
+
+**Rule:** Community layers are read-only. All project modifications live in `meta-hmi-platform` and `meta-hmi-app`. No exceptions.
+
+---
+
+## 5. Partition Layout (Fixed at Image Build — Cannot Change Without Full Reflash)
+
+```
+/dev/mmcblk0p1   boot        U-Boot + SPL
+/dev/mmcblk0p2   kernel_a    Kernel + DTB, slot A
+/dev/mmcblk0p3   kernel_b    Kernel + DTB, slot B
+/dev/mmcblk0p4   rootfs_a    Root filesystem, slot A (active)
+/dev/mmcblk0p5   rootfs_b    Root filesystem, slot B (update target)
+/dev/mmcblk0p6   data        Persistent data — NEVER erased by OTA
+```
+
+`/data` holds: application config, content manifest, video assets, logs, OTA staging.
+
+---
+
+## 6. Open Risks
+
+| ID | Risk | Severity | Status |
 |---|---|---|---|
-| A1 | Claude Code | Claude Code CLI | Lead — architecture, review, state tracking, diary |
-| A2 | Composer2 | Cursor Composer | Implementation — code, recipes, patches, configs |
+| R-01 | CM3566 spec says 0°C to +80°C. Project needs −20°C to +60°C. Lower bound not met. | High | **OPEN** — vendor contact required |
+| R-02 | Vendor Debian doc references "LVDS LCD." LMT101 is MIPI-DSI. Carrier routing unconfirmed. | High | **OPEN** — physical confirmation required |
+| R-03 | JD9365D driver not in Linux 6.1.x. Mainline merge was 6.2. | Medium | **OPEN** — backport patch must be prepared (TASK-004) |
+| R-04 | LED backlight lifetime ~2.3yr at 24/7 full brightness. Target is 5yr. | Medium | **ACCEPTED** — adaptive dimming in Phase 3 |
 
 ---
 
-## Coordination Protocol
+## 7. Agent Roles
 
-1. **A1 writes task specs** into the queue below. Status set to `[READY]`.
-2. **A2 picks up** any single `[READY]` task. Changes status to `[IN PROGRESS]`.
-3. **A2 completes** the task, changes status to `[REVIEW]`, adds output notes.
-4. **A1 reviews** the output. If accepted: `[DONE]`. If rejected: `[REWORK]` with notes.
-5. **A1 updates** `diary/PROGRESS.md` and `CLAUDE.md` phase checklist after each `[DONE]`.
+### This agent (Claude Code) — Lead
+- Maintains this file and all files in `diary/`
+- Owns `AGENTS.md` task queue — writes task specs for Composer2, marks them done
+- Reviews all Composer2 output before it is merged
+- Runs integration checks after each Composer2 task
+- Escalates risks and blockers to project owner
+- Updates phase status and decision log
+- Is the single source of truth for project state
 
-**Rule:** A2 never picks up more than one task at a time. Never begins a task that depends on an `[IN PROGRESS]` or `[REVIEW]` task.
-
-**Rule:** A2 must read `CLAUDE.md` fully before starting any task.
-
----
-
-## Task Queue
-
-Tasks are sorted by dependency order. Do not reorder.
-
----
-
-### TASK-001 — Initialize Git repository and kas manifest
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** —  
-
-**Description:**  
-Initialize the project Git repository structure using `kas` as the Yocto workspace manager.
-
-**Deliverables:**
-- `kas/elevator-hmi.yml` — kas manifest pinning all layers to exact commit hashes
-- Layers to include:
-  - `poky` — Scarthgap branch (pin to latest stable tag)
-  - `meta-rockchip` — pin to latest commit compatible with Scarthgap
-  - `meta-qt6` — pin to latest Scarthgap-compatible commit
-  - `meta-rauc` — pin to latest Scarthgap-compatible commit
-- Empty layer skeletons created:
-  - `meta-hmi-platform/` with correct `layer.conf`
-  - `meta-hmi-app/` with correct `layer.conf`
-- `README.md` at repo root explaining how to run `kas build`
-
-**Acceptance criteria:**
-- `kas build kas/elevator-hmi.yml` resolves all layers without error (dry run is acceptable if build host not configured)
-- Both custom layers parse without BitBake syntax errors
-- All external layer SHASUMs are pinned (no floating branches)
-
-**Output notes (A2 fills in):**
-> _pending_
+### Composer2 (Cursor) — Implementation
+- Picks tasks from `AGENTS.md` task queue — only tasks marked `[READY]`
+- Implements exactly as specified; does not deviate from architecture
+- Reports completion by updating task status to `[REVIEW]` in `AGENTS.md`
+- Creates a branch named `task/TASK-NNN-short-description` for every task
+- Never commits directly to `main` or `develop`
+- Never modifies community Yocto layers
+- Never changes partition layout or RAUC key material
+- See `.cursor/rules/elevator-hmi.mdc` for full rules
 
 ---
 
-### TASK-002 — Yocto build host setup script
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** TASK-001  
+## 8. Coding Conventions
 
-**Description:**  
-Create a reproducible build host setup script for Ubuntu 22.04 LTS.
+### Yocto recipes
+- Recipe format: Yocto Scarthgap compatible (no deprecated syntax)
+- All kernel patches named: `NNNN-description-of-patch.patch` (4-digit prefix)
+- Patch applied via `SRC_URI` in kernel recipe, not by modifying kernel source directly
+- All recipes in `meta-hmi-platform` or `meta-hmi-app` — never in community layers
 
-**Deliverables:**
-- `scripts/setup-build-host.sh` — installs all Yocto Scarthgap build dependencies
-- `scripts/README.md` — one-page setup guide
-- Required packages must include everything listed in Yocto Scarthgap host requirements: `kas`, `git`, `diffstat`, `unzip`, `texinfo`, `gcc`, `build-essential`, `chrpath`, `socat`, `python3`, `python3-pip`, `python3-pexpect`, `xz-utils`, `debianutils`, `iputils-ping`, `python3-git`, `python3-jinja2`, `libegl1-mesa`, `libsdl1.2-dev`, `pylint`, `xterm`, `python3-subunit`, `mesa-common-dev`, `zstd`, `liblz4-tool`
+### Qt / QML
+- No C++ UI code — all UI is QML
+- C++ backend exposes state to QML via `Q_PROPERTY` and signals only
+- EGLFS backend — no Wayland, no X11, no window manager
+- All QML files in `src/qml/`, mirrored in `meta-hmi-app` recipe
 
-**Acceptance criteria:**
-- Script is idempotent (safe to run twice)
-- Script checks Ubuntu version and exits with clear error if not 22.04
-- After running, `kas --version` and `bitbake --version` both work
+### Protocol Abstraction Layer (PAL)
+- PAL is a separate systemd daemon — not part of the Qt application process
+- Qt application communicates with PAL via D-Bus or Unix domain socket (TBD Phase 2)
+- PAL handles all hardware protocol details (CAN-FD / RS-485 framing, retries, timeouts)
+- Application layer never includes CAN or Modbus headers
 
-**Output notes (A2 fills in):**
-> _pending_
-
----
-
-### TASK-003 — Partition layout (WKS file)
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** TASK-001  
-
-**Description:**  
-Create the Yocto WKS (Wic Kickstart) partition layout file in `meta-hmi-platform`.
-
-**Deliverables:**
-- `meta-hmi-platform/wic/elevator-hmi-emmc.wks.in`
-
-**Partition layout to implement:**
-```
-# Elevator HMI eMMC partition layout
-# Total eMMC: 16 GB
-
-part /boot    --source bootimg-partition  --ondisk mmcblk0 --fstype=vfat  --label boot     --active --align 4    --size 64M
-part /        --source rootfs             --ondisk mmcblk0 --fstype=ext4  --label rootfs_a --align 4    --size 2048M
-part          --ondisk mmcblk0 --fstype=ext4  --label rootfs_b --align 4    --size 2048M   # slot B, empty at factory
-part /data    --source rootfs             --ondisk mmcblk0 --fstype=ext4  --label data     --align 4    --size 4096M
-```
-
-Note: This is a simplified WKS. The final A/B layout will be coordinated with RAUC in Phase 2. For Phase 0, establish the data partition and document the intent clearly in comments.
-
-**Acceptance criteria:**
-- File parses with `wic ls` without error
-- Comments in file explain A/B intent for Phase 2 RAUC integration
-- Added to `meta-hmi-platform/conf/layer.conf` as a WICVARS source
-
-**Output notes (A2 fills in):**
-> _pending_
+### General
+- All code committed with meaningful messages: `[phase][component] what changed and why`
+- No WIP commits to main branch
+- Branch naming: `task/TASK-NNN-short-description` for all A2 task branches
+- Integration test results logged in `diary/PROGRESS.md`
 
 ---
 
-### TASK-004 — JD9365D kernel backport patch (Phase 1 prerequisite)
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0 (prepared), applied in Phase 1  
-**Depends on:** TASK-001  
+## 9. Key Source References (in library/)
 
-**Description:**  
-Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.99. This is a Phase 0 deliverable (preparation only) per roadmap item 1.3.
+| Document | What it covers |
+|---|---|
+| `library/EM3566/Usermanual/CM3566_Hardware_Manual_V3.md` | CM3566 hardware manual — GPIO, pinout, interfaces |
+| `library/EM3566/Datasheet/Rockchip_RK3566_Datasheet_V1.5-20241211.md` | RK3566 SoC datasheet (latest) |
+| `library/EM3566/Linux6.1/Usermanual/EM3566 linux6.1 user manual_V1.0.md` | Linux 6.1 BSP user manual |
+| `library/EM3566/Schematic/em3566_v3sch.md` | EM3566 schematic (text extraction) |
+| `library/EM3566/Datasheet/K101-IM2KYL02-L3_MIPI.md` | MIPI panel datasheet (R-02 reference) |
+| `docs/roadmap-v1.md` | Full 32-week roadmap, phase gates, deliverable list |
+| `docs/platform-decisions-v1.md` | ADR-001 — all technology decisions with rationale |
 
-**Deliverables:**
-- `meta-hmi-platform/recipes-kernel/linux/files/0001-drm-panel-add-jadard-jd9365da-h3-driver-backport-6.1.99.patch`
-- Source: `drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c` from Linux 6.2 tag
-- DT binding: `Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml` from Linux 6.2 tag
-- Patch must apply cleanly to 6.1.99 with `patch --dry-run`
-- `meta-hmi-platform/recipes-kernel/linux/linux-rockchip_%.bbappend` skeleton that applies the patch via `SRC_URI`
-
-**Important notes:**
-- Do NOT modify the kernel source directly — patch only
-- The DTS node for this panel is a Phase 1 task (TASK-101) — this task delivers the driver only
-- Verify the panel driver has no dependencies on 6.2-specific kernel APIs that do not exist in 6.1.99
-
-**Acceptance criteria:**
-- Patch applies with `git apply --check` on a clean 6.1.99 tree
-- `linux-rockchip_%.bbappend` is syntactically valid
-- A check note is added to `diary/PROGRESS.md` confirming backport compatibility
-
-**Output notes (A2 fills in):**
-> _pending_
+*Note: LMT101SX006C, SKD41, ACM reference PDFs not yet in library/ — add when obtained.*
 
 ---
 
-### TASK-101 — [Phase 1] DTS node for JD9365D / LMT101SX006C
-**Status:** `[BLOCKED — needs TASK-004 done and R-02 closed]`  
-**Phase:** 1  
+## 10. Session Start Protocol
 
----
+1. Read this file (`CLAUDE.md`) fully.
+2. Read `diary/PROGRESS.md` — last 10 entries minimum.
+3. Read `AGENTS.md` — check task queue status.
+4. Check `diary/BLOCKERS.md` — any open blockers?
+5. Then proceed with the session goal.
 
-### TASK-102 — [Phase 1] U-Boot eMMC boot recipe
-**Status:** `[BLOCKED — needs TASK-001 done and CM3566 dev kit on hand]`  
-**Phase:** 1  
+## 11. Session End Protocol
 
----
-
-### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566)
-**Status:** `[BLOCKED — needs TASK-001 done]`  
-**Phase:** 1  
-
----
-
-## Completed Tasks
-
-_None yet — project start._
-
----
-
-## Notes on A2 Behavior (Composer2)
-
-- Always read `CLAUDE.md` at session start.
-- Implement exactly as specified in the task. If the spec is ambiguous, **stop and ask A1**, do not assume.
-- Never modify `meta-rockchip`, `meta-qt6`, or `meta-rauc` directly.
-- Never change the partition layout without a new task spec from A1.
-- Code style: shell scripts use `set -euo pipefail`. Python uses type hints.
-- Commit format: `[phaseN][component] short description` — e.g., `[phase0][kas] pin layer SHASUMs`
+1. Update `diary/PROGRESS.md` with what was done, any findings, next actions.
+2. Update `AGENTS.md` — add new tasks for Composer2 if applicable, update task statuses.
+3. Update `diary/BLOCKERS.md` — add new blockers, close resolved ones.
+4. Update section 2 (Current Phase Status) if phase or checklist changed.
+5. Commit all diary/status changes with message: `[diary] YYYY-MM-DD session summary`
