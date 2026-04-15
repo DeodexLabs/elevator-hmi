@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-002/003/004 reviewed and merged by A1 — Phase 0 queue complete)  
+**Last updated:** 2026-04-15 (EM3566 v3 dev kit on hand; TASK-102/103 → `[READY]`)  
 
 ---
 
@@ -34,29 +34,59 @@
 
 Tasks are sorted by dependency order. Do not reorder.
 
-**Phase 0 gate status:** All A2 tasks complete. Remaining blockers are human-action items.  
-Phase 1 cannot start until BLK-001 (CM3566 temp range) and BLK-002 (MIPI-DSI routing) are resolved by the project owner.
+**Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
+**A2 queue:** **`[READY]`** tasks **TASK-104**, **TASK-102**, **TASK-103`** — pick **one** at a time per protocol; suggested order **104 → 102 → 103** (DTS/kernel path, then U-Boot eMMC, then minimal image).
 
 ---
 
-### TASK-101 — [Phase 1] DTS node for JD9365D / LMT101SX006C
-**Status:** `[BLOCKED — needs R-02 closed (MIPI-DSI routing confirmed)]`  
+### TASK-104 — [Phase 1] Boardcon EM3566 machine DTS — integrate LMT101 panel fragment
+**Status:** `[READY]`  
 **Phase:** 1  
-**Depends on:** TASK-004 ✓, R-02 OPEN  
+**Depends on:** TASK-101 ✓, TASK-001 ✓, TASK-002 ✓ (build host packages + kas), pinned `meta-rockchip` tree available locally so the correct **`rk3566-*.dts` / machine** path can be identified **without guessing**  
+
+**Spec:**  
+- Wire `elevator-hmi-lmt101sx006c-panel.dtsi` into the **Boardcon EM3566 v3** machine device tree used for bring-up: `#include` or equivalent merge in **`meta-hmi-platform` only** (bbappend, inc fragment, or project-side `.dts` — **never** edit `meta-rockchip` git subdir).  
+- Align **`vdd-supply` / `vccio-supply` / `backlight`** phandles to **actual BSP** regulator and backlight node names; add `reset-gpios` only when **BLK-006** is resolved with a cited GPIO.  
+- If BSP already defines `&dsi { ports { port@0 { … }}}` for VOP, merge **one** `ports` block per the header comment in `elevator-hmi-lmt101sx006c-panel.dtsi` (avoid duplicate `ports` fragments).  
+- Set **`KERNEL_DEVICETREE`** (machine `.conf` / `local.conf` / kas env — follow BSP convention) so the built DTB matches **EM3566 v3 + MIPI LCD** bring-up.  
+- **Smoke:** `kas build` / `bitbake virtual/kernel` (or at minimum `bitbake linux-rockchip -c compile`) succeeds on a host that completed TASK-002. Log command + result in task output notes.  
+
+**Acceptance:** Panel fragment included; DT compiles; kernel recipe builds; output notes list files touched and any BSP label renames.
 
 ---
 
 ### TASK-102 — [Phase 1] U-Boot eMMC boot recipe
-**Status:** `[BLOCKED — needs CM3566 dev kit on hand]`  
+**Status:** `[READY]`  
 **Phase:** 1  
-**Depends on:** TASK-001 ✓, hardware in hand  
+**Depends on:** TASK-001 ✓, **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
 
 ---
 
 ### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566)
-**Status:** `[BLOCKED — needs TASK-002 complete on build host and CM3566 dev kit]`  
+**Status:** `[READY]`  
 **Phase:** 1  
-**Depends on:** TASK-001 ✓, TASK-002 ✓ (build host), hardware in hand  
+**Depends on:** TASK-001 ✓, TASK-002 ✓ (build host script + deps installed on the machine used for `kas`/`bitbake`), **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
+
+**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance (or TASK-104); if the host is not yet exercised, run **`scripts/yocto-build-host-setup.sh`** (TASK-002) before claiming `[REVIEW]`.
+
+---
+
+### TASK-101 — [Phase 1] DTS node for JD9365D / LMT101SX006C *(archived — [DONE] 2026-04-15)*
+**Status:** `[DONE]`  
+**Branch:** `task/TASK-101-lmt101-dts` (merge at owner discretion after artifacts are **committed** on branch).  
+
+**Output notes (A2):**  
+- `0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch` (after 0001): product `compatible`, optional `reset-gpios`, `devm_gpiod_get_optional`, 135 ms delay path when no reset GPIO.  
+- `elevator-hmi-lmt101sx006c-panel.dtsi`: `&dsi` / `panel@0` / `ports/port@1` graph; placeholder phandles per Rockchip BSP conventions.  
+- `linux-rockchip_%.bbappend`: `SRC_URI` + `CONFIG_DRM_PANEL_JADARD_JD9365DA_H3=y`.  
+
+**A1 review notes (2026-04-15):**  
+- **PASS:** Patch 0002 is minimal, ordered after 0001, uses Scarthgap bitbake syntax; binding change matches driver; `prepare`/`unprepare`/`probe` handle `NULL` reset safely — **aligned with BLK-006** (no invented XRES GPIO).  
+- **PASS:** Reference `.dtsi` documents CON1 sources, merge hazard for `ports`, and defers `reset-gpios` until bench/trace.  
+- **PASS:** No modifications under community layers (`meta-rockchip` / `meta-qt6` / `meta-rauc`).  
+- **Caveat:** `elevator-hmi,lmt101sx006c` reuses `cz101b4001_desc` timings — **acceptable for first DSI link-up**; validate against **LMT101SX006C** electrical/timing spec on hardware and add a dedicated `jadard_panel_desc` if measurements differ.  
+- **Process:** At review time, `0002` / `.dtsi` / `bbappend` changes must be **git committed** on `task/TASK-101-lmt101-dts` before merge to `main`/`develop` (agents did not commit per owner policy).
 
 ---
 
@@ -69,6 +99,7 @@ Phase 1 cannot start until BLK-001 (CM3566 temp range) and BLK-002 (MIPI-DSI rou
 | TASK-003 | eMMC partition layout WKS file (A2 impl, A1 reviewed — A1 fixed duplicate WICVARS) | 2026-04-15 |
 | TASK-004 | JD9365D panel driver backport patch 6.2→6.1.99 (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
+| TASK-101 | LMT101 / JD9365 DSI fragment + optional-reset kernel patch (A2 impl, A1 reviewed) | 2026-04-15 |
 
 ---
 

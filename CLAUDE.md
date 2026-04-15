@@ -13,15 +13,16 @@
 | Target market | Turkey and regional markets |
 | Production volume | 500–1,000 units/year |
 | SoM | Compulab CM3566 (RK3566, 2 GB LPDDR4, 16 GB eMMC) |
-| Display | LMT101SX006C — 10.1" portrait, 800×1280, 4-lane MIPI-DSI, JD9365D driver IC |
+| Reference carrier (bring-up) | **Boardcon EM3566 v3** — development kit / carrier for CM3566 (sources under `library/EM3566/`: schematic, Linux 6.1 manual, block diagram). Not the production elevator PCB; use it to validate kernel, panel, and RAUC flow. |
+| Display | LMT101SX006C — 10.1" portrait, 800×1280, 4-lane MIPI-DSI, JD9365D driver IC — **attach to EM3566 v3 `MIPI LCD` connector** for bench work (see §6 R-02) |
 | Build system | Yocto Scarthgap 5.0 LTS |
 | Kernel | Linux 6.1.99 (Rockchip vendor fork) + JD9365D backport |
 | UI | Qt 6.8 LTS — QML only, EGLFS backend, Mali-G52 GPU |
 | Media | GStreamer + gst-plugins-rockchip (zero-copy VPU, H.264/H.265) |
 | OTA | RAUC A/B partitioning, signed bundles |
-| Protocol | Abstraction layer — CAN-FD (MCP2518FD SPI) or RS-485 Modbus RTU |
+| Protocol | Abstraction layer (PAL) — **elevator fieldbus PHY deferred** (RS-485 / CAN-FD not planned in Phase 0; revisit when product scope returns). **Interim bring-up link (Phase 0/1):** **UART serial console** on the board (host PC ↔ SoM) to watch **U-Boot/Linux boot**, **loaded image behaviour**, **systemd**, and **RAUC** messages — see §8 PAL; pinout on **EM3566 v3** in `library/EM3566/` (debug / UART headers). This is **lab/diagnostics**, not the ship-time controller interface. |
 | Watchdog | Two-tier: systemd WDT + RK3566 hardware WDT |
-| Operation | 24/7 unattended, industrial −20°C to +60°C (pending risk R-01) |
+| Operation | 24/7 unattended, industrial −20°C to +60°C (R-01: vendor −20°C test passed; see §6 for spec vs recommended range) |
 | Field life target | 5+ years |
 
 ---
@@ -36,7 +37,7 @@
 | **Phase weeks** | Weeks 1–3 |
 | **Phase gate** | All risks resolved or accepted. Hardware ordered. Dev environment operational. |
 | **Current week** | Week 1 |
-| **Blocking risks** | R-01 (temperature), R-02 (MIPI-DSI routing) — must close before Phase 1 |
+| **Blocking risks** | R-01 / R-02 mitigated (2026-04-15/16); **production** carrier still needs schematic sign-off + formal −20°C acceptance — **EM3566 v3** is the agreed Phase 0/1 reference board |
 
 ### Phase 0 Checklist
 
@@ -45,14 +46,15 @@
 - [x] Build host setup script created — TASK-002 DONE 2026-04-15
 - [x] eMMC partition layout (WKS file) created — TASK-003 DONE 2026-04-15
 - [x] R-03: JD9365D backport patch prepared (panel-jadard-jd9365da-h3.c from Linux 6.2→6.1.99) — TASK-004 DONE 2026-04-15
-- [ ] R-01: CM3566 min temp confirmed with vendor (need −20°C or heater decision) — **OPEN, human action**
-- [ ] R-02: MIPI-DSI routing confirmed on CM3566 carrier board display connector — **OPEN, human action**
+- [x] Phase 1 prep (kernel/DTS in tree): LMT101SX006C DSI fragment (`elevator-hmi-lmt101sx006c-panel.dtsi`) + optional `reset-gpios` follow-up patch on JD9365 driver/binding — **TASK-101 DONE** 2026-04-15; machine integration → **TASK-104** `[READY]`
+- [x] R-01: CM3566 −20°C — vendor: **4 h @ −20°C test passed**; datasheet **recommended** op still **0°C–70°C** — **accepted with documented caveat** (see `diary/BLOCKERS.md` BLK-001)
+- [x] R-02: MIPI vs LVDS — SoM **DSI/LVDS mux** (pins 25–34). **EM3566 v3** carrier exposes a dedicated **MIPI LCD** connector (same muxed TX bus also branches to optional **LVDS OUT**); use **MIPI LCD** + DT/strap for **MIPI-DSI** with LMT101 (see `diary/BLOCKERS.md` BLK-002); custom production carrier still needs its own review
 - [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
-- [ ] Protocol interface decided: RS-485 only vs RS-485 + CAN-FD expansion — **OPEN, human action**
-- [ ] Backlight boost IC selected (candidates: TPS61187, RT4813, MP3309) — **OPEN, human action**
-- [ ] CM3566 dev kit ordered
+- [x] Protocol interface — **fieldbus deferred** (no RS-485 / CAN-FD controller PHY for now; see BLK-004); **interim:** **UART console** for SoM bring-up and image diagnostics
+- [x] Backlight boost IC — **deferred** (constant backlight acceptable for now; see BLK-003)
+- [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
 - [ ] LMT101SX006C panel ordered
-- [ ] `bitbake core-image-minimal` for RK3566 passes clean — blocked on hardware + BLK-001/002
+- [ ] `bitbake core-image-minimal` for RK3566 passes clean — blocked on panel availability + first full build/boot cycle (**TASK-103**); not BLK-001/002
 
 ---
 
@@ -115,9 +117,9 @@ meta-hmi-app           # Application layer:
 
 | ID | Risk | Severity | Status |
 |---|---|---|---|
-| R-01 | CM3566 spec says 0°C to +80°C. Project needs −20°C to +60°C. Lower bound not met. | High | **OPEN** — vendor contact required |
-| R-02 | Vendor Debian doc references "LVDS LCD." LMT101 is MIPI-DSI. Carrier routing unconfirmed. | High | **OPEN** — physical confirmation required |
-| R-03 | JD9365D driver not in Linux 6.1.x. Mainline merge was 6.2. | Medium | **OPEN** — backport patch must be prepared (TASK-004) |
+| R-01 | Datasheet “recommended” 0°C–70°C vs project −20°C. | High → **Medium** | **MITIGATED** — vendor reliability test **4 h @ −20°C ±2°C** passed; continuous −20°C still outside *recommended* wording — owner acceptance on file (BLK-001) |
+| R-02 | Debian “LVDS” vs LMT101 MIPI-DSI. | High → **Low** | **MITIGATED** — **EM3566 v3** block diagram: **MIPI LCD** connector is the intended DSI attach point; signals remain the SoM’s **shared LVDS/MIPI TX** bus (also routed to optional LVDS OUT). **Action:** DSI mode + LMT101 on **MIPI LCD**; validate on dev kit before custom carrier (BLK-002) |
+| R-03 | JD9365D driver not in Linux 6.1.x. Mainline merge was 6.2. | Medium | **MITIGATED** — TASK-004 backport patch + bbappend in `meta-hmi-platform` (validate on hardware in Phase 1) |
 | R-04 | LED backlight lifetime ~2.3yr at 24/7 full brightness. Target is 5yr. | Medium | **ACCEPTED** — adaptive dimming in Phase 3 |
 
 ---
@@ -161,7 +163,9 @@ meta-hmi-app           # Application layer:
 ### Protocol Abstraction Layer (PAL)
 - PAL is a separate systemd daemon — not part of the Qt application process
 - Qt application communicates with PAL via D-Bus or Unix domain socket (TBD Phase 2)
-- PAL handles all hardware protocol details (CAN-FD / RS-485 framing, retries, timeouts)
+- **Phase 0/1 — bring-up “comms” to the SoM:** use **UART serial console** (115200 8N1 typical on Rockchip BSPs — confirm in `meta-rockchip` / vendor U-Boot/kernel docs) from the **host PC** to the board’s **debug or UART header** (EM3566 v3 exposes UART1, UART2, and a **debug** port per board docs in `library/EM3566/`). Use it to see **what the loaded image is doing** (boot, login/getty, RAUC, application logs). **Image recipes** should keep **kernel command line + systemd** logging on that console until PAL fieldbus exists.
+- **Phase 0/1:** elevator **fieldbus** (RS-485 / CAN-FD) **deferred** — no PHY/BOM for controller link until product scope returns; PAL remains the **software** abstraction for that future link.
+- When fieldbus returns: PAL handles hardware protocol details (framing, retries, timeouts) without leaking bus headers into Qt
 - Application layer never includes CAN or Modbus headers
 
 ### General
