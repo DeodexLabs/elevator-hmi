@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-001 reviewed and approved by A1)  
+**Last updated:** 2026-04-15 (TASK-002/003/004 reviewed and merged by A1 — Phase 0 queue complete)  
 
 ---
 
@@ -26,119 +26,37 @@
 
 **Rule:** A2 must read `CLAUDE.md` fully before starting any task.
 
+**Reminder (A2 — branching):** For every task, create and work only on a branch named `task/TASK-NNN-short-description` (example: `task/TASK-003-partition-wks`). Do not commit directly to `main` or `develop`. Merge only after A1 sets the task to `[DONE]`.
+
 ---
 
 ## Task Queue
 
 Tasks are sorted by dependency order. Do not reorder.
 
----
-
-### TASK-002 — Yocto build host setup script
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** TASK-001 ✓  
-
-**Description:**  
-Create a reproducible build host setup script for Ubuntu 22.04 LTS.
-
-**Deliverables:**
-- `scripts/setup-build-host.sh` — installs all Yocto Scarthgap build dependencies
-- `scripts/README.md` — one-page setup guide
-- Required packages must include everything listed in Yocto Scarthgap host requirements: `kas`, `git`, `diffstat`, `unzip`, `texinfo`, `gcc`, `build-essential`, `chrpath`, `socat`, `python3`, `python3-pip`, `python3-pexpect`, `xz-utils`, `debianutils`, `iputils-ping`, `python3-git`, `python3-jinja2`, `libegl1-mesa`, `libsdl1.2-dev`, `pylint`, `xterm`, `python3-subunit`, `mesa-common-dev`, `zstd`, `liblz4-tool`
-
-**Acceptance criteria:**
-- Script is idempotent (safe to run twice)
-- Script checks Ubuntu version and exits with clear error if not 22.04
-- After running, `kas --version` and `bitbake --version` both work
-
-**Output notes (A2 fills in):**
-> _pending_
-
----
-
-### TASK-003 — Partition layout (WKS file)
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0  
-**Depends on:** TASK-001 ✓  
-
-**Description:**  
-Create the Yocto WKS (Wic Kickstart) partition layout file in `meta-hmi-platform`.
-
-**Deliverables:**
-- `meta-hmi-platform/wic/elevator-hmi-emmc.wks.in`
-
-**Partition layout to implement:**
-```
-# Elevator HMI eMMC partition layout
-# Total eMMC: 16 GB
-
-part /boot    --source bootimg-partition  --ondisk mmcblk0 --fstype=vfat  --label boot     --active --align 4    --size 64M
-part /        --source rootfs             --ondisk mmcblk0 --fstype=ext4  --label rootfs_a --align 4    --size 2048M
-part          --ondisk mmcblk0 --fstype=ext4  --label rootfs_b --align 4    --size 2048M   # slot B, empty at factory
-part /data    --source rootfs             --ondisk mmcblk0 --fstype=ext4  --label data     --align 4    --size 4096M
-```
-
-Note: This is a simplified WKS. The final A/B layout will be coordinated with RAUC in Phase 2. For Phase 0, establish the data partition and document the intent clearly in comments.
-
-**Acceptance criteria:**
-- File parses with `wic ls` without error
-- Comments in file explain A/B intent for Phase 2 RAUC integration
-- Added to `meta-hmi-platform/conf/layer.conf` as a WICVARS source
-
-**Output notes (A2 fills in):**
-> _pending_
-
----
-
-### TASK-004 — JD9365D kernel backport patch (Phase 1 prerequisite)
-**Status:** `[READY]`  
-**Assigned to:** A2  
-**Phase:** 0 (prepared), applied in Phase 1  
-**Depends on:** TASK-001 ✓  
-
-**Description:**  
-Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.99. This is a Phase 0 deliverable (preparation only) per roadmap item 1.3.
-
-**Deliverables:**
-- `meta-hmi-platform/recipes-kernel/linux/files/0001-drm-panel-add-jadard-jd9365da-h3-driver-backport-6.1.99.patch`
-- Source: `drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c` from Linux 6.2 tag
-- DT binding: `Documentation/devicetree/bindings/display/panel/jadard,jd9365da-h3.yaml` from Linux 6.2 tag
-- Patch must apply cleanly to 6.1.99 with `patch --dry-run`
-- `meta-hmi-platform/recipes-kernel/linux/linux-rockchip_%.bbappend` skeleton that applies the patch via `SRC_URI`
-
-**Important notes:**
-- Do NOT modify the kernel source directly — patch only
-- The DTS node for this panel is a Phase 1 task (TASK-101) — this task delivers the driver only
-- Verify the panel driver has no dependencies on 6.2-specific kernel APIs that do not exist in 6.1.99
-
-**Acceptance criteria:**
-- Patch applies with `git apply --check` on a clean 6.1.99 tree
-- `linux-rockchip_%.bbappend` is syntactically valid
-- A check note is added to `diary/PROGRESS.md` confirming backport compatibility
-
-**Output notes (A2 fills in):**
-> _pending_
+**Phase 0 gate status:** All A2 tasks complete. Remaining blockers are human-action items.  
+Phase 1 cannot start until BLK-001 (CM3566 temp range) and BLK-002 (MIPI-DSI routing) are resolved by the project owner.
 
 ---
 
 ### TASK-101 — [Phase 1] DTS node for JD9365D / LMT101SX006C
-**Status:** `[BLOCKED — needs TASK-004 done and R-02 closed]`  
+**Status:** `[BLOCKED — needs R-02 closed (MIPI-DSI routing confirmed)]`  
 **Phase:** 1  
+**Depends on:** TASK-004 ✓, R-02 OPEN  
 
 ---
 
 ### TASK-102 — [Phase 1] U-Boot eMMC boot recipe
-**Status:** `[BLOCKED — needs TASK-001 done and CM3566 dev kit on hand]`  
+**Status:** `[BLOCKED — needs CM3566 dev kit on hand]`  
 **Phase:** 1  
+**Depends on:** TASK-001 ✓, hardware in hand  
 
 ---
 
 ### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566)
-**Status:** `[BLOCKED — needs TASK-001 done]`  
+**Status:** `[BLOCKED — needs TASK-002 complete on build host and CM3566 dev kit]`  
 **Phase:** 1  
+**Depends on:** TASK-001 ✓, TASK-002 ✓ (build host), hardware in hand  
 
 ---
 
@@ -147,6 +65,9 @@ Prepare the JD9365D panel driver backport patch from Linux 6.2 mainline to 6.1.9
 | Task | Description | Completed |
 |---|---|---|
 | TASK-001 | kas manifest + layer skeletons (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-002 | Ubuntu 22.04 build host setup script (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-003 | eMMC partition layout WKS file (A2 impl, A1 reviewed — A1 fixed duplicate WICVARS) | 2026-04-15 |
+| TASK-004 | JD9365D panel driver backport patch 6.2→6.1.99 (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
 
 ---

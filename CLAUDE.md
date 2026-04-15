@@ -42,15 +42,17 @@
 
 - [x] Git repo structure initialized (kas manifest) — TASK-001 DONE 2026-04-15
 - [x] Vendor PDF library converted to Markdown — TASK-005 DONE 2026-04-15
-- [ ] R-01: CM3566 min temp confirmed with vendor (need −20°C or heater decision)
-- [ ] R-02: MIPI-DSI routing confirmed on CM3566 carrier board display connector
-- [ ] R-03: JD9365D backport patch prepared and tested (panel-jadard-jd9365da-h3.c from Linux 6.2) — TASK-004 in queue
+- [x] Build host setup script created — TASK-002 DONE 2026-04-15
+- [x] eMMC partition layout (WKS file) created — TASK-003 DONE 2026-04-15
+- [x] R-03: JD9365D backport patch prepared (panel-jadard-jd9365da-h3.c from Linux 6.2→6.1.99) — TASK-004 DONE 2026-04-15
+- [ ] R-01: CM3566 min temp confirmed with vendor (need −20°C or heater decision) — **OPEN, human action**
+- [ ] R-02: MIPI-DSI routing confirmed on CM3566 carrier board display connector — **OPEN, human action**
 - [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
-- [ ] Protocol interface decided: RS-485 only vs RS-485 + CAN-FD expansion
-- [ ] Backlight boost IC selected (candidates: TPS61187, RT4813, MP3309)
+- [ ] Protocol interface decided: RS-485 only vs RS-485 + CAN-FD expansion — **OPEN, human action**
+- [ ] Backlight boost IC selected (candidates: TPS61187, RT4813, MP3309) — **OPEN, human action**
 - [ ] CM3566 dev kit ordered
 - [ ] LMT101SX006C panel ordered
-- [ ] `bitbake core-image-minimal` for RK3566 passes clean — TASK-002/003 in queue
+- [ ] `bitbake core-image-minimal` for RK3566 passes clean — blocked on hardware + BLK-001/002
 
 ---
 
@@ -135,8 +137,7 @@ meta-hmi-app           # Application layer:
 - Picks tasks from `AGENTS.md` task queue — only tasks marked `[READY]`
 - Implements exactly as specified; does not deviate from architecture
 - Reports completion by updating task status to `[REVIEW]` in `AGENTS.md`
-- Creates a branch named `task/TASK-NNN-short-description` for every task
-- Never commits directly to `main` or `develop`
+- **Branching (mandatory):** creates and uses a branch named `task/TASK-NNN-short-description` for every task — never commit directly to `main` or `develop`; merge only after A1 marks `[DONE]`
 - Never modifies community Yocto layers
 - Never changes partition layout or RAUC key material
 - See `.cursor/rules/elevator-hmi.mdc` for full rules
