@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-04-15 — Git: TASK-101 commits + merge to `develop` + push (A1)
+
+**Agent:** A1  
+**Phase:** 1 prep  
+
+### Actions taken
+- On **`task/TASK-101-lmt101-dts`:** three commits — `[phase1][kernel]` TASK-101 artifacts, `[docs]` `library/EM3566/README.md`, `[diary]` queue/blocker/CLAUDE/PROGRESS/BLOCKERS state.  
+- **`develop`:** merged task branch (`--no-ff`); **`git push origin develop`**.  
+- **`task/TASK-101-lmt101-dts`:** pushed to `origin` for archive. **A2** should **`git checkout develop` && `git pull`** before starting **TASK-104** (or any new task branch from current `develop`).
+
+---
+
 ## 2026-04-15 — EM3566 v3 dev kit on hand; TASK-102/103 unblocked (A1 / owner)
 
 **Agent:** A1 (state update — owner input)  
