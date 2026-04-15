@@ -4,6 +4,45 @@
 
 ---
 
+## 2026-04-15 — TASK-103 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-103** approved: **`core-image-minimal.bbappend`** inherits **`rockchip-image`** and sets **`WKS_FILE`** to **`ELEVATOR_HMI_EMMC_WKS`** (TASK-003); **`kas dump`** smoke OK; full **`kas build`** deferred to TASK-002 host (`lz4c` / BitBake), same as TASK-102/104.
+
+### Git
+- Committed on **`task/TASK-103-core-image-minimal`**, pushed; **`develop`** merged (`--no-ff`) and pushed.
+
+### Optional — kas build logs (when a proper build host exists)
+- On Ubuntu **22.04** after **`scripts/setup-build-host.sh`**, run e.g.  
+  `kas build kas/elevator-hmi.yml --target u-boot 2>&1 | tee build-logs/u-boot.log`  
+  `kas build kas/elevator-hmi.yml --target virtual/kernel 2>&1 | tee build-logs/kernel.log`  
+  `kas build kas/elevator-hmi.yml 2>&1 | tee build-logs/core-image-minimal.log`  
+- Store under **`build-logs/`** (gitignored) or attach excerpts to **`diary/PROGRESS.md`** — not required for TASK-103 **`[DONE]`** sign-off.
+
+### Next
+- **A1:** Add next **`[READY]`** tasks in **`AGENTS.md`** (bench validation, image flash doc, RAUC, Qt, etc.).  
+- **Owner / lab:** green **`kas build`** + first eMMC flash on **EM3566 v3**.
+
+---
+
+## 2026-04-15 — TASK-103: core-image-minimal + rockchip-image / project WIC (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend`**: **`inherit rockchip-image`** (Rockchip ext4 + WIC + kernel image layout per **`meta-rockchip`** class) and **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** so images use **`wic/elevator-hmi-emmc.wks.in`** (TASK-003) instead of BSP default **`generic-gptdisk.wks.in`**.  
+- **Branch:** `task/TASK-103-core-image-minimal` (from **`develop`**). **`AGENTS.md`**: TASK-103 → **`[REVIEW]`** with output notes.  
+- **Smoke:** **`kas dump kas/elevator-hmi.yml`** succeeded. **`kas build`** not executed here — **`lz4c`** not on **`PATH`**; install **`liblz4-tool`** / TASK-002 host deps before BitBake (same as TASK-102/104 deferred smoke).
+
+### Next
+- A1: review TASK-103; on TASK-002 host run **`kas build kas/elevator-hmi.yml`** (+ optional **`virtual/kernel`** / **`u-boot`** targets).
+
+---
+
 ## 2026-04-15 — TASK-102 A1 review [DONE], merge to `develop`, push (A1)
 
 **Agent:** A1  

@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-102 `[DONE]`; TASK-103 `[READY]` — next for A2)  
+**Last updated:** 2026-04-15 (TASK-103 `[DONE]`; Phase 1 queue empty — A1 adds next `[READY]` tasks)  
 
 ---
 
@@ -36,16 +36,24 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **TASK-103** **`[READY]`** only — **`git checkout develop && git pull`** before **`task/TASK-103-…`** branch.
+**A2 queue:** **No `[READY]` tasks** — next work items: A1 writes new **`[READY]`** specs (Phase 1 bench, RAUC bundle, Qt image, etc.).
 
 ---
 
-### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566)
-**Status:** `[READY]`  
-**Phase:** 1  
+### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566) *(archived — [DONE] 2026-04-15)*
+**Status:** `[DONE]`  
+**Branch:** `task/TASK-103-core-image-minimal` (merged to `develop` after A1 review in this session).  
 **Depends on:** TASK-001 ✓, TASK-002 ✓ (build host script + deps installed on the machine used for `kas`/`bitbake`), **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
 
-**Note:** First successful `kas build` / `bitbake` on that host can be part of TASK-103 acceptance; if the host is not yet exercised, run **`scripts/setup-build-host.sh`** (TASK-002) before claiming `[REVIEW]`. **Follow-up:** on a TASK-002–prepared host, run **`kas build kas/elevator-hmi.yml --target virtual/kernel`** and **`--target u-boot`** to close smoke gaps from TASK-104 / TASK-102 sign-off (host `lz4c`).
+**Output notes (A2):** *(summary)* **`core-image-minimal.bbappend`**: **`inherit rockchip-image`** + **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** (TASK-003 WIC vs BSP **`generic-gptdisk.wks.in`**); **`kas dump`** OK; **`kas build`** not run on agent host (`lz4c`). See branch for full bullets.
+
+**A1 review notes (2026-04-15):**  
+- **PASS:** Changes confined to **`meta-hmi-platform/recipes-core/images/`**; no edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.  
+- **PASS:** **`inherit rockchip-image`** matches **`meta-rockchip/classes/rockchip-image.bbclass`** (ext4 + WIC, **`ROCKCHIP_KERNEL_IMAGES`**, postprocess hooks).  
+- **PASS:** **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** overrides the class’s weak **`WKS_FILE ?=`** default and points at **`layer.conf`**-defined **`elevator-hmi-emmc.wks.in`** (TASK-003) — correct wiring for the fixed A/B + **`/data`** layout.  
+- **PASS:** **`kas dump`** is an appropriate minimal smoke when BitBake cannot run on the review host.  
+- **Deferred acceptance:** Full **`kas build kas/elevator-hmi.yml`** (image + **`virtual/kernel`** + **`u-boot`**) remains **owner / TASK-002 host** — capture logs there when ready (see **Optional A1 log collection** in `diary/PROGRESS.md`).  
+- **Caveat:** First flash must still match **SPL + partition table + WIC** on real **EM3566 v3**; validate boot and **`/data`** persistence vs OTA story when hardware images exist.
 
 ---
 
@@ -110,6 +118,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-101 | LMT101 / JD9365 DSI fragment + optional-reset kernel patch (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
 
 ---
 
