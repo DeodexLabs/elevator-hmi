@@ -21,6 +21,12 @@
 - Run **`scripts/setup-build-host.sh`** on the build machine, then **`kas build kas/elevator-hmi.yml --target virtual/kernel`** to close smoke.  
 - Bench: **EM3566 v3 + LMT101** on **MIPI LCD** for **BLK-006** / DSI0 caveat.
 
+### Next A1 session (prep)
+- **Review queue:** When A2 submits **`[REVIEW]`**, run the same gate: community layers read-only, Scarthgap syntax, acceptance vs spec.  
+- **TASK-104 follow-up:** Log a green **`kas build … virtual/kernel`** (or attach CI) when available; no new task unless DTS changes after bench.  
+- **Specs:** Tighten **TASK-102** / **TASK-103** acceptance in `AGENTS.md` if A2 needs clearer U-Boot vs image boundaries (optional before pick-up).  
+- **Product:** **`main`** promotion / release tagging remains **owner** decision; `develop` is now integration head through TASK-104.
+
 ---
 
 ## 2026-04-15 — TASK-104: A2 verification + commit on task branch (A2)
@@ -35,7 +41,7 @@
 - **Hygiene:** fixed wrong script path in TASK-103 note (`scripts/setup-build-host.sh`).
 
 ### Git
-- Committed all TASK-104 changes on **`task/TASK-104-boardcon-machine-dts`** for A1 review (`[REVIEW]` unchanged until A1 sets `[DONE]` / `[REWORK]`).
+- Committed all TASK-104 changes on **`task/TASK-104-boardcon-machine-dts`** for A1 review (later **`[DONE]`** on 2026-04-15).
 
 ---
 
