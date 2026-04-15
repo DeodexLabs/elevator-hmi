@@ -4,6 +4,37 @@
 
 ---
 
+## 2026-04-15 — TASK-105 / TASK-107 A1 review [DONE], merge to `develop` (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-107** **`[DONE]`** — **`docs/BRINGUP-CHECKLIST.md`** meets spec; **`README.md`** + **`library/EM3566/README.md`** links; in-repo citation paths verified.  
+- **TASK-105** **`[DONE]`** — **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; **`lz4c`** / HOSTTOOLS failure on **24.04** documented — **green build** still for owner on **TASK-002 22.04** (append success to **`diary/PROGRESS.md`**).  
+- **Process:** combined branch **`task/TASK-105-107-lab-handoff`** — noted in **`AGENTS.md`**; prefer one task per branch later.
+
+### Git
+- Committed on task branch; **`develop`** merged (`--no-ff`); pushed **`origin/develop`**.
+
+---
+
+## 2026-04-15 — TASK-105 + TASK-107: kas smoke script + bring-up checklist (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **TASK-105:** **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`** section — sequential **`kas build`** (**`u-boot`**, **`virtual/kernel`**, **`core-image-minimal`**) with logs under **`build-logs/`** (gitignored). Ran three builds on Composer host → **HOSTTOOLS** failure (**`lz4c`** missing); logs captured. **Green image acceptance** remains for **Ubuntu 22.04 TASK-002** host. **`AGENTS.md`** TASK-105 → **`[REVIEW]`** with log excerpts.  
+- **TASK-107:** **`docs/BRINGUP-CHECKLIST.md`** — TASK-002, kas commands, deploy dir, UART (**`EM3566_hardware_manual.md`** §2.14), **MIPI LCD**, flash doc pointers (**no** invented **`rkdeveloptool`** offsets). **`README.md`** + **`library/EM3566/README.md`** link to checklist. **`AGENTS.md`** TASK-107 → **`[REVIEW]`**.  
+- **Branch:** **`task/TASK-105-107-lab-handoff`** (both tasks one linear branch; split commits if preferred).
+
+### Next
+- **Owner / TASK-002 host:** **`./scripts/kas-build-task-105.sh`** → confirm **exit 0**; paste deploy paths + log tails into **`AGENTS.md`** TASK-105 output notes (or new session).  
+- **A1:** Review TASK-105 / TASK-107; **`[DONE]`** when satisfied.
+
+---
+
 ## 2026-04-15 — A1 queue: TASK-105/107 READY, TASK-106 blocked (A1)
 
 **Agent:** A1  

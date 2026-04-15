@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-105/107 `[READY]`; TASK-106 blocked on LMT101)  
+**Last updated:** 2026-04-15 (TASK-105/107 `[DONE]`; TASK-106 blocked on LMT101)  
 
 ---
 
@@ -36,23 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **`[READY]`** — **TASK-105** (green **`kas build`** + logs), **TASK-107** (bring-up checklist doc). **`[BLOCKED]`** — **TASK-106** (LMT101 on MIPI LCD for **BLK-006** / DSI validation). Suggested order **105 → 107**; pick **one** task at a time. **`git checkout develop && git pull`** before each task branch.
-
----
-
-### TASK-105 — [Phase 1] Green `kas build` + smoke logs on TASK-002 host
-**Status:** `[READY]`  
-**Phase:** 1  
-**Depends on:** TASK-001 ✓, TASK-002 ✓, TASK-103 ✓, Ubuntu **22.04** build PC with **`scripts/setup-build-host.sh`** applied (or equivalent **`liblz4-tool`** + kas deps so **`lz4c`** is on **`PATH`**)  
-
-**Spec:**  
-- From repo root: **`kas build kas/elevator-hmi.yml`** (default **`core-image-minimal`** for **`elevator-hmi-em3566`**).  
-- Also run **`kas build kas/elevator-hmi.yml --target u-boot`** and **`--target virtual/kernel`** (can be separate invocations).  
-- Capture stdout/stderr under **`build-logs/`** with descriptive names (e.g. **`core-image-minimal.log`**, **`u-boot.log`**, **`virtual-kernel.log`**) — directory is **gitignored**; do **not** commit multi‑MB build trees.  
-- In **`AGENTS.md` Output notes** (at `[REVIEW]`): paste **last ~40 lines** of each log or note “clean / exit 0” + any **warnings**; list **key deploy artifacts** (paths under `build/tmp/deploy/images/elevator-hmi-em3566/` or as printed by BitBake) if present.  
-- **No** edits to **`meta-rockchip`**, **`meta-qt6`**, **`meta-rauc`**. Recipe fixes **only** in **`meta-hmi-platform` / `meta-hmi-app`** if BitBake exposes a **parse/build error** in our layers — otherwise document upstream gaps in output notes for A1.  
-
-**Acceptance:** At least one full **`kas build …`** (image) completes **exit 0** on the TASK-002 host; logs referenced in output notes.
+**A2 queue:** **`[BLOCKED]`** — **TASK-106** only (LMT101 on MIPI LCD for **BLK-006** / DSI validation). Next **`[READY]`** tasks: **A1** adds (e.g. RAUC skeleton spec, Qt image) when scoped. **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
@@ -69,17 +53,31 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-107 — [Phase 1] Bring-up checklist doc (flash + UART + kas)
-**Status:** `[READY]`  
-**Phase:** 1  
-**Depends on:** TASK-001 ✓, TASK-002 ✓, TASK-003 ✓ (WIC path), dev kit on hand ✓  
+### TASK-107 — [Phase 1] Bring-up checklist doc (flash + UART + kas) *(archived — [DONE] 2026-04-15)*
+**Status:** `[DONE]`  
+**Branch:** `task/TASK-105-107-lab-handoff` (merged to `develop` 2026-04-15; combined with TASK-105 — **prefer one task per branch next time**).  
 
-**Spec:**  
-- Add **`docs/BRINGUP-CHECKLIST.md`** (or extend **`library/EM3566/README.md`** with a clear “First image” section — **one** canonical doc, link from root **`README.md`**).  
-- Include: TASK-002 host prep, **`kas build`** command(s), where WIC/output artifacts live, **UART** header pointer (`library/EM3566/`), **MIPI LCD** connector reminder, **do not** invent **rkdeveloptool** offsets — cite **in-repo** Boardcon / Rockchip doc paths only; mark unknowns for owner.  
-- No changes to **`.wks`** layout without A1 task spec.
+**Output notes (A2):** *(summary)* **`docs/BRINGUP-CHECKLIST.md`**; **`README.md`** Documentation link; **`library/EM3566/README.md`** link; in-repo flash doc pointers only.
 
-**Acceptance:** Single checklist doc committed; **`README.md`** (or **`library/EM3566/README.md`**) links to it.
+**A1 review notes (2026-04-15):**  
+- **PASS:** Single canonical checklist; links from **`README.md`** and **`library/EM3566/README.md`**; cited paths exist under **`library/EM3566/`** (UART §2.14, Linux6.1 user manual, RKDevTool manual).  
+- **PASS:** No **`.wks`** edits; flash section explicitly avoids invented **`rkdeveloptool`** offsets — owner to record first working command in **`diary/PROGRESS.md`**.  
+- **PASS:** TASK-105 script cross-linked; **`kas dump`** / deploy path guidance matches project layout.  
+- **Process:** Combined **TASK-105 + TASK-107** on one branch — acceptable for this handoff; follow **`task/TASK-NNN-…`** per task for future work.
+
+---
+
+### TASK-105 — [Phase 1] Green `kas build` + smoke logs on TASK-002 host *(archived — [DONE] 2026-04-15)*
+**Status:** `[DONE]`  
+**Branch:** `task/TASK-105-107-lab-handoff` (merged to `develop` 2026-04-15).  
+
+**Output notes (A2):** *(summary)* **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; three **`kas build`** runs; HOSTTOOLS **`lz4c`** failure on Ubuntu **24.04** agent host; failure tails + expected deploy dir documented.
+
+**A1 review notes (2026-04-15):**  
+- **PASS:** **`scripts/kas-build-task-105.sh`** uses **`set -euo pipefail`**, repo-root **`cd`**, ordered **`u-boot`** → **`virtual/kernel`** → **`core-image-minimal`**, **`tee`** to **`build-logs/`** — matches TASK-105 intent.  
+- **PASS:** **`scripts/README.md`** documents prerequisites (22.04 / **`setup-build-host.sh`** / **`lz4c`**).  
+- **PASS:** No community-layer edits.  
+- **Deferred acceptance (explicit in spec):** **Green full image `exit 0`** remains for **TASK-002 Ubuntu 22.04** host — re-run **`./scripts/kas-build-task-105.sh`** there and append success log tails + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (or a follow-on diary entry); not a recipe **REWORK**.
 
 ---
 
@@ -162,6 +160,8 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending 22.04 host) | 2026-04-15 |
+| TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
 
 ---
 

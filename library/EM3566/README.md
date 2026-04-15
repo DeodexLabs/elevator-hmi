@@ -2,6 +2,8 @@
 
 This tree holds **Boardcon EM3566 v3** collateral used as the **Phase 0/1 reference carrier** for CM3566 bring-up. It is **not** the production elevator PCB. Authoritative project context lives in [`CLAUDE.md`](../../CLAUDE.md); tasks in [`AGENTS.md`](../../AGENTS.md); blockers in [`diary/BLOCKERS.md`](../../diary/BLOCKERS.md).
 
+**First Yocto image (kas, logs, UART, flash pointers):** [`docs/BRINGUP-CHECKLIST.md`](../../docs/BRINGUP-CHECKLIST.md).
+
 ---
 
 ## What lives here (quick map)
