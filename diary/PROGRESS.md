@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-04-15 — TASK-104 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-104** approved: `meta-hmi-platform` machine + board DTS + DSI0 panel overlay + kas machine; community layers untouched. **`kas build … virtual/kernel`** not proven on review host (`lz4c`) — deferred to TASK-002 host / **TASK-103** acceptance.
+
+### Git
+- **`task/TASK-104-boardcon-machine-dts`:** A1 status commit (`AGENTS` / `CLAUDE` / `PROGRESS`); **pushed** to `origin`.  
+- **`develop`:** merged task branch (`--no-ff`); **pushed** to `origin`.
+
+### Next for A2 / owner
+- **`git checkout develop && git pull`**, then **TASK-102** or **TASK-103** (one at a time).  
+- Run **`scripts/setup-build-host.sh`** on the build machine, then **`kas build kas/elevator-hmi.yml --target virtual/kernel`** to close smoke.  
+- Bench: **EM3566 v3 + LMT101** on **MIPI LCD** for **BLK-006** / DSI0 caveat.
+
+---
+
 ## 2026-04-15 — TASK-104: A2 verification + commit on task branch (A2)
 
 **Agent:** A2  
