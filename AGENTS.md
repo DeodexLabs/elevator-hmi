@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-15 (TASK-103 `[DONE]`; Phase 1 queue empty — A1 adds next `[READY]` tasks)  
+**Last updated:** 2026-04-15 (TASK-105/107 `[READY]`; TASK-106 blocked on LMT101)  
 
 ---
 
@@ -36,7 +36,50 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue:** **No `[READY]` tasks** — next work items: A1 writes new **`[READY]`** specs (Phase 1 bench, RAUC bundle, Qt image, etc.).
+**A2 queue:** **`[READY]`** — **TASK-105** (green **`kas build`** + logs), **TASK-107** (bring-up checklist doc). **`[BLOCKED]`** — **TASK-106** (LMT101 on MIPI LCD for **BLK-006** / DSI validation). Suggested order **105 → 107**; pick **one** task at a time. **`git checkout develop && git pull`** before each task branch.
+
+---
+
+### TASK-105 — [Phase 1] Green `kas build` + smoke logs on TASK-002 host
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** TASK-001 ✓, TASK-002 ✓, TASK-103 ✓, Ubuntu **22.04** build PC with **`scripts/setup-build-host.sh`** applied (or equivalent **`liblz4-tool`** + kas deps so **`lz4c`** is on **`PATH`**)  
+
+**Spec:**  
+- From repo root: **`kas build kas/elevator-hmi.yml`** (default **`core-image-minimal`** for **`elevator-hmi-em3566`**).  
+- Also run **`kas build kas/elevator-hmi.yml --target u-boot`** and **`--target virtual/kernel`** (can be separate invocations).  
+- Capture stdout/stderr under **`build-logs/`** with descriptive names (e.g. **`core-image-minimal.log`**, **`u-boot.log`**, **`virtual-kernel.log`**) — directory is **gitignored**; do **not** commit multi‑MB build trees.  
+- In **`AGENTS.md` Output notes** (at `[REVIEW]`): paste **last ~40 lines** of each log or note “clean / exit 0” + any **warnings**; list **key deploy artifacts** (paths under `build/tmp/deploy/images/elevator-hmi-em3566/` or as printed by BitBake) if present.  
+- **No** edits to **`meta-rockchip`**, **`meta-qt6`**, **`meta-rauc`**. Recipe fixes **only** in **`meta-hmi-platform` / `meta-hmi-app`** if BitBake exposes a **parse/build error** in our layers — otherwise document upstream gaps in output notes for A1.  
+
+**Acceptance:** At least one full **`kas build …`** (image) completes **exit 0** on the TASK-002 host; logs referenced in output notes.
+
+---
+
+### TASK-106 — [Phase 1] Bench: EM3566 v3 + LMT101 MIPI LCD (DSI / BLK-006)
+**Status:** `[BLOCKED — needs LMT101SX006C panel on hand]`  
+**Phase:** 1  
+**Depends on:** TASK-104 ✓, **LMT101SX006C** panel received and cabled to **`MIPI LCD`**, dev kit on hand ✓  
+
+**Spec (when unblocked):**  
+- Power/sequence per **LMT101** vendor doc (in repo when available).  
+- Capture **UART** boot + **`dmesg`** excerpts (DRM / panel / dsi).  
+- **BLK-006:** confirm display stable without **`reset-gpios`** or add **`reset-gpios`** with **cited** GPIO + update DTS + **`diary/BLOCKERS.md`**.  
+- Log results in **`diary/PROGRESS.md`**; no partition layout changes.
+
+---
+
+### TASK-107 — [Phase 1] Bring-up checklist doc (flash + UART + kas)
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** TASK-001 ✓, TASK-002 ✓, TASK-003 ✓ (WIC path), dev kit on hand ✓  
+
+**Spec:**  
+- Add **`docs/BRINGUP-CHECKLIST.md`** (or extend **`library/EM3566/README.md`** with a clear “First image” section — **one** canonical doc, link from root **`README.md`**).  
+- Include: TASK-002 host prep, **`kas build`** command(s), where WIC/output artifacts live, **UART** header pointer (`library/EM3566/`), **MIPI LCD** connector reminder, **do not** invent **rkdeveloptool** offsets — cite **in-repo** Boardcon / Rockchip doc paths only; mark unknowns for owner.  
+- No changes to **`.wks`** layout without A1 task spec.
+
+**Acceptance:** Single checklist doc committed; **`README.md`** (or **`library/EM3566/README.md`**) links to it.
 
 ---
 

@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-04-15 — A1 queue: TASK-105/107 READY, TASK-106 blocked (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Plan (next on roadmap after TASK-101–103)
+1. **TASK-105** **`[READY]`** — On a **TASK-002** build host, run a **green `kas build`** (image + optional **`u-boot`** / **`virtual/kernel`**) and save **logs** under **`build-logs/`**; prove the Yocto stack end-to-end.  
+2. **TASK-107** **`[READY]`** — Single **bring-up checklist** doc (flash + UART + kas), linked from **`README.md`**, no guessed flash offsets.  
+3. **TASK-106** **`[BLOCKED]`** until **LMT101** is on hand — **DSI / BLK-006** bench and **`dmesg`** evidence.
+
+### Later (not yet `[READY]` in queue)
+- RAUC signing / bundle recipe (**keys** — new A1 task spec before A2).  
+- Qt / EGLFS image + **`meta-hmi-app`** (roadmap Phase 2+).  
+- **`main`** promotion vs **`develop`** (owner).
+
+### Git
+- **`AGENTS.md`** updated with **TASK-105**, **TASK-106**, **TASK-107** definitions.
+
+---
+
 ## 2026-04-15 — TASK-103 A1 review [DONE], merge to `develop`, push (A1)
 
 **Agent:** A1  
