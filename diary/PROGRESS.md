@@ -4,6 +4,35 @@
 
 ---
 
+## 2026-04-15 — TASK-102 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-102** approved: `meta-hmi-platform/recipes-bsp/u-boot/` bbappend + **`*.cfg`** fragment merged via Poky **`u-boot-configure.inc`** / **`merge_config.sh`**; **`UBOOT_LOCALVERSION`**; machine comments only. No community-layer edits. **`kas build … u-boot`** not proven on review host (`lz4c`) — deferred to TASK-002 / **TASK-103**.
+
+### Git
+- Committed on **`task/TASK-102-uboot-emmc`**, pushed; **`develop`** merged (`--no-ff`) and pushed.
+
+### Next
+- **A2:** **`TASK-103`** only in queue — branch from **`develop`**, then **`[REVIEW]`** for A1.
+
+---
+
+## 2026-04-15 — TASK-102: U-Boot eMMC Kconfig fragment + bbappend (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip_%.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC / GPT / DW MMC / raw-partition options (aligned with vendor `rk3568_defconfig` at `SRCREV a93658f8…`); `UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`.  
+- **`elevator-hmi-em3566.conf`** — comments on eMMC bring-up, WIC, inherited `rk3568_defconfig`.  
+- **Smoke:** `kas build kas/elevator-hmi.yml --target u-boot` — **failed** before BitBake (**`lz4c`** / HOSTTOOLS on review host).  
+- **Branch:** `task/TASK-102-uboot-emmc`.
+
+---
+
 ## 2026-04-15 — TASK-104 A1 review [DONE], merge to `develop`, push (A1)
 
 **Agent:** A1  
@@ -88,6 +117,19 @@
 ### Next actions
 - A2: branch `task/TASK-104-boardcon-machine-dts` (or similar), implement TASK-104 when BSP path is known.  
 - Owner: commit/merge TASK-101 branch after verifying git state; EM3566 v3 + LMT101 bench for BLK-006.
+
+---
+
+## 2026-04-15 — TASK-102: U-Boot eMMC Kconfig fragment + bbappend (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip_%.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC/GPT/raw-partition options aligned with vendor **`rk3568_defconfig`**; **`UBOOT_LOCALVERSION`**.  
+- **`elevator-hmi-em3566.conf`** — eMMC / WIC / U-Boot inheritance comments.  
+- **`kas build … --target u-boot`:** blocked on host **`lz4c`** (TASK-002 host setup).  
+- **Branch:** `task/TASK-102-uboot-emmc`.
 
 ---
 
