@@ -51,7 +51,7 @@
 - [x] Phase 1 U-Boot eMMC bring-up fragment: **`u-boot-rockchip.bbappend`** + **`elevator-hmi-emmc-boot.cfg`**, **`UBOOT_LOCALVERSION`** — **TASK-102 DONE** 2026-04-15 (`kas build … u-boot` smoke: confirm on TASK-002 host)
 - [x] R-01: CM3566 −20°C — vendor: **4 h @ −20°C test passed**; datasheet **recommended** op still **0°C–70°C** — **accepted with documented caveat** (see `diary/BLOCKERS.md` BLK-001)
 - [x] R-02: MIPI vs LVDS — SoM **DSI/LVDS mux** (pins 25–34). **EM3566 v3** carrier exposes a dedicated **MIPI LCD** connector (same muxed TX bus also branches to optional **LVDS OUT**); use **MIPI LCD** + DT/strap for **MIPI-DSI** with LMT101 (see `diary/BLOCKERS.md` BLK-002); custom production carrier still needs its own review
-- [ ] R-04: Adaptive backlight strategy documented (accepted — Phase 3 implementation)
+- [x] R-04: Adaptive backlight strategy documented — accepted — adaptive backlight dimming scheduled for Phase 3 (TASK-3xx). LED lifetime risk documented in R-04.
 - [x] Protocol interface — **fieldbus deferred** (no RS-485 / CAN-FD controller PHY for now; see BLK-004); **interim:** **UART console** for SoM bring-up and image diagnostics
 - [x] Backlight boost IC — **deferred** (constant backlight acceptable for now; see BLK-003)
 - [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
@@ -124,6 +124,7 @@ meta-hmi-app           # Application layer:
 | R-02 | Debian “LVDS” vs LMT101 MIPI-DSI. | High → **Low** | **MITIGATED** — **EM3566 v3** block diagram: **MIPI LCD** connector is the intended DSI attach point; signals remain the SoM’s **shared LVDS/MIPI TX** bus (also routed to optional LVDS OUT). **Action:** DSI mode + LMT101 on **MIPI LCD**; validate on dev kit before custom carrier (BLK-002) |
 | R-03 | JD9365D driver not in Linux 6.1.x. Mainline merge was 6.2. | Medium | **MITIGATED** — TASK-004 backport patch + bbappend in `meta-hmi-platform` (validate on hardware in Phase 1) |
 | R-04 | LED backlight lifetime ~2.3yr at 24/7 full brightness. Target is 5yr. | Medium | **ACCEPTED** — adaptive dimming in Phase 3 |
+| R-05 | JD9365D XRES reset line not mapped on EM3566 v3 CON1. DSI device tree fragment ships without `reset-gpios`. Must be validated at bench when LMT101 panel arrives. If reset line is absent, display power-on sequence cannot be controlled. | Medium | **OPEN** — bench validation required, panel not yet on hand (see `diary/BLOCKERS.md` BLK-006) |
 
 ---
 
