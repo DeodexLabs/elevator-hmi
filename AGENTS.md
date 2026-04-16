@@ -40,6 +40,26 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
+### TASK-110 — [Phase 1] Fix linux-rockchip_%.bbappend: cfg fragment + DTS placement
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Branch:** `task/TASK-110-bbappend-fix` (from `develop` 2026-04-16)
+
+**Defects fixed (supervisor-identified):**
+
+1. **FIX 1 — `KERNEL_CONFIG:append` removed; replaced with `.cfg` fragment.**  
+   `KERNEL_CONFIG:append` is not a valid Yocto mechanism for setting kernel config options on `linux-rockchip`. Replaced with `file://elevator-hmi-panel.cfg` in `SRC_URI:append`; the fragment is processed by `kernel_configme` / `merge_config.sh` during `do_kernel_configme`.
+
+2. **FIX 2 — `do_configure:append()` added to copy DTS/DTSI into kernel source tree.**  
+   Non-patch `SRC_URI` files land in `WORKDIR`, not `${S}/arch/arm64/boot/dts/rockchip/` where the kernel Makefile looks for them. Added `do_configure:append()` with `install -m 0644` for both `elevator-hmi-boardcon-em3566-v3.dts` and `elevator-hmi-lmt101sx006c-panel.dtsi`.
+
+**Output notes (A1):**
+- `meta-hmi-platform/recipes-kernel/linux/linux-rockchip_%.bbappend` — updated.
+- `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-panel.cfg` — created.
+- No community layer edits.
+
+---
+
 ### TASK-108 — [Phase 1] RAUC skeleton — system.conf + key infra + bundle recipe stub
 **Status:** `[READY]`  
 **Phase:** 1  
