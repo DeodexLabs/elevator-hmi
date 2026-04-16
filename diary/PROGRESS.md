@@ -4,6 +4,356 @@
 
 ---
 
+## 2026-04-15 — Session end summary (A2)
+
+**Agent:** A2  
+**Phase:** 0 / 1  
+
+### Host / TASK-002
+- **Ubuntu 24.04.4 LTS** (`schone`) confirmed as lab build host; repo text and **`scripts/setup-build-host.sh`** now allow **`VERSION_ID`** **22.04** or **24.04** with the same Scarthgap-oriented package list.
+- **Noble package drift:** **`libegl1-mesa`** is not in Ubuntu **24.04** archives → script installs **`libegl1`** + **`libegl-mesa0`** on **24.04**, keeps **`libegl1-mesa`** on **22.04**.
+- **`setup-build-host.sh`** run completed on owner host; **`command -v lz4c`** → **`/usr/bin/lz4c`**; **`kas --version`** → **5.2** (HOSTTOOLS / **`lz4c`** path unblocked).
+
+### Kas smoke / TASK-105 / TASK-102
+- **`kas dump kas/elevator-hmi.yml`**: **exit 0** (machine **`elevator-hmi-em3566`**, pinned layers).
+- **Recipe append fix:** **`u-boot-rockchip_%.bbappend`** did not bind to **`u-boot-rockchip.bb`** → renamed **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`**.
+- **Smoke target fix:** Rockchip **`PREFERRED_PROVIDER_virtual/bootloader = u-boot-rockchip`** — **`scripts/kas-build-task-105.sh`**, **`docs/BRINGUP-CHECKLIST.md`**, **`scripts/README.md`** now use **`--target u-boot-rockchip`** and tee **`build-logs/u-boot-rockchip.log`** (not **`u-boot`**).
+- **Still open for this host:** let **`kas build … --target u-boot-rockchip`** / full **`./scripts/kas-build-task-105.sh`** finish; then append **exit 0** evidence + **`ls -la build/tmp/deploy/images/elevator-hmi-em3566/`** (expect **`.wic`** after **`core-image-minimal`**) to a new diary line when done.
+
+### Repo / diary / coordination
+- **`README.md`**, **`CLAUDE.md`**, **`AGENTS.md`**, **`diary/BLOCKERS.md`** (new closed **BLK-007**) updated in this session.
+- **Git:** session changes committed with **`[diary] 2026-04-15 session summary`**.
+
+---
+
+## 2026-04-15 — Phase B (TASK-105): `kas dump` OK; smoke script + U-Boot bbappend fixes (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+**Host:** Ubuntu 24.04.4 LTS (`schone`), **`lz4c`** + **`kas 5.2`** after **`setup-build-host.sh`**.
+
+### Done
+- **B1 / B2:** Repo root **`/home/sener/Projects/elevator-hmi`**; **`kas dump kas/elevator-hmi.yml`** exit **0** (machine **`elevator-hmi-em3566`**, layers as manifest).
+- **B3 blockers fixed (repo):**
+  1. **`u-boot-rockchip_%.bbappend`** did not apply to **`u-boot-rockchip.bb`** (unversioned recipe filename) → renamed to **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`**.
+  2. **`kas build --target u-boot`** invalid when **`PREFERRED_PROVIDER_virtual/bootloader = u-boot-rockchip`** → **`scripts/kas-build-task-105.sh`**, **`docs/BRINGUP-CHECKLIST.md`**, **`scripts/README.md`** now use **`--target u-boot-rockchip`** and log **`build-logs/u-boot-rockchip.log`**.
+- **Docs:** **`README.md`**, **`CLAUDE.md`**, **`AGENTS.md`**, **`diary/PROGRESS.md`** references updated from **`u-boot-rockchip_%.bbappend`** to **`u-boot-rockchip.bbappend`**.
+
+### In progress / next
+- **`kas build kas/elevator-hmi.yml --target u-boot-rockchip`** was started to validate fixes (log: **`build-logs/u-boot-rockchip-smoke.log`**); first-from-scratch graph ~**1082** tasks — expect a long run. When it finishes, run **`./scripts/kas-build-task-105.sh`** for the full **u-boot-rockchip → virtual/kernel → core-image-minimal** sequence.
+- **B4:** **`.wic`** appears under **`build/tmp/deploy/images/elevator-hmi-em3566/`** only after **`core-image-minimal`** succeeds — append **`ls -la`** of that dir + final log tail here when green.
+
+---
+
+## 2026-04-15 — Build host guidance: Ubuntu 24.04 LTS + script allow-list (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- Owner PC is **Ubuntu 24.04.4 LTS** with Yocto/poky minimal builds; repo copy still read as **22.04-only** after TASK-002.
+- **`scripts/setup-build-host.sh`**: **`VERSION_ID`** may be **22.04** or **24.04** (same package list). **`lz4c`** / **HOSTTOOLS** failure on the earlier agent run was **missing `liblz4-tool`**, not an OS ceiling.
+- Docs updated: **`README.md`**, **`scripts/README.md`**, **`docs/BRINGUP-CHECKLIST.md`**, **`CLAUDE.md`**, **`AGENTS.md`** (TASK-105 archive clarification), **`scripts/kas-build-task-105.sh`** header comment.
+
+### Next
+- On **24.04**: run **`./scripts/setup-build-host.sh`** once if deps are not pinned, then **`./scripts/kas-build-task-105.sh`**; append green **`exit 0`** + deploy listing to this diary when available.
+
+---
+
+## 2026-04-15 — TASK-105 / TASK-107 A1 review [DONE], merge to `develop` (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-107** **`[DONE]`** — **`docs/BRINGUP-CHECKLIST.md`** meets spec; **`README.md`** + **`library/EM3566/README.md`** links; in-repo citation paths verified.  
+- **TASK-105** **`[DONE]`** — **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; **`lz4c`** / HOSTTOOLS failure on **24.04** documented — **green build** still for owner on **TASK-002 22.04** (append success to **`diary/PROGRESS.md`**).  
+- **Process:** combined branch **`task/TASK-105-107-lab-handoff`** — noted in **`AGENTS.md`**; prefer one task per branch later.
+
+### Git
+- Committed on task branch; **`develop`** merged (`--no-ff`); pushed **`origin/develop`**.
+
+---
+
+## 2026-04-15 — TASK-105 + TASK-107: kas smoke script + bring-up checklist (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **TASK-105:** **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`** section — sequential **`kas build`** (**`u-boot`**, **`virtual/kernel`**, **`core-image-minimal`**) with logs under **`build-logs/`** (gitignored). Ran three builds on Composer host → **HOSTTOOLS** failure (**`lz4c`** missing); logs captured. **Green image acceptance** remains for **Ubuntu 22.04 TASK-002** host. **`AGENTS.md`** TASK-105 → **`[REVIEW]`** with log excerpts.  
+- **TASK-107:** **`docs/BRINGUP-CHECKLIST.md`** — TASK-002, kas commands, deploy dir, UART (**`EM3566_hardware_manual.md`** §2.14), **MIPI LCD**, flash doc pointers (**no** invented **`rkdeveloptool`** offsets). **`README.md`** + **`library/EM3566/README.md`** link to checklist. **`AGENTS.md`** TASK-107 → **`[REVIEW]`**.  
+- **Branch:** **`task/TASK-105-107-lab-handoff`** (both tasks one linear branch; split commits if preferred).
+
+### Next
+- **Owner / TASK-002 host:** **`./scripts/kas-build-task-105.sh`** → confirm **exit 0**; paste deploy paths + log tails into **`AGENTS.md`** TASK-105 output notes (or new session).  
+- **A1:** Review TASK-105 / TASK-107; **`[DONE]`** when satisfied.
+
+---
+
+## 2026-04-15 — A1 queue: TASK-105/107 READY, TASK-106 blocked (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Plan (next on roadmap after TASK-101–103)
+1. **TASK-105** **`[READY]`** — On a **TASK-002** build host, run a **green `kas build`** (image + optional **`u-boot`** / **`virtual/kernel`**) and save **logs** under **`build-logs/`**; prove the Yocto stack end-to-end.  
+2. **TASK-107** **`[READY]`** — Single **bring-up checklist** doc (flash + UART + kas), linked from **`README.md`**, no guessed flash offsets.  
+3. **TASK-106** **`[BLOCKED]`** until **LMT101** is on hand — **DSI / BLK-006** bench and **`dmesg`** evidence.
+
+### Later (not yet `[READY]` in queue)
+- RAUC signing / bundle recipe (**keys** — new A1 task spec before A2).  
+- Qt / EGLFS image + **`meta-hmi-app`** (roadmap Phase 2+).  
+- **`main`** promotion vs **`develop`** (owner).
+
+### Git
+- **`AGENTS.md`** updated with **TASK-105**, **TASK-106**, **TASK-107** definitions.
+
+---
+
+## 2026-04-15 — TASK-103 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-103** approved: **`core-image-minimal.bbappend`** inherits **`rockchip-image`** and sets **`WKS_FILE`** to **`ELEVATOR_HMI_EMMC_WKS`** (TASK-003); **`kas dump`** smoke OK; full **`kas build`** deferred to TASK-002 host (`lz4c` / BitBake), same as TASK-102/104.
+
+### Git
+- Committed on **`task/TASK-103-core-image-minimal`**, pushed; **`develop`** merged (`--no-ff`) and pushed.
+
+### Optional — kas build logs (when a proper build host exists)
+- On Ubuntu **22.04** after **`scripts/setup-build-host.sh`**, run e.g.  
+  `kas build kas/elevator-hmi.yml --target u-boot 2>&1 | tee build-logs/u-boot.log`  
+  `kas build kas/elevator-hmi.yml --target virtual/kernel 2>&1 | tee build-logs/kernel.log`  
+  `kas build kas/elevator-hmi.yml 2>&1 | tee build-logs/core-image-minimal.log`  
+- Store under **`build-logs/`** (gitignored) or attach excerpts to **`diary/PROGRESS.md`** — not required for TASK-103 **`[DONE]`** sign-off.
+
+### Next
+- **A1:** Add next **`[READY]`** tasks in **`AGENTS.md`** (bench validation, image flash doc, RAUC, Qt, etc.).  
+- **Owner / lab:** green **`kas build`** + first eMMC flash on **EM3566 v3**.
+
+---
+
+## 2026-04-15 — TASK-103: core-image-minimal + rockchip-image / project WIC (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend`**: **`inherit rockchip-image`** (Rockchip ext4 + WIC + kernel image layout per **`meta-rockchip`** class) and **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** so images use **`wic/elevator-hmi-emmc.wks.in`** (TASK-003) instead of BSP default **`generic-gptdisk.wks.in`**.  
+- **Branch:** `task/TASK-103-core-image-minimal` (from **`develop`**). **`AGENTS.md`**: TASK-103 → **`[REVIEW]`** with output notes.  
+- **Smoke:** **`kas dump kas/elevator-hmi.yml`** succeeded. **`kas build`** not executed here — **`lz4c`** not on **`PATH`**; install **`liblz4-tool`** / TASK-002 host deps before BitBake (same as TASK-102/104 deferred smoke).
+
+### Next
+- A1: review TASK-103; on TASK-002 host run **`kas build kas/elevator-hmi.yml`** (+ optional **`virtual/kernel`** / **`u-boot`** targets).
+
+---
+
+## 2026-04-15 — TASK-102 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-102** approved: `meta-hmi-platform/recipes-bsp/u-boot/` bbappend + **`*.cfg`** fragment merged via Poky **`u-boot-configure.inc`** / **`merge_config.sh`**; **`UBOOT_LOCALVERSION`**; machine comments only. No community-layer edits. **`kas build … u-boot`** not proven on review host (`lz4c`) — deferred to TASK-002 / **TASK-103**.
+
+### Git
+- Committed on **`task/TASK-102-uboot-emmc`**, pushed; **`develop`** merged (`--no-ff`) and pushed.
+
+### Next
+- **A2:** **`TASK-103`** only in queue — branch from **`develop`**, then **`[REVIEW]`** for A1.
+
+---
+
+## 2026-04-15 — TASK-102: U-Boot eMMC Kconfig fragment + bbappend (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC / GPT / DW MMC / raw-partition options (aligned with vendor `rk3568_defconfig` at `SRCREV a93658f8…`); `UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`.  
+- **`elevator-hmi-em3566.conf`** — comments on eMMC bring-up, WIC, inherited `rk3568_defconfig`.  
+- **Smoke:** `kas build kas/elevator-hmi.yml --target u-boot` — **failed** before BitBake (**`lz4c`** / HOSTTOOLS on review host).  
+- **Branch:** `task/TASK-102-uboot-emmc`.
+
+---
+
+## 2026-04-15 — TASK-104 A1 review [DONE], merge to `develop`, push (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **TASK-104** approved: `meta-hmi-platform` machine + board DTS + DSI0 panel overlay + kas machine; community layers untouched. **`kas build … virtual/kernel`** not proven on review host (`lz4c`) — deferred to TASK-002 host / **TASK-103** acceptance.
+
+### Git
+- **`task/TASK-104-boardcon-machine-dts`:** A1 status commit (`AGENTS` / `CLAUDE` / `PROGRESS`); **pushed** to `origin`.  
+- **`develop`:** merged task branch (`--no-ff`); **pushed** to `origin`.
+
+### Next for A2 / owner
+- **`git checkout develop && git pull`**, then **TASK-102** or **TASK-103** (one at a time).  
+- Run **`scripts/setup-build-host.sh`** on the build machine, then **`kas build kas/elevator-hmi.yml --target virtual/kernel`** to close smoke.  
+- Bench: **EM3566 v3 + LMT101** on **MIPI LCD** for **BLK-006** / DSI0 caveat.
+
+### Next A1 session (prep)
+- **Review queue:** When A2 submits **`[REVIEW]`**, run the same gate: community layers read-only, Scarthgap syntax, acceptance vs spec.  
+- **TASK-104 follow-up:** Log a green **`kas build … virtual/kernel`** (or attach CI) when available; no new task unless DTS changes after bench.  
+- **Specs:** Tighten **TASK-102** / **TASK-103** acceptance in `AGENTS.md` if A2 needs clearer U-Boot vs image boundaries (optional before pick-up).  
+- **Product:** **`main`** promotion / release tagging remains **owner** decision; `develop` is now integration head through TASK-104.
+
+---
+
+## 2026-04-15 — TASK-104: A2 verification + commit on task branch (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Verification (against TASK-104 spec)
+- **meta-hmi-platform only:** machine `elevator-hmi-em3566.conf`, board DTS include chain, panel `.dtsi` on **`&dsi0`** with BSP phandles, `linux-rockchip_%.bbappend` `SRC_URI`, `kas/elevator-hmi.yml` machine — matches task report.  
+- **Community layers:** no `meta-rockchip` / `meta-qt6` / `meta-rauc` diffs in working tree.  
+- **Smoke:** not green on review host (no `lz4c`); documented in `AGENTS.md` TASK-104 output notes.  
+- **Hygiene:** fixed wrong script path in TASK-103 note (`scripts/setup-build-host.sh`).
+
+### Git
+- Committed all TASK-104 changes on **`task/TASK-104-boardcon-machine-dts`** for A1 review (later **`[DONE]`** on 2026-04-15).
+
+---
+
+## 2026-04-15 — Git: TASK-101 commits + merge to `develop` + push (A1)
+
+**Agent:** A1  
+**Phase:** 1 prep  
+
+### Actions taken
+- On **`task/TASK-101-lmt101-dts`:** three commits — `[phase1][kernel]` TASK-101 artifacts, `[docs]` `library/EM3566/README.md`, `[diary]` queue/blocker/CLAUDE/PROGRESS/BLOCKERS state.  
+- **`develop`:** merged task branch (`--no-ff`); **`git push origin develop`**.  
+- **`task/TASK-101-lmt101-dts`:** pushed to `origin` for archive. **A2** should **`git checkout develop` && `git pull`** before starting **TASK-104** (or any new task branch from current `develop`).
+
+---
+
+## 2026-04-15 — EM3566 v3 dev kit on hand; TASK-102/103 unblocked (A1 / owner)
+
+**Agent:** A1 (state update — owner input)  
+**Phase:** 1  
+
+### Recorded
+- Owner confirms **Boardcon EM3566 v3** (**CM3566**) dev kit **on hand**.  
+- **`AGENTS.md`:** **TASK-102** and **TASK-103** set to **`[READY]`**; phase gate note updated; suggested A2 order **TASK-104 → TASK-102 → TASK-103**.  
+- **`CLAUDE.md`:** Phase checklist — dev kit item checked **on hand**; `bitbake core-image-minimal` line clarified (panel + TASK-103 path).
+
+---
+
+## 2026-04-15 — TASK-101 reviewed [DONE]; TASK-104 queued; BLK-005 closed (A1)
+
+**Agent:** A1 (Claude Code)  
+**Phase:** 0 / Phase 1 prep  
+
+### Actions taken
+- **TASK-101** (branch `task/TASK-101-lmt101-dts`): A1 code review — **APPROVED → `[DONE]`**.  
+  - **0002** patch: optional `reset-gpios`, `devm_gpiod_get_optional`, null-safe `prepare`/`unprepare`, 135 ms rail-delay path — matches **BLK-006** rationale; applies after **0001**.  
+  - **`elevator-hmi-lmt101sx006c-panel.dtsi`:** `&dsi` / panel graph + merge guidance for existing `ports`; documents phandle placeholders.  
+  - **`linux-rockchip_%.bbappend`:** Scarthgap `SRC_URI` / `KERNEL_CONFIG:append`; no community-layer edits.  
+  - **Caveat recorded:** `elevator-hmi,lmt101sx006c` uses `cz101b4001_desc` until LMT101-specific timings are validated on silicon.  
+  - **Reminder:** Commit `0002`, `.dtsi`, and `bbappend` on the task branch before owner merges to `main`/`develop` (working tree had uncommitted artifacts at review time).  
+- **`AGENTS.md`:** TASK-101 marked done; **TASK-104** `[READY]` — Boardcon machine DTS + `KERNEL_DEVICETREE` + kas/bitbake kernel smoke (spec in queue). TASK-102/103 remain blocked on dev kit + validated build.  
+- **`CLAUDE.md`:** Phase 0 checklist — TASK-101 completion + TASK-104 pointer.  
+- **`diary/BLOCKERS.md`:** **BLK-005** closed as *not in project scope* (OV13850). **BLK-006** remains open until bench.
+
+### Next actions
+- A2: branch `task/TASK-104-boardcon-machine-dts` (or similar), implement TASK-104 when BSP path is known.  
+- Owner: commit/merge TASK-101 branch after verifying git state; EM3566 v3 + LMT101 bench for BLK-006.
+
+---
+
+## 2026-04-15 — TASK-102: U-Boot eMMC Kconfig fragment + bbappend (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-bsp/u-boot/u-boot-rockchip.bbappend`** + **`files/elevator-hmi-emmc-boot.cfg`** — merge MMC/GPT/raw-partition options aligned with vendor **`rk3568_defconfig`**; **`UBOOT_LOCALVERSION`**.  
+- **`elevator-hmi-em3566.conf`** — eMMC / WIC / U-Boot inheritance comments.  
+- **`kas build … --target u-boot`:** blocked on host **`lz4c`** (TASK-002 host setup).  
+- **Branch:** `task/TASK-102-uboot-emmc`.
+
+---
+
+## 2026-04-15 — TASK-104: Boardcon EM3566 machine + LMT101 on DSI0 (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- Added **`meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf`** (`require rockchip-rk3566-evb.conf`, `KERNEL_DEVICETREE = rockchip/elevator-hmi-boardcon-em3566-v3.dtb`).  
+- Added **`elevator-hmi-boardcon-em3566-v3.dts`** including **`rk3566-evb2-lp4x-v10-linux.dts`** + rewrote **`elevator-hmi-lmt101sx006c-panel.dtsi`** as **`&dsi0`** overlay: `/delete-node/` stock EVB `panel@0` and `ports/port@1`, jadard `panel@0`, phandles **`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`** (from pinned `linux-rockchip_6.1` BSP DTS at `SRCREV ea9e2a93…`).  
+- **`kas/elevator-hmi.yml`:** default `machine: elevator-hmi-em3566`. **`linux-rockchip_%.bbappend`:** `SRC_URI` for new `.dts`.  
+- **Smoke:** `kas build … --target virtual/kernel` failed on this host — missing **`lz4c`** (`HOSTTOOLS`); document install + re-run.  
+- **Branch:** `task/TASK-104-boardcon-machine-dts`.
+
+---
+
+## 2026-04-15 — `library/EM3566/README.md` (lab + compliance index)
+
+**Agent:** A2  
+**Phase:** 0 / 1  
+
+Added [`library/EM3566/README.md`](../library/EM3566/README.md): folder map, **EM3566 v3 + LMT101 / MIPI LCD** bring-up steps tied to **BLK-006**, in-repo doc pointers, and **owner-only** product/compliance notes (**R-01** / closed **BLK-001**, dev kit vs production carrier).
+
+---
+
+## 2026-04-15 — TASK-101: LMT101 / JD9365 DSI fragment + kernel follow-up patch (A2)
+
+**Agent:** A2 (Composer)  
+**Phase:** 1 prep  
+
+### Summary
+- Picked up **TASK-101** (DTS for JD9365 / LMT101SX006C). Delivered reference **`elevator-hmi-lmt101sx006c-panel.dtsi`** under `meta-hmi-platform/recipes-kernel/linux/files/` and **`0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch`** (product `compatible`, optional `reset-gpios` in binding + `devm_gpiod_get_optional` in driver).  
+- **Rationale:** EM3566 CON1 / in-tree schematic do not document **JD9365 XRES** → **RK3566 GPIO**; **BLK-006** opened. Patch 0002 avoids inventing a reset line while still allowing a valid DT node.  
+- Extended **`linux-rockchip_%.bbappend`** with patch 0002, dtsi in `SRC_URI`, and `CONFIG_DRM_PANEL_JADARD_JD9365DA_H3=y`.  
+- **Follow-up:** Boardcon machine DTS must `#include` the fragment (or merge `&dsi` content), align regulator/backlight labels, resolve `ports` merge if VOP `port@0` already exists; bench-validate on EM3566 v3 + LMT101.  
+- Work on git branch **`task/TASK-101-lmt101-dts`**.
+
+---
+
+## 2026-04-16 — Interim SoM link: UART serial console (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0 / 1 prep  
+
+### Decision captured
+- While **elevator fieldbus** (RS-485 / CAN-FD) stays **deferred** (BLK-004), **Phase 0/1 “communication” to the SoM** is **UART serial** from a **host PC** to the board (**EM3566 v3** debug / UART headers per `library/EM3566/`) for **boot trace, image behaviour, systemd, RAUC**, and early logging.
+- `CLAUDE.md` §1 **Protocol** row and §8 **PAL** bullets updated; **BLK-004** addendum in `diary/BLOCKERS.md`. Typical Rockchip BSP console **115200 8N1** noted as “confirm in BSP” — not a hardware spec from unverified GPIO numbers.
+
+---
+
+## 2026-04-16 — Reference hardware: EM3566 v3 carrier + MIPI LCD connector (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0 / 1 prep  
+
+### Recorded in repo
+- **Boardcon EM3566 v3** documented as the **reference development kit / carrier** for CM3566 (sources: `library/EM3566/` schematic, manuals, block diagram).
+- Expert / board summary incorporated: multiple display paths (HDMI, LVDS, **MIPI LCD**, eDP, BT656); **LMT101 bench wiring** → **EM3566 v3 `MIPI LCD`** connector; underlying signals remain SoM **muxed LVDS/MIPI TX** (also routed to optional LVDS OUT).
+- `CLAUDE.md` identity table + R-02; `diary/BLOCKERS.md` BLK-002 addendum; `AGENTS.md` gate note; **TASK-101** set to **`[READY]`** (R-02 mitigated; dependency is dev kit + panel in hand).
+
+---
+
+## 2026-04-15 — BLK-001–004 closed from owner/vendor inputs (A1)
+
+**Agent:** A1 (documentation)  
+**Phase:** 0  
+
+### Blocker resolutions (see `diary/BLOCKERS.md`)
+- **BLK-001 / R-01:** Vendor confirms CM3566 **operated 4 h @ −20°C ±2°C** in reliability testing; datasheet **recommended** range remains **0°C–70°C** — closed as **mitigated with documented caveat** (formal acceptance before production still advised).
+- **BLK-002 / R-02:** Hardware manual: display lanes on SoM are **MIPI-DSI / LVDS multiplexed** (pins 25–34); FPC is on **carrier** — not “MIPI-only” at module. Closed with action: **carrier must select MIPI-DSI** for LMT101; schematic review on target carrier before layout lock.
+- **BLK-003:** Backlight boost IC pick **deferred** — constant backlight acceptable for current LCD path.
+- **BLK-004:** RS-485 vs CAN-FD **deferred** — no comms PHY planning for now; `CLAUDE.md` identity + PAL notes updated.
+
+`CLAUDE.md` §2 checklist, §6 risks, and `AGENTS.md` Phase 0 gate note updated. **BLK-005** (OV13850 PDF) remains open, low severity.
+
+---
+
 ## 2026-04-15 — TASK-002/003/004 reviewed and merged — Phase 0 A2 queue complete (A1)
 
 **Agent:** A1 (Claude Code / product lead)  

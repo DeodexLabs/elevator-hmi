@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# Elevator HMI — Ubuntu 22.04 LTS host packages for Yocto Scarthgap + kas.
+# Elevator HMI — Ubuntu LTS host packages for Yocto Scarthgap + kas.
+# Tested: 22.04 LTS (Jammy), 24.04 LTS (Noble). Other Ubuntu releases: untested — extend ALLOWED_* if you verify.
 # Idempotent: safe to run multiple times.
 set -euo pipefail
 
-REQUIRED_UBUNTU_VERSION_ID="22.04"
+# Yocto Scarthgap / kas work on both; TASK-002 originally validated 22.04 only.
+ALLOWED_UBUNTU_VERSION_IDS=("22.04" "24.04")
 SCRIPT_NAME="$(basename "$0")"
 
 log() {
@@ -23,10 +25,19 @@ source /etc/os-release
 if [[ "${ID:-}" != "ubuntu" ]]; then
 	die "This script supports Ubuntu only (found ID=${ID:-unknown})"
 fi
-if [[ "${VERSION_ID:-}" != "$REQUIRED_UBUNTU_VERSION_ID" ]]; then
-	die "Ubuntu ${REQUIRED_UBUNTU_VERSION_ID} LTS required (found VERSION_ID=${VERSION_ID:-unknown})"
+allowed=0
+for v in "${ALLOWED_UBUNTU_VERSION_IDS[@]}"; do
+	if [[ "${VERSION_ID:-}" == "$v" ]]; then
+		allowed=1
+		break
+	fi
+done
+if [[ "$allowed" -ne 1 ]]; then
+	die "Ubuntu 22.04 or 24.04 LTS required (found VERSION_ID=${VERSION_ID:-unknown})"
 fi
 
+# EGL runtime for host tools (e.g. QEMU/SDL): Jammy ships libegl1-mesa; Noble dropped
+# that metapackage — use GLVND libegl1 + Mesa vendor libegl-mesa0 instead.
 PACKAGES=(
 	build-essential
 	chrpath
@@ -36,7 +47,6 @@ PACKAGES=(
 	git
 	iputils-ping
 	kas
-	libegl1-mesa
 	liblz4-tool
 	libsdl1.2-dev
 	mesa-common-dev
@@ -54,9 +64,13 @@ PACKAGES=(
 	xz-utils
 	zstd
 )
+case "${VERSION_ID}" in
+22.04) PACKAGES+=(libegl1-mesa) ;;
+24.04) PACKAGES+=(libegl1 libegl-mesa0) ;;
+esac
 
 export DEBIAN_FRONTEND=noninteractive
-log "Ensure universe component (kas lives in universe on Jammy)"
+log "Ensure universe component (kas is packaged from universe on Ubuntu LTS)"
 sudo apt-get install -y --no-install-recommends software-properties-common
 sudo add-apt-repository -y universe || true
 log "apt-get update"

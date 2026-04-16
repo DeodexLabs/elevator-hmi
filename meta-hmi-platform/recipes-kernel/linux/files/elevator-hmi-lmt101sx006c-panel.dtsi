@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * LMT101SX006C + JD9365DA-H3 (jadard) on RK3566 MIPI-DSI controller **dsi0**.
+ *
+ * Replaces the stock EVB `simple-panel-dsi` `panel@0` under &dsi0 from
+ * rk3568-evb.dtsi (same graph pattern: panel endpoint + &dsi0/ports/port@1).
+ *
+ * Phandle alignment (BSP tree at linux-rockchip_6.1 SRCREV, files
+ * arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10.dtsi + rk3568-evb.dtsi):
+ *   vcc3v3_lcd0_n — GPIO-regulated rail used for dsi0_panel in rk3566-evb2
+ *   vcca_1v8 — rk809 PMIC LDO in rk3568-evb.dtsi (panel IO / VCCIO)
+ *   backlight — pwm-backlight node in rk3568-evb.dtsi
+ *
+ * In-repo carrier docs (signal names, not alternate phandles):
+ *   library/EM3566/Usermanual/EM3566_hardware_manual.md §2.8 CON1
+ *   library/EM3566/Schematic/em3566_v3sch.md
+ *
+ * BLK-006: reset-gpios omitted until JD9365 XRES is traced to an RK GPIO.
+ */
+
+&dsi0 {
+	/delete-node/ panel@0;
+
+	ports {
+		/delete-node/ port@1;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+
+	panel-lmt101: panel@0 {
+		compatible = "elevator-hmi,lmt101sx006c", "jadard,jd9365da-h3";
+		reg = <0>;
+		vdd-supply = <&vcc3v3_lcd0_n>;
+		vccio-supply = <&vcca_1v8>;
+		backlight = <&backlight>;
+
+		port {
+			panel_in_dsi: endpoint {
+				remote-endpoint = <&dsi_out_panel>;
+			};
+		};
+	};
+};

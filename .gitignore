@@ -14,6 +14,9 @@ build/conf/
 build/bitbake.lock
 build/*.log
 
+# Optional local copies of kas / bitbake stdout (see diary/PROGRESS.md)
+build-logs/
+
 # BitBake task logs
 *.bb_log
 
