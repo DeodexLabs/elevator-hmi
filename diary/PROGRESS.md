@@ -4,6 +4,48 @@
 
 ---
 
+## 2026-04-16 — Morning audit: branch cleanup, main sync, R-05, TASK-108/109 queued (A1)
+
+**Agent:** A1  
+**Phase:** 0 → 1  
+
+### AUDIT-1 — Stale remote branch cleanup
+
+All 5 merged task branches confirmed **FULLY_MERGED** into `develop` (zero unmerged commits):
+- `task/TASK-101-lmt101-dts` — deleted local + remote
+- `task/TASK-102-uboot-emmc` — deleted local + remote
+- `task/TASK-103-core-image-minimal` — deleted local + remote
+- `task/TASK-104-boardcon-machine-dts` — deleted local + remote
+- `task/TASK-105-107-lab-handoff` — deleted local + remote
+
+### AUDIT-2 — TASK-104 status
+
+TASK-104 (`boardcon-machine-dts`) is **`[DONE]`** in `AGENTS.md` (archived, A1-reviewed 2026-04-15). My session-start report listed it implicitly under "TASK-101 through TASK-105 `[DONE]`" — terminology was not explicit enough. No action required.
+
+### AUDIT-3 — develop / main sync
+
+`develop` was 10 commits ahead of `main` (all from Phase 1 work: TASK-101 through TASK-107 merges and diary commits). Merged `develop` → `main` via `--no-ff`; pushed to `origin/main`. Both branches now at same commit.
+
+### AUDIT-4 — R-04 checkbox closed
+
+`CLAUDE.md` §2 Phase 0 checklist: R-04 checkbox **closed**. Line updated to: "Accepted — adaptive backlight dimming scheduled for Phase 3 (TASK-3xx). LED lifetime risk documented in R-04."
+
+### BLK-006 → R-05
+
+BLK-006 (JD9365D XRES reset line not mapped on EM3566 v3 CON1) escalated to **R-05** in `CLAUDE.md` §6 open risks table. Risk severity: **Medium**. Status: **OPEN** — bench validation required when LMT101 panel arrives. BLK-006 entry in `diary/BLOCKERS.md` remains unchanged (resolution criteria unchanged).
+
+### TASK-108 and TASK-109 queued
+
+- **TASK-108** `[READY]` — RAUC skeleton: `system.conf` (`compatible=elevator-hmi`, slots rootfs_a/b on mmcblk0p4/p5), `scripts/rauc-gen-keys.sh`, `certs/README.md`, `.gitignore` cert exclusions, `meta-hmi-app` bundle recipe stub, `rauc` added to image install.
+- **TASK-109** `[READY]` — Qt/EGLFS image skeleton: `meta-hmi-app/conf/layer.conf` (BBFILE_PRIORITY 9, scarthgap, qt6-layer dep), `elevator-hmi-image.bb` (core-image + Qt 6 packages, EGLFS, no X11/Wayland), placeholder app recipe (`elevator-hmi-app_0.1.bb`). **Depends on TASK-108 `[DONE]`** — A2 must not start TASK-109 until TASK-108 is merged.
+
+### Next actions
+- A2: pick up **TASK-108** (branch `task/TASK-108-rauc-skeleton` from `develop`).
+- Owner: order LMT101SX006C panel to unblock TASK-106.
+- Owner: run `./scripts/kas-build-task-105.sh` on TASK-002 host and record green output here (deferred TASK-105 acceptance).
+
+---
+
 ## 2026-04-15 — Session end summary (A2)
 
 **Agent:** A2  
