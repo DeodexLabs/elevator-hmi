@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-16 (morning audit: stale branches deleted, develop→main synced, BLK-006 elevated to R-05, TASK-108 and TASK-109 queued as `[READY]`)  
+**Last updated:** 2026-04-16 (TASK-110 merged [DONE]; TASK-108 released to A2; BLK-008 phandle validation logged)  
 
 ---
 
@@ -36,12 +36,12 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-16):** **TASK-108** `[READY]` (RAUC skeleton), **TASK-109** `[READY]` (Qt/EGLFS image skeleton) — pick up in order; **TASK-106** remains `[BLOCKED]` (LMT101 hardware). **Follow-up (no new task ID):** on **TASK-002** host (**22.04** or **24.04**), run **`./scripts/kas-build-task-105.sh`** to completion and append green **log tails** + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (deferred acceptance from TASK-105). **`git checkout develop && git pull`** before the next task branch.
+**A2 queue (2026-04-16):** **TASK-108** `[READY]` — **A2 pick up now. TASK-109 depends on TASK-108 done.** TASK-109 `[READY]` (Qt/EGLFS image skeleton — do not start until TASK-108 merged and `[DONE]`); **TASK-106** remains `[BLOCKED]` (LMT101 hardware). **Follow-up (no new task ID):** on **TASK-002** host (**22.04** or **24.04**), run **`./scripts/kas-build-task-105.sh`** to completion and append green **log tails** + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (deferred acceptance from TASK-105). **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
-### TASK-110 — [Phase 1] Fix linux-rockchip_%.bbappend: cfg fragment + DTS placement
-**Status:** `[REVIEW]`  
+### TASK-110 — [Phase 1] Fix linux-rockchip_%.bbappend: cfg fragment + DTS placement *(archived — [DONE] 2026-04-16)*
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Branch:** `task/TASK-110-bbappend-fix` (from `develop` 2026-04-16)
 
@@ -281,6 +281,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending TASK-002 host) | 2026-04-15 |
 | TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
+| TASK-110 | Fix linux-rockchip_%.bbappend: cfg fragment (replaces KERNEL_CONFIG:append) + do_configure DTS placement (A1 impl, supervisor approved) | 2026-04-16 |
 
 ---
 

@@ -4,6 +4,34 @@
 
 ---
 
+## 2026-04-16 — TASK-110 merged, TASK-108 released to A2, BLK-008 logged (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### TASK-110 — [DONE]
+Supervisor-approved bbappend fixes merged to `develop` and synced to `main`:
+1. `KERNEL_CONFIG:append` removed; replaced with `elevator-hmi-panel.cfg` fragment in `SRC_URI:append` — correct Yocto mechanism for kernel config options via `kernel_configme`.
+2. `do_configure:append()` added to `install -m 0644` both DTS/DTSI files from `WORKDIR` into `${S}/arch/arm64/boot/dts/rockchip/` — required because non-patch `SRC_URI` files land in WORKDIR, not the kernel source tree.
+Branch `task/TASK-110-bbappend-fix` deleted local and remote after merge.
+
+### TASK-108 released to A2
+A2 queue header updated: "TASK-108 `[READY]` — A2 pick up now. TASK-109 depends on TASK-108 done."
+TASK-110 added to completed tasks table in AGENTS.md.
+
+### BLK-007 numbering note
+BLK-007 was already used (closed 2026-04-15 — Noble `libegl1-mesa`). New phandle validation blocker logged as **BLK-008**.
+
+### BLK-008 logged
+New open blocker: DTS phandle validation at bench — `vcc3v3_lcd0_n`, `vcca_1v8`, `backlight` assumed from BSP EVB2 tree. Must verify no `-ENOENT` errors in first-boot `dmesg`. Owner: A1 at TASK-106.
+
+### Next actions
+- A2: pick up **TASK-108** (branch `task/TASK-108-rauc-skeleton` from `develop`).
+- Owner: order LMT101SX006C panel (TASK-106 / BLK-006 unblock).
+- Owner: run `./scripts/kas-build-task-105.sh` on TASK-002 host for deferred TASK-105 acceptance.
+
+---
+
 ## 2026-04-16 — Morning audit: branch cleanup, main sync, R-05, TASK-108/109 queued (A1)
 
 **Agent:** A1  

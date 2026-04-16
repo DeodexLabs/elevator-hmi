@@ -7,6 +7,24 @@
 
 ## Open Blockers
 
+### BLK-008 — DTS phandle validation required at bench (vcc3v3_lcd0_n / vcca_1v8 / backlight)
+**Opened:** 2026-04-16  
+**Severity:** MEDIUM — boot-time DTS parse failure risk until validated on real hardware  
+**Owner:** A1 (bench validation at TASK-106)  
+**Details:**  
+`elevator-hmi-lmt101sx006c-panel.dtsi` assumes three phandles from the Rockchip BSP EVB2 tree:
+- `vcc3v3_lcd0_n` — GPIO-regulated 3.3V LCD rail (`rk3566-evb2-lp4x-v10.dtsi`)
+- `vcca_1v8` — RK809 PMIC LDO for panel VCCIO (`rk3568-evb.dtsi`)
+- `backlight` — PWM backlight node (`rk3568-evb.dtsi`)
+
+If any of these are absent or renamed on the **EM3566 v3** carrier's DTS (which may differ from the reference EVB2 board), the kernel will log DTS parse errors and the panel node will fail to probe at boot.  
+**Required action:**  
+- On first boot of `elevator-hmi-boardcon-em3566-v3.dtb`: capture full `dmesg` output via UART console and check for `-ENOENT` or `couldn't get supply` errors on these three phandles.  
+- If any phandle is missing: trace the correct node name in `rk3566-evb2-lp4x-v10-linux.dts` / Boardcon BSP DTS and update `elevator-hmi-lmt101sx006c-panel.dtsi` (new task for A2 if changes needed).  
+**Resolution criteria:** First boot `dmesg` shows no DTS phandle errors for the panel node, or corrected phandle names are committed with cited source.
+
+---
+
 ### BLK-006 — JD9365 / LMT101 panel reset (XRES) not documented on EM3566 CON1
 **Opened:** 2026-04-15  
 **Severity:** MEDIUM — display bring-up risk until bench-validated  
