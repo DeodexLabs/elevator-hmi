@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-04-16 — TASK-108: RAUC skeleton (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`meta-hmi-platform/recipes-images/files/system.conf`** + **`elevator-hmi-rauc-system-conf.bb`** → **`/etc/rauc/system.conf`**; **`LAYERDEPENDS`** **`rauc`**; **`core-image-minimal.bbappend`** installs **`rauc`** + config package; **`elevator-hmi-em3566.conf`** **`DISTRO_FEATURES:append = " rauc"`** (meta-rauc README).  
+- **`scripts/rauc-gen-keys.sh`** + **`certs/README.md`**; **`.gitignore`** explicit **`certs/*.pem`**, **`certs/*.key`**; verified **`git add -A`** does not stage ignored key material.  
+- **`meta-hmi-app/recipes-images/elevator-hmi-bundle.bb`** stub (**`inherit bundle`**, **`RAUC_BUNDLE_COMPATIBLE`**); **`meta-hmi-app/conf/layer.conf`** **`LAYERDEPENDS`** **`rauc`** + **`BBFILES`** for **`recipes-images/*.bb`**.  
+- **Smoke:** **`kas shell … bitbake -p`** — 0 errors; **`IMAGE_INSTALL`** includes **`rauc`** **`elevator-hmi-rauc-system-conf`**. **Branch:** **`task/TASK-108-rauc-skeleton`**. **`AGENTS.md`** TASK-108 → **`[REVIEW]`**.
+
+### Next
+- A1: review TASK-108; then TASK-109 per queue (**after** 108 **`[DONE]`**).
+
+---
+
 ## 2026-04-16 — TASK-110 merged, TASK-108 released to A2, BLK-008 logged (A1)
 
 **Agent:** A1  

@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-16 (TASK-110 merged [DONE]; TASK-108 released to A2; BLK-008 phandle validation logged)  
+**Last updated:** 2026-04-16 (TASK-108 `[REVIEW]` — RAUC skeleton; TASK-109 unblocked after A1 `[DONE]` on 108)  
 
 ---
 
@@ -36,7 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-16):** **TASK-108** `[READY]` — **A2 pick up now. TASK-109 depends on TASK-108 done.** TASK-109 `[READY]` (Qt/EGLFS image skeleton — do not start until TASK-108 merged and `[DONE]`); **TASK-106** remains `[BLOCKED]` (LMT101 hardware). **Follow-up (no new task ID):** on **TASK-002** host (**22.04** or **24.04**), run **`./scripts/kas-build-task-105.sh`** to completion and append green **log tails** + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (deferred acceptance from TASK-105). **`git checkout develop && git pull`** before the next task branch.
+**A2 queue (2026-04-16):** **TASK-108** `[REVIEW]` — branch **`task/TASK-108-rauc-skeleton`**. **TASK-109** `[READY]` (Qt/EGLFS image — **do not start** until TASK-108 merged and A1 marks **`[DONE]`**). **TASK-106** `[BLOCKED]` (LMT101 hardware). **Follow-up:** **`./scripts/kas-build-task-105.sh`** green logs → **`diary/PROGRESS.md`**. **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
@@ -61,10 +61,10 @@ Tasks are sorted by dependency order. Do not reorder.
 ---
 
 ### TASK-108 — [Phase 1] RAUC skeleton — system.conf + key infra + bundle recipe stub
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Phase:** 1  
 **Depends on:** TASK-103 ✓ (core-image-minimal + WKS layout)  
-**Branch:** create `task/TASK-108-rauc-skeleton` from `develop`
+**Branch:** `task/TASK-108-rauc-skeleton`
 
 **Spec:**
 
@@ -105,6 +105,20 @@ Tasks are sorted by dependency order. Do not reorder.
 - `system.conf` lands in `${sysconfdir}/rauc/` in the image rootfs (verify via `bitbake -e` variable trace or deploy artifact path).
 - `certs/` is gitignored; `rauc-gen-keys.sh` is executable and has the warning header.
 - No modifications to `meta-rauc` community layer.
+
+**Output notes (A2):**  
+- **`meta-hmi-platform/recipes-images/files/system.conf`** — per spec; installed by **`elevator-hmi-rauc-system-conf.bb`** → **`${sysconfdir}/rauc/system.conf`** (**`/etc/rauc/system.conf`** on target). **`meta-hmi-platform/conf/layer.conf`** — **`LAYERDEPENDS`** adds **`rauc`**.  
+- **`meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend`** — **`IMAGE_INSTALL:append = " rauc elevator-hmi-rauc-system-conf"`**. **`elevator-hmi-em3566.conf`** — **`DISTRO_FEATURES:append = " rauc"`** (clears meta-rauc README warning when layer is present).  
+- **`scripts/rauc-gen-keys.sh`** — executable; header matches required dev-only / production warning; **`certs/README.md`**. **`.gitignore`** — existing **`*.pem`**, **`*.key`**, **`certs/private/`**; added explicit **`certs/*.pem`**, **`certs/*.key`**. **`git add -A`** does **not** stage dummy **`certs/*.pem`** / **`certs/private/*.key`** (verified).  
+- **`meta-hmi-app/recipes-images/elevator-hmi-bundle.bb`** — **`inherit bundle`**, **`RAUC_BUNDLE_COMPATIBLE = "elevator-hmi"`**, PLACEHOLDER comment; **`meta-hmi-app/conf/layer.conf`** — **`LAYERDEPENDS`** **`rauc`** + **`BBFILES`** line for **`recipes-images/*.bb`** so the flat bundle path parses.  
+- **Smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** — **exit 0**, **0 errors** (after **`rauc`** distro feature). **`bitbake -e core-image-minimal`** shows **`IMAGE_INSTALL`** includes **`rauc`** and **`elevator-hmi-rauc-system-conf`**. **`bitbake-layers show-recipes elevator-hmi-bundle`** — recipe **meta-hmi-app 1.0**.  
+- **No** edits under **`meta-rauc/`** (community layer).
+
+**A1 fix notes (2026-04-16 — supervisor-identified defect):**  
+- **DEFECT fixed:** `DISTRO_FEATURES:append = " rauc"` removed from `elevator-hmi-em3566.conf`. Machine conf sets hardware capabilities only; DISTRO_FEATURES belongs in a distro conf.  
+- **New file:** `meta-hmi-platform/conf/distro/elevator-hmi.conf` — `require conf/distro/poky.conf`; `DISTRO = "elevator-hmi"`; `DISTRO_VERSION = "0.1"`; `DISTRO_FEATURES:append = " rauc"`; `DISTRO_FEATURES:remove = "x11 wayland"`.  
+- **`kas/elevator-hmi.yml`** — `distro: poky` → `distro: elevator-hmi`; `local_conf_header` block added with `DISTRO = "elevator-hmi"`.  
+- **`kas dump`** smoke after fix: `distro: elevator-hmi` confirmed, exit 0, no errors.
 
 ---
 
