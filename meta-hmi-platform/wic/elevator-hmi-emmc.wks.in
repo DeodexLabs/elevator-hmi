@@ -7,6 +7,8 @@
 # A/B RAUC intent: rootfs_b is empty at factory — RAUC update target.
 # data partition is never erased by OTA.
 
+bootloader --ptable gpt
+
 part /boot --source bootimg-partition --sourceparams "loader=u-boot" --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4 --size 64M
 part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label rootfs_a --align 4 --size 1024M
 part --ondisk mmcblk0 --fstype=ext4 --label rootfs_b --align 4 --size 1024M
