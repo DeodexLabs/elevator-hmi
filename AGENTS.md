@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-16 (TASK-108 `[REVIEW]` — RAUC skeleton; TASK-109 unblocked after A1 `[DONE]` on 108)  
+**Last updated:** 2026-04-16 (TASK-108 `[DONE]` merged; TASK-109 `[READY]` — released to A2)  
 
 ---
 
@@ -36,7 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-16):** **TASK-108** `[REVIEW]` — branch **`task/TASK-108-rauc-skeleton`**. **TASK-109** `[READY]` (Qt/EGLFS image — **do not start** until TASK-108 merged and A1 marks **`[DONE]`**). **TASK-106** `[BLOCKED]` (LMT101 hardware). **Follow-up:** **`./scripts/kas-build-task-105.sh`** green logs → **`diary/PROGRESS.md`**. **`git checkout develop && git pull`** before the next task branch.
+**A2 queue (2026-04-16):** **TASK-109** `[READY]` — **A2 pick up now.** Branch `task/TASK-109-qt-eglfs-image` from `develop`. **TASK-106** `[BLOCKED]` (LMT101 hardware). **Follow-up:** **`./scripts/kas-build-task-105.sh`** green logs → **`diary/PROGRESS.md`**. **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
@@ -60,11 +60,11 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-108 — [Phase 1] RAUC skeleton — system.conf + key infra + bundle recipe stub
-**Status:** `[REVIEW]`  
+### TASK-108 — [Phase 1] RAUC skeleton — system.conf + key infra + bundle recipe stub *(archived — [DONE] 2026-04-16)*
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** TASK-103 ✓ (core-image-minimal + WKS layout)  
-**Branch:** `task/TASK-108-rauc-skeleton`
+**Branch:** `task/TASK-108-rauc-skeleton` (merged to `develop` 2026-04-16; branch deleted)
 
 **Spec:**
 
@@ -296,6 +296,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending TASK-002 host) | 2026-04-15 |
 | TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-110 | Fix linux-rockchip_%.bbappend: cfg fragment (replaces KERNEL_CONFIG:append) + do_configure DTS placement (A1 impl, supervisor approved) | 2026-04-16 |
+| TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1) | 2026-04-16 |
 
 ---
 

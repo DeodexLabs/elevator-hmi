@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-04-16 — TASK-108 merged [DONE], TASK-109 released to A2 (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### TASK-108 — [DONE]
+RAUC skeleton merged to `develop` (supervisor-approved after DISTRO_FEATURES fix). Deliverables:
+- `meta-hmi-platform/conf/distro/elevator-hmi.conf` — project distro conf; `DISTRO_FEATURES:append = " rauc"` and `DISTRO_FEATURES:remove = "x11 wayland"` placed here (not in machine conf).
+- `meta-hmi-platform/recipes-images/files/system.conf` — `compatible=elevator-hmi`; slots rootfs_a/b on `/dev/mmcblk0p4` / `p5`; `bootloader=u-boot`.
+- `meta-hmi-platform/recipes-images/elevator-hmi-rauc-system-conf/elevator-hmi-rauc-system-conf.bb` — installs `system.conf` to `/etc/rauc/`.
+- `meta-hmi-platform/conf/layer.conf` — `LAYERDEPENDS` includes `rauc`.
+- `meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend` — `rauc` and `elevator-hmi-rauc-system-conf` added to `IMAGE_INSTALL`.
+- `scripts/rauc-gen-keys.sh` + `certs/README.md` — dev key generation script (gitignored certs).
+- `meta-hmi-app/recipes-images/elevator-hmi-bundle.bb` — RAUC bundle stub (`inherit bundle`, `RAUC_BUNDLE_COMPATIBLE`), PLACEHOLDER comment.
+- `kas/elevator-hmi.yml` — `distro: elevator-hmi`; `local_conf_header` block.
+
+**Note:** `local_conf_header` DISTRO line is redundant with kas top-level `distro:` setting. Harmless. Clean up when kas manifest is next touched.
+
+Branch `task/TASK-108-rauc-skeleton` deleted local and remote after merge.
+
+### TASK-109 released to A2
+Queue header updated: "TASK-109 `[READY]` — A2 pick up now." A2 should branch `task/TASK-109-qt-eglfs-image` from `develop`.
+
+### Next actions
+- A2: pick up **TASK-109** (branch `task/TASK-109-qt-eglfs-image` from `develop`).
+- Owner: order LMT101SX006C panel (TASK-106 / BLK-006 unblock).
+- Owner: run `./scripts/kas-build-task-105.sh` on TASK-002 host for deferred TASK-105 acceptance.
+
+---
+
 ## 2026-04-16 — TASK-108: RAUC skeleton (A2)
 
 **Agent:** A2  
