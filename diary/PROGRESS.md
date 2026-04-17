@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-04-17 — TASK-109 Qt EGLFS image + placeholder app (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+Implemented **TASK-109** on branch **`task/TASK-109-qt-eglfs-image`**: **`meta-hmi-app`** layer priority **9**; **`elevator-hmi-image`** (`core-image` + **`rockchip-image`** + project **`WKS_FILE`**); **`packagegroup-qt6-essentials`** (substitution for non-existent **`packagegroup-qt6-minimal`** in pinned meta-qt6); **`QT_QPA_PLATFORM=eglfs`** via **`profile.d`** + **`environment.d`**; **`elevator-hmi-app`** stub (CMake + QML **`Window`** / **`elevator-hmi`** text) → **`/usr/bin/elevator-hmi`**. **`AGENTS.md`** TASK-109 → **`[REVIEW]`** with output notes.
+
+**Smoke:** `kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"` — exit **0**, **0** parse errors; **`bitbake-layers`** shows **`hmi-app`** at priority **9**.
+
+**Next:** A1 review → **`[DONE]`** / merge; full image **`kas build elevator-hmi-image`** on TASK-002 host when ready.
+
+---
+
 ## 2026-04-16 — TASK-108 merged [DONE], TASK-109 released to A2 (A1)
 
 **Agent:** A1  
