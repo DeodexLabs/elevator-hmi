@@ -1,17 +1,13 @@
-# Elevator HMI — eMMC layout (Phase 0 factory image)
+# Elevator HMI — eMMC layout (Phase 1 bring-up sizes)
 #
-# Total device capacity assumed: 16 GB. Sizes below are a simplified layout
-# for bring-up. Slot B is reserved empty at factory for a future RAUC slot B
-# rootfs; Phase 2 will align kernel/rootfs A/B slots, RAUC bundle metadata, and
-# `/data` retention policy with the RAUC slot scheme in CLAUDE.md (do not change
-# partition geometry here without an A1 task spec).
+# BRING-UP NOTE: Partition sizes reduced for reliable flashing via
+# rkdeveloptool. Production sizes: rootfs 2048M, data 4096M.
+# Expand after first boot is confirmed working.
 #
-# boot: U-Boot + SPL payload area (vfat) — size matches project bootstrap plan
-# rootfs_a: active root (ext4)
-# rootfs_b: second root slot (ext4), unpopulated at factory — RAUC target slot
-# data: persistent partition (ext4) — never erased by OTA in production design
+# A/B RAUC intent: rootfs_b is empty at factory — RAUC update target.
+# data partition is never erased by OTA.
 
 part /boot --source bootimg-partition --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4 --size 64M
-part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label rootfs_a --align 4 --size 2048M
-part --ondisk mmcblk0 --fstype=ext4 --label rootfs_b --align 4 --size 2048M
-part /data --ondisk mmcblk0 --fstype=ext4 --label data --align 4 --size 4096M
+part / --source rootfs --ondisk mmcblk0 --fstype=ext4 --label rootfs_a --align 4 --size 1024M
+part --ondisk mmcblk0 --fstype=ext4 --label rootfs_b --align 4 --size 1024M
+part /data --ondisk mmcblk0 --fstype=ext4 --label data --align 4 --size 512M

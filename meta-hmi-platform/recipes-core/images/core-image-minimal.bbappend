@@ -2,6 +2,7 @@
 inherit rockchip-image
 
 WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"
+IMAGE_OVERHEAD_FACTOR = "1.1"
 
 IMAGE_INSTALL:append = " rauc elevator-hmi-rauc-system-conf"
 
