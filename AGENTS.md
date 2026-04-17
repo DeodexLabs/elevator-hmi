@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-17 (TASK-109 `[REVIEW]` — A2 Qt EGLFS skeleton on branch `task/TASK-109-qt-eglfs-image`)  
+**Last updated:** 2026-04-17 (TASK-109 `[DONE]` merged; no `[READY]` tasks — A1 to spec next task)  
 
 ---
 
@@ -123,7 +123,7 @@ Tasks are sorted by dependency order. Do not reorder.
 ---
 
 ### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton *(archived — [DONE] 2026-04-17)*
-**Status:** `[REVIEW — A1 fixed defect, ready to merge]`  
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** TASK-108 `[DONE]` (ensures `meta-hmi-app` is building cleanly before adding Qt)  
 **Branch:** `task/TASK-109-qt-eglfs-image` (from `develop` 2026-04-17)
@@ -311,6 +311,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-110 | Fix linux-rockchip_%.bbappend: cfg fragment (replaces KERNEL_CONFIG:append) + do_configure DTS placement (A1 impl, supervisor approved) | 2026-04-16 |
 | TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1) | 2026-04-16 |
+| TASK-109 | Qt 6.8 EGLFS image skeleton + placeholder app (A2 impl; A1 fixed DISTRO_FEATURES defect + committed uncommitted A2 work; parse clean) | 2026-04-17 |
 
 ---
 
