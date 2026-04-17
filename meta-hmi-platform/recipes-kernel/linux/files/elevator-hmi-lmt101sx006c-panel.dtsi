@@ -32,7 +32,7 @@
 		};
 	};
 
-	panel-lmt101: panel@0 {
+	panel_lmt101: panel@0 {
 		compatible = "elevator-hmi,lmt101sx006c", "jadard,jd9365da-h3";
 		reg = <0>;
 		vdd-supply = <&vcc3v3_lcd0_n>;
