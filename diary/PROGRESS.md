@@ -4,6 +4,134 @@
 
 ---
 
+## 2026-04-18 — WIC bring-up fixes: IMAGE_BOOT_FILES, partition sizes, extlinux, GPT, boot offset (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Summary
+
+Six sequential WIC/build defects identified and fixed during eMMC bring-up, all applied directly to `develop`. Each fix was supervisor-reviewed before proceeding. No flash tonight — session closed with WIC verified and flash procedure documented for next session.
+
+### Fix 1 — IMAGE_BOOT_FILES unset (`do_image_wic` failure)
+
+`bootimg-partition` WIC plugin raises `WicError` when `IMAGE_BOOT_FILES` is unset. `meta-rockchip` never sets this variable. Deploy dir produces `Image` and `elevator-hmi-boardcon-em3566-v3.dtb` flat (Yocto kernel recipe strips `arch/arm64/boot/` prefix).  
+**Fix:** Added to `meta-hmi-platform/conf/machine/elevator-hmi-em3566.conf`:
+```bitbake
+IMAGE_BOOT_FILES = "Image elevator-hmi-boardcon-em3566-v3.dtb"
+```
+Commit: `5cf6b39`
+
+### Fix 2 — `do_image_wic_ufs` failure (UFS not eMMC)
+
+`rockchip-image` bbclass adds a `do_image_wic_ufs` task for 4K-sector UFS images. This project targets eMMC. Overrode to no-op in `core-image-minimal.bbappend`.  
+Commit: `a37356f`
+
+### Fix 3 — WIC image 8.7 GB causing flash tool failure at 83%
+
+Production partition sizes (rootfs_a 2048M, rootfs_b 2048M, data 4096M) produced an 8.7GB image too large for reliable `rkdeveloptool` single-write. Reduced for bring-up:
+- `rootfs_a`: 2048M → 1024M
+- `rootfs_b`: 2048M → 1024M
+- `data`: 4096M → 512M
+- Added `IMAGE_OVERHEAD_FACTOR = "1.1"` to `core-image-minimal.bbappend`.
+
+New total: ~2.6 GB fixed + rootfs overhead. Target after first boot confirmed: restore production sizes.  
+Commit: `c02c6a1`
+
+### Fix 4 — Boot partition had files but no extlinux.conf (silent scan failure)
+
+`bootimg-partition` without `--sourceparams "loader=u-boot"` copies `IMAGE_BOOT_FILES` into the partition but exits `do_configure_partition` early — no `extlinux/extlinux.conf` generated. `bootimg-efi` attempted first (wrong — requires a loader param, fails with "bootimg-efi requires a loader, none specified"). Reverted and added correct `--sourceparams "loader=u-boot"`.
+
+WKS boot line:
+```
+part /boot --source bootimg-partition --sourceparams "loader=u-boot" --ondisk mmcblk0 --fstype=vfat --label boot --active --align 4 --size 64M
+```
+Boot partition verified via `mdir`: `Image`, `elevator-hmi-boardcon-em3566-v3.dtb`, `extlinux/extlinux.conf`.  
+Commit: `744a831`
+
+### Fix 5 — Missing GPT declaration (U-Boot cannot find boot partition by GPT label)
+
+WKS was creating DOS/MBR by default. Added `bootloader --ptable gpt` as first line of WKS.  
+`fdisk -l` confirmed: `Disklabel type: gpt`.  
+Commit: `dc21a6c`
+
+### Fix 6 — Boot partition FAT corrupted by idblock.img at sector 64
+
+Hardware bring-up U-Boot serial confirmed `PartType: EFI` (GPT working) but `fatls mmc 0:1` returned `0 file(s), 1 dir(s)` with a garbage directory entry. Root cause: WIC p1 started at sector 40; `rkdeveloptool wl 64 idblock.img` writes at sector 64 which is **inside** p1, overwriting FAT tables.
+
+Investigation confirmed:
+- `bootloader` directive does NOT support `--offset` (checked `ksparser.py` — only `--ptable`, `--append`, `--configfile`, `--timeout`, `--source`)
+- `part` DOES support `--offset` via `sizetype("K", True)` — accepts `M` suffix
+
+**Fix:** `--offset 16M` on boot part → forces p1 start to sector 32768 (16 MB), safely past both idbloader (sector 64 = 32 KB) and U-Boot FIT (sector 16384 = 8 MB).  
+Commit: `a2acb82`
+
+### Final verified WIC state (supervisor-approved)
+
+| Check | Result |
+|---|---|
+| Partition table | GPT ✓ |
+| p1 (boot/vfat) start sector | 32768 ✓ — clear of idblock (64) and uboot (16384) |
+| p1 size | 83.2M ✓ |
+| p2 rootfs_a | 1.3G ✓ |
+| p3 rootfs_b | 1.0G ✓ |
+| p4 data | 512M ✓ |
+| Total image size | 2.9G ✓ |
+| No overlap with bootloader chain | Confirmed ✓ |
+| Boot partition contents | `Image`, `elevator-hmi-boardcon-em3566-v3.dtb`, `extlinux/extlinux.conf` ✓ |
+
+### U-Boot serial findings (from hardware bring-up before Fix 6)
+
+```
+PartType: EFI                          ← GPT confirmed
+bootcmd=boot_android ${devtype} ${devnum};boot_fit;bootrkp;run distro_bootcmd;
+boot_targets=mmc1 mmc0 mtd2 mtd1 mtd0 usb0 pxe dhcp
+Scanning mmc 0:1...                    ← reaches our boot partition via distro_bootcmd
+fatls mmc 0:1 → 0 file(s)             ← FAT corrupted by idblock overlap (now fixed)
+ext4ls mmc 0:2 → Linux root tree ✓    ← rootfs_a correctly populated
+```
+
+`bootcmd` path: Android (fails) → boot_fit (fails) → bootrkp (fails) → `distro_bootcmd` → scans mmc0:1 for `extlinux/extlinux.conf`. With Fix 6 applied, this scan should now succeed.
+
+### Tomorrow — First boot flash procedure
+
+```bash
+# 1. Enter Maskrom (hold RECOVERY + power on)
+lsusb | grep 2207:   # must show 2207:350a
+
+# 2. Load bootloader
+sudo rkdeveloptool db build/tmp/deploy/images/elevator-hmi-em3566/loader.bin
+
+# 3. Flash full WIC
+sudo rkdeveloptool wl 0 build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260417223520.wic
+
+# 4. Write idbloader at sector 64
+sudo rkdeveloptool wl 64 build/tmp/deploy/images/elevator-hmi-em3566/idblock.img
+
+# 5. Write U-Boot FIT at sector 16384
+sudo rkdeveloptool wl 0x4000 build/tmp/deploy/images/elevator-hmi-em3566/uboot.img
+
+# 6. Reboot
+sudo rkdeveloptool rd
+```
+
+Expected:
+```
+PartType: EFI
+Scanning mmc 0:1...
+Found /extlinux/extlinux.conf
+Retrieving file: /Image
+Starting kernel ...
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x412fd050]
+```
+
+### Next actions
+- Owner: execute first boot flash sequence above; log full UART output in diary
+- A1 (next session): review `dmesg` for BLK-008 phandle errors (`vcc3v3_lcd0_n`, `vcca_1v8`, `backlight`)
+- A1 (next session): spec TASK-111 for RAUC slot device path correction (system.conf uses `mmcblk0p4/p5` but WIC GPT p2/p4 are rootfs_a/data; confirm correct slot device numbers after first boot partition listing)
+
+---
+
 ## 2026-04-17 — TASK-109 A1 review fix — DISTRO_FEATURES removed from image recipe (A1)
 
 **Agent:** A1  
