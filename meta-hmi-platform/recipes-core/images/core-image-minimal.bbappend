@@ -8,3 +8,11 @@ IMAGE_INSTALL:append = " rauc elevator-hmi-rauc-system-conf"
 # Prevent rauc-conf (upstream example system.conf) from being pulled in as a
 # weak dependency of rauc — it conflicts with our elevator-hmi-rauc-system-conf.
 BAD_RECOMMENDATIONS += "rauc-conf"
+
+# rockchip-image do_fixup_wks uses grep to find file=*.img references.
+# grep exits 1 on zero matches; set -e in the run script kills the task.
+# Our WKS uses --source keywords only — no file=*.img lines — so the
+# grep always returns 1. Override to no-op without modifying meta-rockchip.
+do_fixup_wks() {
+    :
+}
