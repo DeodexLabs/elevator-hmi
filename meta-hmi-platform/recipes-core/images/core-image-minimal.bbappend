@@ -16,3 +16,9 @@ BAD_RECOMMENDATIONS += "rauc-conf"
 do_fixup_wks() {
     :
 }
+
+# do_image_wic_ufs creates a UFS 4K-sector image variant from rockchip-image.
+# This project uses eMMC (mmcblk0), not UFS. Disable to no-op.
+do_image_wic_ufs() {
+    :
+}
