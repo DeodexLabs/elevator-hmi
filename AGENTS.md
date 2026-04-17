@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-16 (TASK-108 `[DONE]` merged; TASK-109 `[READY]` — released to A2)  
+**Last updated:** 2026-04-17 (TASK-109 `[REVIEW]` — A2 Qt EGLFS skeleton on branch `task/TASK-109-qt-eglfs-image`)  
 
 ---
 
@@ -36,7 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-16):** **TASK-109** `[READY]` — **A2 pick up now.** Branch `task/TASK-109-qt-eglfs-image` from `develop`. **TASK-106** `[BLOCKED]` (LMT101 hardware). **Follow-up:** **`./scripts/kas-build-task-105.sh`** green logs → **`diary/PROGRESS.md`**. **`git checkout develop && git pull`** before the next task branch.
+**A2 queue (2026-04-17):** **TASK-109** `[REVIEW]` — branch `task/TASK-109-qt-eglfs-image` (Qt image + placeholder app). **TASK-106** `[BLOCKED]` (LMT101 hardware). **Follow-up:** **`./scripts/kas-build-task-105.sh`** green logs → **`diary/PROGRESS.md`**. **`git checkout develop && git pull`** before the next task branch.
 
 ---
 
@@ -122,11 +122,25 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton
-**Status:** `[READY]`  
+### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton *(archived — [DONE] 2026-04-17)*
+**Status:** `[REVIEW — A1 fixed defect, ready to merge]`  
 **Phase:** 1  
 **Depends on:** TASK-108 `[DONE]` (ensures `meta-hmi-app` is building cleanly before adding Qt)  
-**Branch:** create `task/TASK-109-qt-eglfs-image` from `develop` **after TASK-108 is merged**
+**Branch:** `task/TASK-109-qt-eglfs-image` (from `develop` 2026-04-17)
+
+**Output notes (A2):**
+- **`meta-hmi-app/conf/layer.conf`** — `BBFILE_PRIORITY_hmi-app` **9** (above `meta-hmi-platform` 8). **`LAYERDEPENDS_hmi-app`** remains **`core qt6-layer rauc`** (spec text listed only `core qt6-layer`; **`rauc`** kept so **`elevator-hmi-bundle.bb`** / **`inherit bundle`** stay valid when only app layer metadata is considered).
+- **`meta-hmi-app/recipes-images/elevator-hmi-image.bb`** — **`inherit core-image rockchip-image`**, **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** (same eMMC layout as **`core-image-minimal`**; not in one-line TASK text but required for Rockchip WIC images). **`IMAGE_INSTALL`** per TASK plus **`elevator-hmi-app`**. **`packagegroup-qt6-minimal`** from TASK text **does not exist** in pinned **meta-qt6** — substituted **`packagegroup-qt6-essentials`** (minimal qtbase+declarative set). **`DISTRO_FEATURES:remove = "x11 wayland"`** as specified. **`QT_QPA_PLATFORM=eglfs`** via **`ROOTFS_POSTPROCESS_COMMAND`**: **`/etc/profile.d/qt-eglfs.sh`** and **`/etc/environment.d/90-qt-eglfs.conf`** (no X11/Wayland compositors in **`IMAGE_INSTALL`**).
+- **`meta-hmi-app/recipes-images/files/COPYING`** — **`LICENSE = "CLOSED"`** checksum for image recipe.
+- **`meta-hmi-app/recipes-qt/elevator-hmi-app/elevator-hmi-app_0.1.bb`** + **`files/`** (`CMakeLists.txt`, **`main.cpp`** loader, **`main.qml`** Window stub, **`COPYING`**) — **`inherit qt6-cmake`**, **`DEPENDS = "qtbase qtdeclarative"`**, installs **`/usr/bin/elevator-hmi`** and **`/usr/share/elevator-hmi/main.qml`**, top comment PLACEHOLDER per spec.
+- **`kas/elevator-hmi.yml`** — **unchanged** (**`meta-hmi-app`** already present).
+- **Smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — **exit 0**, **0 parse errors** (2586 recipes). **`bitbake-layers show-layers`** — **`hmi-app`** priority **9**.
+- **No** edits under **`meta-qt6`**, **`meta-rockchip`**, **`meta-rauc`**.
+
+**A1 review fix (2026-04-17):**
+- **DEFECT fixed:** `DISTRO_FEATURES:remove = "x11 wayland"` removed from `elevator-hmi-image.bb`. Cannot be reliably modified in an image recipe; already correctly set in `meta-hmi-platform/conf/distro/elevator-hmi.conf` (TASK-108). Replaced with a comment citing the distro conf.
+- **Process note:** A2 left all changes uncommitted on the task branch (working tree only). A1 applied the fix and committed everything: `[phase1][meta-hmi-app] TASK-109 Qt 6.8 EGLFS image skeleton and placeholder app`.
+- **Parse smoke re-run after fix:** `bitbake -p elevator-hmi-image` — exit 0, 0 errors, 4481 targets.
 
 **Spec:**
 
