@@ -103,6 +103,8 @@ Makefile
 *.key
 *.p12
 certs/private/
+certs/*.pem
+certs/*.key
 
 # ------------------------------------------------------------
 # OTA bundles (large, ephemeral)

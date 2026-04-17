@@ -13,8 +13,12 @@ header:
   version: 21
 
 machine: elevator-hmi-em3566
-distro: poky
+distro: elevator-hmi
 target: core-image-minimal
+
+local_conf_header:
+  distro: |
+    DISTRO = "elevator-hmi"
 
 repos:
   poky:

@@ -38,6 +38,16 @@ Usage:
 ./scripts/kas-build-task-105.sh
 ```
 
+## `rauc-gen-keys.sh`
+
+**TASK-108:** generates **development-only** RAUC signing material under **`certs/`** (gitignored). Read the script header — **never** commit generated keys; production keys are offline / HSM only.
+
+```bash
+./scripts/rauc-gen-keys.sh
+```
+
+See **`certs/README.md`**.
+
 ## `convert-library.sh`
 
 Vendor PDF → Markdown conversion helper (see script header for usage).
