@@ -4,6 +4,44 @@
 
 ---
 
+## 2026-04-17 — TASK-109 A1 review fix — DISTRO_FEATURES removed from image recipe (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review outcome
+- **All checks passed** except one defect (see below).
+- **Process issue:** A2 left all changes uncommitted on `task/TASK-109-qt-eglfs-image`. A1 applied the fix and committed everything as the first commit on the branch.
+
+### Defect fixed
+`DISTRO_FEATURES:remove = "x11 wayland"` removed from `elevator-hmi-image.bb`. Image recipes cannot reliably modify `DISTRO_FEATURES`. Already handled in `meta-hmi-platform/conf/distro/elevator-hmi.conf` (TASK-108). Replaced with an explanatory comment.
+
+### STEP 3 check results
+
+| Check | Result |
+|---|---|
+| `LAYERSERIES_COMPAT = "scarthgap"` | **PASS** |
+| `BBFILE_PRIORITY_hmi-app = "9"` | **PASS** |
+| `LAYERDEPENDS` includes `qt6-layer` | **PASS** |
+| `LAYERDEPENDS` includes `rauc` | **PASS** (acceptable — bundle.bb needs it) |
+| `inherit core-image` | **PASS** |
+| `inherit rockchip-image` | **PASS** |
+| `WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"` | **PASS** |
+| No X11/Wayland in `IMAGE_INSTALL` | **PASS** |
+| `QT_QPA_PLATFORM=eglfs` via profile.d + environment.d | **PASS** |
+| `packagegroup-qt6-essentials` (not minimal — documented) | **PASS** |
+| `elevator-hmi-app` in `IMAGE_INSTALL` | **PASS** |
+| `gstreamer1.0` + `gstreamer1.0-plugins-base` | **PASS** |
+| `inherit qt6-cmake` | **PASS** |
+| `DEPENDS = "qtbase qtdeclarative"` | **PASS** |
+| Installs to `/usr/bin/elevator-hmi` (via `CMAKE_INSTALL_BINDIR`) | **PASS** |
+| `LICENSE` set | **PASS** |
+| QML: `import QtQuick` (not Qt5 compat) | **PASS** |
+| QML: `Window` with visible element | **PASS** |
+| `bitbake -p elevator-hmi-image` — exit 0, 0 errors | **PASS** |
+
+---
+
 ## 2026-04-17 — TASK-109 Qt EGLFS image + placeholder app (A2)
 
 **Agent:** A2  

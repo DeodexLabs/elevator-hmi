@@ -122,8 +122,8 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton
-**Status:** `[REVIEW]`  
+### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton *(archived — [DONE] 2026-04-17)*
+**Status:** `[REVIEW — A1 fixed defect, ready to merge]`  
 **Phase:** 1  
 **Depends on:** TASK-108 `[DONE]` (ensures `meta-hmi-app` is building cleanly before adding Qt)  
 **Branch:** `task/TASK-109-qt-eglfs-image` (from `develop` 2026-04-17)
@@ -136,6 +136,11 @@ Tasks are sorted by dependency order. Do not reorder.
 - **`kas/elevator-hmi.yml`** — **unchanged** (**`meta-hmi-app`** already present).
 - **Smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — **exit 0**, **0 parse errors** (2586 recipes). **`bitbake-layers show-layers`** — **`hmi-app`** priority **9**.
 - **No** edits under **`meta-qt6`**, **`meta-rockchip`**, **`meta-rauc`**.
+
+**A1 review fix (2026-04-17):**
+- **DEFECT fixed:** `DISTRO_FEATURES:remove = "x11 wayland"` removed from `elevator-hmi-image.bb`. Cannot be reliably modified in an image recipe; already correctly set in `meta-hmi-platform/conf/distro/elevator-hmi.conf` (TASK-108). Replaced with a comment citing the distro conf.
+- **Process note:** A2 left all changes uncommitted on the task branch (working tree only). A1 applied the fix and committed everything: `[phase1][meta-hmi-app] TASK-109 Qt 6.8 EGLFS image skeleton and placeholder app`.
+- **Parse smoke re-run after fix:** `bitbake -p elevator-hmi-image` — exit 0, 0 errors, 4481 targets.
 
 **Spec:**
 
