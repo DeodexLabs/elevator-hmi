@@ -17,3 +17,7 @@ do_install () {
 FILES:${PN} = "${sysconfdir}/rauc/system.conf"
 
 RDEPENDS:${PN} += "rauc"
+
+# Fail fast if rauc-conf is ever explicitly added to IMAGE_INSTALL — it installs
+# an example /etc/rauc/system.conf that collides with this recipe's file.
+RCONFLICTS:${PN} = "rauc-conf"
