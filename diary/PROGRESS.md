@@ -4,6 +4,87 @@
 
 ---
 
+## 2026-04-18 — root=PARTUUID override fix, GPT backup header fix, gptfdisk (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Problems (observed on first boot)
+
+1. **`root=PARTUUID=614e0000-0000` in kernel cmdline** despite extlinux.conf having `root=/dev/mmcblk0p2`. Kernel cannot find rootfs.
+
+2. **`GPT:6075217 != 15155199`** — backup GPT header at wrong sector. WIC image is 2.9 GB (~6,075,217 sectors); eMMC is 7.23 GB (~15,155,199 sectors). Backup GPT in WIC image points to last sector of the image, not the device.
+
+### Root cause analysis — PARTUUID override
+
+Traced through Rockchip vendor U-Boot source:
+
+- `sysboot` (extlinux boot) calls `env_set("bootargs", ...)` with extlinux `append` value — correct `root=/dev/mmcblk0p2`.
+- Then `do_booti()` calls `fdt_chosen()` → `board_fdt_chosen_bootargs()` (Rockchip override in `board.c:1335`).
+- This calls `bootargs_add_dtb_dtbo()` which reads `/chosen/bootargs` from the **static compiled-in DTB**.
+- `rk3568-linux.dtsi` (included by our DTS chain via `rk3566-evb2-lp4x-v10-linux.dts`) sets: `chosen { bootargs = "earlycon=... console=ttyFIQ0 root=PARTUUID=614e0000-0000 rw rootwait"; }`
+- `env_update()` (`nvedit.c:406`) performs a **key-match merge**: tokenizes both bootargs strings, replaces matching keys — so `root=PARTUUID=...` replaces `root=/dev/mmcblk0p2`.
+- extlinux.conf `append` value is lost for the `root=` key.
+
+### Fixes
+
+**Fix 1 — DTS chosen.bootargs override** (`elevator-hmi-boardcon-em3566-v3.dts`):
+```dts
+&chosen {
+    bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait";
+};
+```
+- earlycon address `0xfe660000` verified from `rk356x.dtsi` uart2 node (`reg = <0x0 0xfe660000 0x0 0x100>`).
+- ttyFIQ0 replaced with ttyS2 (EM3566 v3 debug UART).
+- Overrides the `rk3568-linux.dtsi` `root=PARTUUID=` so `env_update()` merges the correct values.
+- NOTE: `UBOOT_EXTLINUX_BOOTPREFIXES` does NOT exist in OE/meta-rockchip — not added. DTS override is the correct fix.
+
+**Fix 2 — `scripts/fix-gpt.sh`**: One-time post-flash script:
+```bash
+sgdisk -e /dev/mmcblk0   # relocates backup GPT to actual last sector
+partprobe /dev/mmcblk0   # reload partition table without reboot
+```
+Run once after first boot.
+
+**Fix 3 — `gptfdisk` in image**: Added to `IMAGE_INSTALL:append` in `core-image-minimal.bbappend` so `sgdisk` is available on the target.
+
+### Commit
+
+`c297a53` — `[phase1][dts/image] fix root=PARTUUID override, GPT backup header, add gptfdisk`
+
+### Build result
+
+`kas build kas/elevator-hmi.yml` — **4310 tasks, all succeeded** (4225 from sstate). 2 warnings (non-fatal).  
+Build time: 12:38:32 → 12:43:21 (~5 min, kernel compile via sstate cache).
+
+### Post-build verification
+
+**extlinux.conf in WIC boot partition** (mtype from WIC `@@32768s`):
+```
+default Yocto
+label Yocto
+   kernel /Image
+   fdt /elevator-hmi-boardcon-em3566-v3.dtb
+   append root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait console=ttyS2,1500000
+```
+
+**DTB `/chosen/bootargs`** (strings on deploy DTB):
+```
+earlycon=uart8250,mmio32,0xfe660000 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait
+```
+
+No `PARTUUID` in either. `env_update()` will now merge `root=/dev/mmcblk0p2` (not replace it). ✓
+
+### Next actions
+
+1. Re-flash board with new WIC image.
+2. On first boot, run via UART console: `sh /usr/sbin/fix-gpt.sh`
+3. Verify kernel cmdline: should show `root=/dev/mmcblk0p2` (not `root=PARTUUID=`).
+4. Confirm rootfs mounts and login prompt appears on ttyS2.
+5. Expand partition sizes to production (rootfs 2048M, data 4096M) after boot confirmed.
+
+---
+
 ## 2026-04-18 — Fix extlinux.conf: explicit fdt via WKS --configfile (A1)
 
 **Agent:** A1  
