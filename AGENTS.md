@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-19 (A1: **`TASK-113`** **`[DONE]`** — merge after review; **`TASK-114`** **`[READY]`** next → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-04-19 (A1: **`TASK-114`** **`[DONE]`**; **`[READY]`:** **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -36,7 +36,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench; **pre-LCD `dmesg` baseline** allowed per **`CLAUDE.md`** §2.1). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-04-19):** **`[READY]`:** **`TASK-114`** (BRINGUP no-LCD; branch **`task/TASK-114-bringup-no-lcd`**) → **`TASK-115`** (Qt image parse) → **`TASK-116`** (RAUC runtime / systemd). Pick **one** task at a time. **`TASK-113`** **`[DONE]`** — PR/merge **`task/TASK-113-kas-build-105-logs`** when ready. **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**A2 sprint queue (2026-04-19):** **`[READY]`:** **`TASK-115`** (Qt image parse; branch **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-113`** / **`TASK-114`** **`[DONE]`** (merged **`develop`**). **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** §8 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
@@ -44,7 +44,7 @@ Tasks are sorted by dependency order. Do not reorder.
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** none  
-**Branch:** `task/TASK-113-kas-build-105-logs` (A2; merge to **`develop`** after A1 **`[DONE]`**)
+**Branch:** `task/TASK-113-kas-build-105-logs` (A2; merged **`develop`** 2026-04-19)
 
 **Spec:**
 
@@ -68,11 +68,11 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-114 — [Phase 1] BRINGUP — “No LCD yet” lab checklist
-**Status:** `[READY]`  
-**Phase:** 1  
-**Depends on:** none (docs only)  
-**Branch:** `task/TASK-114-bringup-no-lcd` (A2)
+### TASK-114 — [Phase 1] BRINGUP — “No LCD yet” lab checklist *(archived — [DONE] 2026-04-19)*
+**Status:** `[DONE]`
+**Phase:** 1
+**Depends on:** none (docs only)
+**Branch:** `task/TASK-114-bringup-no-lcd` (A2; merge to **`develop`** when PR lands)
 
 **Spec:**
 
@@ -81,6 +81,15 @@ Tasks are sorted by dependency order. Do not reorder.
 3. No partition / **`.wks`** changes.
 
 **Acceptance:** Doc PR only; links resolve; no invented flash offsets beyond existing diary block.
+
+**Output notes (A2):**
+- Added **`docs/BRINGUP-CHECKLIST.md`** **§8 — Lab without LCD (EM3566 v3)** — numbered steps mirror **`CLAUDE.md`** §2.1 (image ≥ TASK-111, **`lsblk -f`** / **`/proc/partitions`**, **`sgdisk -e`**, UART baseline, **`pre-LCD baseline`** **`dmesg`** with **`egrep -i`** pattern list, **`rauc status`**, optional **`ip link`** / **`lsusb`**, **U-Boot bootdelay**); cross-links to **`CLAUDE.md`** §2.1 and **`diary/PROGRESS.md`** paste targets; pointer to **§6** for bootdelay detail; **§5** / no-invented-GPIO reminder for when LCD arrives.
+- **No** **`.wks`** / partition / flash-offset edits.
+- **`AGENTS.md`** / **`CLAUDE.md`** / **`diary/PROGRESS.md`** — status lines updated for A1 review (**`[DONE]`** 2026-04-19).
+
+**A1 review notes (`[DONE]` 2026-04-19):**
+- **PASS** — **§8** matches **`CLAUDE.md`** §2.1 intent; **`../CLAUDE.md`** / **`../diary/PROGRESS.md`** links from **`docs/BRINGUP-CHECKLIST.md`** resolve; no new flash offsets; **§6** / **§5** pointers appropriate.
+- **PASS** — doc-only; no **`.wks`** or recipe edits.
 
 ---
 
@@ -448,6 +457,7 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1) | 2026-04-16 |
 | TASK-109 | Qt 6.8 EGLFS image skeleton + placeholder app (A2 impl; A1 fixed DISTRO_FEATURES defect + committed uncommitted A2 work; parse clean) | 2026-04-17 |
 | TASK-113 | Green `kas-build-task-105.sh` + deploy evidence in `diary/PROGRESS.md` (A2 impl, A1 reviewed; Ubuntu 24.04 TASK-002-class host) | 2026-04-19 |
+| TASK-114 | BRINGUP §8 “Lab without LCD” + cross-links (A2 impl, A1 reviewed) | 2026-04-19 |
 
 ---
 

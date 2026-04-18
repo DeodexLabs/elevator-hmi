@@ -77,7 +77,7 @@
 - [ ] **LMT101** on **MIPI LCD** + **`dmesg`** / stability — still pending hardware (**TASK-106**); not BLK-001/002  
 - [ ] **Owner — no-LCD lab** (§2.1): **`lsblk`**, optional **GPT** repair, **UART** baseline log, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, optional **eth/USB** — capture in **`diary/PROGRESS.md`**  
 - [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15  
-- [ ] **TASK-114** — **`docs/BRINGUP-CHECKLIST.md`** “no LCD yet” section (**[READY]** in **`AGENTS.md`**)  
+- [x] **TASK-114** — **`docs/BRINGUP-CHECKLIST.md`** §8 “Lab without LCD” — **DONE** 2026-04-19 (A2 + A1 review; merged **`develop`**)  
 
 ---
 

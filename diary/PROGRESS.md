@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-04-19 — A1: TASK-114 `[DONE]` review
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **PASS** — **`docs/BRINGUP-CHECKLIST.md`** **§8** mirrors **`CLAUDE.md`** §2.1; cross-links valid; no **`.wks`** / partition edits; **§6** / **§5** closure rules consistent with project rules.
+
+### Next
+- Merge **`task/TASK-114-bringup-no-lcd`** → **`develop`**. A2: **`TASK-115`** on **`task/TASK-115-qt-image-parse`**.
+
+---
+
+## 2026-04-19 — TASK-114: BRINGUP checklist §8 “Lab without LCD” (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Result
+- **`docs/BRINGUP-CHECKLIST.md`** — new **§8 — Lab without LCD (EM3566 v3)** mirroring **`CLAUDE.md`** §2.1; cross-links to **`CLAUDE.md`** §2.1 and **`diary/PROGRESS.md`** for owner paste targets; **§6**/**§5** pointers (bootdelay, no invented GPIO).  
+- **`AGENTS.md`** — **TASK-114** → **`[REVIEW]`**; sprint queue next **`[READY]`:** **TASK-115**.  
+- **`CLAUDE.md`** — Phase checklist row for **TASK-114** updated (still unchecked until A1 **`[DONE]`**).  
+
+**Branch:** **`task/TASK-114-bringup-no-lcd`** (from **`develop`** @ **`ad4354e`**).
+
+---
+
 ## 2026-04-19 — A1: TASK-113 `[DONE]` review
 
 **Agent:** A1  

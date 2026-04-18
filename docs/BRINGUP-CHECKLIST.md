@@ -90,4 +90,25 @@ This checklist does **not** document **`rkdeveloptool` / `upgrade_tool` / RKDevT
 
 ---
 
-*TASK-107 — last updated 2026-04-18 (§6 lab notes: rkdeveloptool, deploy symlinks, U-Boot bootdelay, rescue shell).*
+## 8. Lab without LCD (EM3566 v3)
+
+Use this when **LMT101** is **not** on **`MIPI LCD`** yet: **Linux on board** still validates **disk layout**, **RAUC**, and **kernel logs** before panel cable-up (**BLK-008** / **TASK-106**).
+
+**Canonical checklist (rationale + project checklist row):** [`CLAUDE.md`](../CLAUDE.md) **§2.1 — Lab without LCD (owner checklist)**.
+
+**Where to paste:** [`diary/PROGRESS.md`](../diary/PROGRESS.md) — optional **`lsblk -f`**, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, UART captures, etc. (same targets as **§2.1** in CLAUDE).
+
+1. **Image** — Use a **`develop`** image **at or after TASK-111** (RAUC **`mmcblk0p2` / `p3`** slots per WIC). **Reflash** if the running image predates that merge.
+2. **Partition audit** — On target: **`lsblk -f`**, **`cat /proc/partitions`**; paste into **`diary/PROGRESS.md`** (optional **BLK-009** trail — **TASK-111** closed slot-path drift, but partition listing remains useful).
+3. **GPT** — If **`dmesg`** reports **backup GPT / header mismatch**: **`sgdisk -e /dev/mmcblk0`** (image includes **`gptfdisk`**), reboot once.
+4. **UART baseline** — Save **one** clean capture: U-Boot → Linux → login (file or **`PROGRESS.md`** section) for later diff when **TASK-106** / **BLK-008** run with the panel.
+5. **Pre-LCD `dmesg`** — Capture full **`dmesg`** or a filtered view, e.g. **`dmesg | egrep -i 'vcc3v3_lcd0_n|vcca_1v8|backlight|jd9365|dsi|panel'`**. In **`diary/PROGRESS.md`**, label the block **`pre-LCD baseline`** — expect **`-EPROBE_DEFER` / “no panel”** noise with nothing on **MIPI LCD**; compare after cable-up (**BLK-008**).
+6. **RAUC** — **`rauc status`**; note **D-Bus** / **systemd** issues for **TASK-116** follow-up if any.
+7. **Optional** — **`ip link`**, **`lsusb`** — carrier Ethernet / USB sanity without a display.
+8. **U-Boot countdown** — If autoboot still shows **`0`**, rebuild **`u-boot-rockchip`** and reflash **`uboot.img`** so **`CONFIG_BOOTDELAY=5`** applies (see **§6** lab notes above).
+
+**When the LCD arrives:** resume **TASK-106**; repeat **`dmesg`** + photo; **BLK-006** / **BLK-008** only with **cited** schematic or logs — **no invented GPIO** (same closure rule as **§5**).
+
+---
+
+*TASK-114 — §8 “Lab without LCD” added 2026-04-19 (`[DONE]` A1 review); prior §6/§7 history: TASK-107 (2026-04-18).*
