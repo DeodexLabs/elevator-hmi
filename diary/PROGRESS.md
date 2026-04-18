@@ -4,6 +4,60 @@
 
 ---
 
+## 2026-04-19 — TASK-113: green `kas-build-task-105.sh` + deploy listing (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Host
+- **Ubuntu 24.04** LTS, **`lz4c`** on **`PATH`**, **`kas` 5.2** — TASK-002-class host (`setup-build-host.sh` previously applied on this machine).
+
+### Result
+- **`./scripts/kas-build-task-105.sh`** — **exit 0** (full sequence: **`u-boot-rockchip`**, **`virtual/kernel`**, **`core-image-minimal`**). Logs under **`build-logs/`** (gitignored).
+
+### Log tails (last lines; full logs in `build-logs/*.log`)
+
+**`u-boot-rockchip.log`**
+```
+NOTE: Tasks Summary: Attempted 1082 tasks of which 1063 didn't need to be rerun and all succeeded.
+```
+
+**`virtual-kernel.log`**
+```
+NOTE: Tasks Summary: Attempted 995 tasks of which 994 didn't need to be rerun and all succeeded.
+```
+
+**`core-image-minimal.log`**
+```
+NOTE: Tasks Summary: Attempted 4310 tasks of which 4280 didn't need to be rerun and all succeeded.
+Summary: There were 2 WARNING messages.
+TASK-105 smoke sequence finished OK.
+```
+
+### `ls -la build/tmp/deploy/images/elevator-hmi-em3566/` (excerpt)
+
+Key artefacts (see deploy dir for full listing): **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`** (symlink **`…rootfs.wic`**), **`Image`** / **`zboot.img`**, **`uboot.img`**, **`loader.bin`**, **`idblock.img`**, **`rootfs.img`** → ext4, **`update.img`**, **`elevator-hmi-boardcon-em3566-v3.dtb`**.
+
+### Notes
+- BitBake **WARNING** count on image: **2** (non-fatal; unchanged from prior green builds on this tree).
+- **Owner (no LCD):** still follow **`CLAUDE.md`** §2.1 — paste **`lsblk -f`** / **`pre-LCD baseline`** **`dmesg`** here when run on **EM3566 v3** (optional **BLK-009** audit trail if you want a hardware cross-check vs WIC).
+
+---
+
+## 2026-04-19 — A1: no-LCD lab plan + TASK-113–TASK-116 `[READY]`
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Changes
+- **`CLAUDE.md`**: new **§2.1 Phase 1 — Lab without LCD (owner checklist)** — reflash post–TASK-111 image, **`lsblk`**, GPT **`sgdisk -e`**, UART baseline, **`pre-LCD baseline`** **`dmesg`** (grep targets for **BLK-008** prep), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**; pointer to **TASK-106** when LMT101 arrives. Phase 0 checklist: owner no-LCD line + **TASK-114** pointer.
+- **`AGENTS.md`**: **`TASK-113`** (TASK-105 green logs + **`PROGRESS.md`**), **`TASK-114`** (BRINGUP no-LCD section), **`TASK-115`** (`elevator-hmi-image` **`bitbake -p`** only), **`TASK-116`** (RAUC / systemd / D-Bus on minimal — **`meta-hmi-platform`** only). Queue: pick **one** task at a time. **BLK-008** blurb: **pre-LCD `dmesg`** baseline allowed per **`CLAUDE.md`** §2.1.
+
+### Next
+- A2: start **`TASK-113`** on **`task/TASK-113-kas-build-105-logs`** (or next in order). Owner: **`CLAUDE.md`** §2.1 on hardware without panel.
+
+---
+
 ## 2026-04-18 — A1: TASK-112 `[DONE]` — merge + queue (develop @ 162f9c2)
 
 **Agent:** A1  

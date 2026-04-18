@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-18 (A1: **`TASK-112`** **`[DONE]`** — merged **`task/TASK-112-agents-rauc-doc`** → **`develop`**; **`TASK-106`** still **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-04-19 (A2: **`TASK-113`** **`[REVIEW]`** — green **`kas-build-task-105.sh`** + **`PROGRESS.md`** evidence; **`TASK-114`**–**`116`** **`[READY]`**; **`TASK-106`** **`[BLOCKED]`**)  
 
 ---
 
@@ -35,8 +35,79 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-04-18):** No **`[READY]`** tasks. **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Develop** @ **`162f9c2`**: RAUC **`p2`/`p3`** (**TASK-111**) + TASK-108 archive note (**TASK-112**). Owner: paste **`lsblk -f`** to **`diary/PROGRESS.md`** when convenient.
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench; **pre-LCD `dmesg` baseline** allowed per **`CLAUDE.md`** §2.1). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
+**A2 sprint queue (2026-04-19):** **`[REVIEW]`:** **`TASK-113`** (branch **`task/TASK-113-kas-build-105-logs`**). **`[READY]`:** **`TASK-114`** (BRINGUP no-LCD) → **`TASK-115`** (Qt image parse) → **`TASK-116`** (RAUC runtime / systemd). Pick **one** task at a time; branch per task. **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+
+---
+
+### TASK-113 — [Phase 1] TASK-105 closure — green `kas-build-task-105.sh` + deploy log in PROGRESS
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Depends on:** none  
+**Branch:** `task/TASK-113-kas-build-105-logs` (A2)
+
+**Spec:**
+
+1. On **TASK-002-class** host (Ubuntu 22.04 or 24.04, **`setup-build-host.sh`** applied), from repo root run **`./scripts/kas-build-task-105.sh`** and capture **exit 0**.
+2. Append to **`diary/PROGRESS.md`**: short tail of each **`build-logs/*.log`**, plus **`ls -la build/tmp/deploy/images/elevator-hmi-em3566/`** (or equivalent deploy listing).
+3. No recipe changes unless the script exposes a real defect (then document in output notes and stop for A1).
+
+**Acceptance:** **`PROGRESS.md`** contains evidence of green **`kas-build-task-105.sh`** + deploy listing; no community-layer edits.
+
+**Output notes (A2):**  
+- **Host:** Ubuntu **24.04**, **`lz4c`** present, **`kas` 5.2** — TASK-002-class.  
+- **`./scripts/kas-build-task-105.sh`** — **exit 0**; logs **`build-logs/u-boot-rockchip.log`**, **`build-logs/virtual-kernel.log`**, **`build-logs/core-image-minimal.log`**. Each ends with **Tasks Summary … all succeeded**; **`core-image-minimal`** run reports **2 WARNING** messages (non-fatal).  
+- **`diary/PROGRESS.md`** — new **2026-04-19 — TASK-113** entry with log tails + deploy artefact summary.  
+- **No** edits under **`meta-rockchip`**, **`meta-qt6`**, **`meta-rauc`**.  
+- **Owner:** **`CLAUDE.md`** §2.1 board captures (**`lsblk`**, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, …) remain **owner** paste targets in **`PROGRESS.md`** (hardware; not part of this TASK-113 build-host acceptance).
+
+---
+
+### TASK-114 — [Phase 1] BRINGUP — “No LCD yet” lab checklist
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** none (docs only)  
+**Branch:** `task/TASK-114-bringup-no-lcd` (A2)
+
+**Spec:**
+
+1. Extend **`docs/BRINGUP-CHECKLIST.md`** with a new section (e.g. **§8** or renumber consistently) **“Lab without LCD (EM3566 v3)”** that mirrors **`CLAUDE.md`** §2.1: reflash **post–TASK-111** image, **`lsblk -f`** / **`/proc/partitions`**, **`sgdisk -e`** if GPT warning, UART baseline log, **`dmesg`** grep list (**`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`**, **`jd9365`**, **`dsi`**, **`panel`**) with **pre-LCD baseline** note, **`rauc status`**, optional **`ip link`** / **`lsusb`**, **U-Boot bootdelay** if autoboot **0**.
+2. Cross-link **`CLAUDE.md`** §2.1 and **`diary/PROGRESS.md`** for paste targets.
+3. No partition / **`.wks`** changes.
+
+**Acceptance:** Doc PR only; links resolve; no invented flash offsets beyond existing diary block.
+
+---
+
+### TASK-115 — [Phase 1] `elevator-hmi-image` parse smoke (Qt path off critical path)
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** none  
+**Branch:** `task/TASK-115-qt-image-parse` (A2)
+
+**Spec:**
+
+1. **`kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — exit **0**, no new parse errors.
+2. Append one-line result + recipe count tail to **`diary/PROGRESS.md`** (or TASK output notes only — A2 chooses; minimum is output notes in **`AGENTS.md`**).
+3. **Do not** bitbake full image unless A1 explicitly extends the task (parse-only keeps CI time bounded).
+
+**Acceptance:** Parse smoke **exit 0**; **`meta-qt6` / `meta-rockchip` / `meta-rauc`** untouched.
+
+---
+
+### TASK-116 — [Phase 1] RAUC CLI / D-Bus / systemd on `core-image-minimal`
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** none (may use owner **`rauc status`** paste from **`PROGRESS.md`** if present)  
+**Branch:** `task/TASK-116-rauc-systemd-minimal` (A2)
+
+**Spec:**
+
+1. Reproduce or analyse **`rauc status`** / **D-Bus** behaviour on **`core-image-minimal`** (owner paste in **`diary/PROGRESS.md`** if available; if not, use **`bitbake -e`** / package inspection only).
+2. In **`meta-hmi-platform`** only: add **`SYSTEMD_AUTO_ENABLE`** / small **`bbappend`** / **`PACKAGECONFIG`** / doc note so **`rauc`** is usable where appropriate, **or** document **expected** limitations (e.g. no keys / no bundle) in **`docs/BRINGUP-CHECKLIST.md`** or recipe comment — A2 picks smallest fix.
+3. **`kas shell … -c "bitbake -p"`** exit **0** after any recipe change.
+
+**Acceptance:** Clear behaviour for developers; no **`meta-rauc`** edits; no partition layout changes.
 
 ---
 
