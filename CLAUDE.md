@@ -38,7 +38,7 @@
 | **Phase gate** | All risks resolved or accepted. Hardware ordered. Dev environment operational. |
 | **Current week** | Week 1 |
 | **Blocking risks** | R-01 / R-02 mitigated (2026-04-15/16); **production** carrier still needs schematic sign-off + formal −20°C acceptance — **EM3566 v3** is the agreed Phase 0/1 reference board |
-| **Phase 1 lab (2026-04-19)** | **EM3566 v3:** serial boot chain validated; **`root` login** on **`ttyFIQ0`**; **`rkdeveloptool`** flash path recorded; **`CONFIG_BOOTDELAY=5`** in U-Boot cfg fragment. **TASK-111** merged: RAUC **`system.conf`** slots **`mmcblk0p2`/`p3`** per WIC (**BLK-009** closed). **TASK-113:** green **`kas-build-task-105.sh`** + deploy evidence on TASK-002-class host (**`diary/PROGRESS.md`**). **Open:** DSI/panel **`dmesg`** (**BLK-008**), LMT101 bench (**TASK-106** / **BLK-006**). Optional: owner **`lsblk -f`** in **`diary/PROGRESS.md`** (§2.1). |
+| **Phase 1 lab (2026-04-19)** | **EM3566 v3:** serial boot chain validated; **`root` login** on **`ttyFIQ0`**; **`rkdeveloptool`** flash path recorded; **`CONFIG_BOOTDELAY=5`** in U-Boot cfg fragment. **TASK-111** merged: RAUC **`system.conf`** slots **`mmcblk0p2`/`p3`** per WIC (**BLK-009** closed). **TASK-113:** green **`kas-build-task-105.sh`** + deploy evidence on TASK-002-class host (**`diary/PROGRESS.md`**). **TASK-114:** **`docs/BRINGUP-CHECKLIST.md`** §8 no-LCD lab (with **`CLAUDE.md`** §2.1). **Open:** DSI/panel **`dmesg`** (**BLK-008**), LMT101 bench (**TASK-106** / **BLK-006**). Optional: owner **`lsblk -f`** in **`diary/PROGRESS.md`** (§2.1 / BRINGUP §8). |
 
 ### §2.1 — Lab without LCD (owner checklist)
 
