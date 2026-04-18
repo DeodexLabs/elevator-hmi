@@ -4,6 +4,67 @@
 
 ---
 
+## 2026-04-18 — Fix extlinux.conf: explicit fdt via WKS --configfile (A1)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Problem
+
+U-Boot was using `fdtdir /` in extlinux.conf and guessing the DTB filename from `$fdtfile` env var. It chose `rockchip-evb_rk3568.dtb` instead of our `elevator-hmi-boardcon-em3566-v3.dtb`, causing kernel load failure.
+
+### Root cause analysis
+
+Two separate extlinux.conf generators exist:
+
+1. **`uboot-extlinux-config.bbclass`** — U-Boot recipe task (`do_create_extlinux_config`). Writes `${B}/extlinux.conf`. Reads `UBOOT_EXTLINUX_ROOT`, `UBOOT_EXTLINUX_FDT`, `UBOOT_EXTLINUX_CONSOLE` from BitBake. Used by U-Boot recipe deployment only — NOT what ends up in the WIC boot partition.
+
+2. **`bootimg-partition.py` WIC plugin** — Generates `extlinux/extlinux.conf` inside the vfat boot partition. **Completely hardcoded** — ignores all `UBOOT_EXTLINUX_*` BitBake variables. Scans `install_task` for `.dtb` files, always writes `fdtdir /`. Root device comes from `cr.rootdev` (WKS rootdev). The only override hook is `bootloader --configfile <filename>` in the WKS file.
+
+### Fix
+
+1. Created `meta-hmi-platform/wic/elevator-hmi-extlinux.conf` with explicit `fdt` line:
+   ```
+   default Yocto
+   label Yocto
+      kernel /Image
+      fdt /elevator-hmi-boardcon-em3566-v3.dtb
+      append root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait console=ttyS2,1500000
+   ```
+   Placed in `meta-hmi-platform/wic/` — `find_canned()` searches layer `wic/` dirs by filename.
+
+2. Updated `elevator-hmi-emmc.wks.in`: `bootloader --ptable gpt --configfile elevator-hmi-extlinux.conf`
+
+3. Kept `UBOOT_EXTLINUX_ROOT / CONSOLE / FDT` in machine conf — required by `do_create_extlinux_config` bbclass (fatal if ROOT is absent). Added `UBOOT_EXTLINUX_FDT` for the bbclass path too. Updated comments to document the two-path architecture.
+
+### Verified extlinux.conf (from new WIC boot partition via mtools)
+
+```
+default Yocto
+label Yocto
+   kernel /Image
+   fdt /elevator-hmi-boardcon-em3566-v3.dtb
+   append root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait console=ttyS2,1500000
+```
+
+**No `fdtdir` line. Explicit `fdt` confirmed. ✓**
+
+### Commits
+
+| Hash | Message |
+|------|---------|
+| `c74316d` | `[phase1][machine] set explicit UBOOT_EXTLINUX_FDT to fix DTB lookup` (superseded — was wrong approach) |
+| `35a05fb` | `[phase1][wic] fix extlinux.conf — explicit fdt via WKS --configfile` |
+| `91a12a4` | `[phase1][machine] restore UBOOT_EXTLINUX_ROOT/CONSOLE/FDT for bbclass` |
+
+### Next actions
+
+- Owner: re-flash board with new WIC (same procedure as 2026-04-18 first boot entry)
+- Expected UART boot path: `distro_bootcmd` → `mmc 0:1` → `extlinux/extlinux.conf` → loads `/Image` + `/elevator-hmi-boardcon-em3566-v3.dtb` → kernel start
+- A1: monitor for BLK-008 phandle errors in dmesg after first successful boot
+
+---
+
 ## 2026-04-18 — WIC bring-up fixes: IMAGE_BOOT_FILES, partition sizes, extlinux, GPT, boot offset (A1)
 
 **Agent:** A1  
