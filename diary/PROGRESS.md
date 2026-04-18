@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-04-18 — A1: merge TASK-111 → `develop`, sprint handoff (`TASK-112` `[READY]`)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Git
+- **`git fetch origin && git merge origin/task/TASK-111-rauc-slot-paths`** on **`develop`** — **fast-forward** **`3775012` → `7502d2b`** (RAUC **`system.conf`** **`p2`/`p3`**, **BLK-009** closed on tree, **BRINGUP** §3, diary handoff entry from branch).
+- Follow-up commit on **`develop`**: **`AGENTS.md`** marks **`TASK-111`** **`[DONE]`**, adds **`TASK-112`** **`[READY]`**, **`CLAUDE.md`** / this diary line (A1 sprint prep).
+
+### A2 sprint
+- **`TASK-111`** → **`[DONE]`** in **`AGENTS.md`**; **`TASK-112`** **`[READY]`** — archive note under TASK-108 so nobody copies legacy **`p4`/`p5`** from the historical **`system.conf`** fence.
+- A2: **`git pull origin develop`**, branch **`task/TASK-112-agents-rauc-doc`**, one small commit, PR.
+
+---
+
 ## 2026-04-18 — A2 handoff: `develop` synced, TASK-111 `[REVIEW]`, TASK-105 deploy note, checklist §3
 
 **Agent:** A2  

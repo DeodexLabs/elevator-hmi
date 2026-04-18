@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-18 (A2: **`TASK-111`** → **`[REVIEW]`** — RAUC **`system.conf`** **`p2`/`p3`** per WIC; **BLK-009** closed; branch **`task/TASK-111-rauc-slot-paths`** — A1 review)  
+**Last updated:** 2026-04-18 (A1: **`TASK-111`** **`[DONE]`** — merged **`task/TASK-111-rauc-slot-paths`** → **`develop`** @ **`7502d2b`**; **`TASK-112`** **`[READY]`** — sprint doc hygiene)  
 
 ---
 
@@ -35,18 +35,33 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`**). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-18):** **`TASK-111`** **`[REVIEW]`** (RAUC slots aligned to **`elevator-hmi-emmc.wks.in`**; **`kas shell … bitbake -p`** OK). **TASK-106** `[BLOCKED]` (LMT101). **Handoff:** A1 **`[DONE]`** / merge **`task/TASK-111-rauc-slot-paths`** → **`develop`** when accepted. **First boot + `root` login** — **`diary/PROGRESS.md`** (2026-04-18). Owner: paste **`lsblk -f`** when convenient (follow-up on BLK-009 closure note).
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
+**A2 sprint queue (2026-04-18):** Pick **`TASK-112`** **`[READY]`** first (small doc hygiene — unblocks mis-copy from archived TASK-108 text). **`TASK-106`** remains **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Develop** tip: **`7502d2b`** includes RAUC **`p2`/`p3`** + diary/BRINGUP updates — **`git pull origin develop`** before new task branches. Owner: paste **`lsblk -f`** to **`diary/PROGRESS.md`** when convenient.
 
 ---
 
-### TASK-111 — [Phase 1] Align RAUC `system.conf` with on-eMMC GPT (`lsblk` evidence)
-**Status:** `[REVIEW]`  
+### TASK-112 — [Phase 1] AGENTS archive hygiene after TASK-111 (RAUC slot paths)
+**Status:** `[READY]`  
+**Phase:** 1  
+**Depends on:** TASK-111 ✓ (merged to `develop`)  
+**Branch:** `task/TASK-112-agents-rauc-doc` (A2)
+
+**Spec:**
+
+1. In **`AGENTS.md`**, under the **archived TASK-108** block, the fenced **`system.conf`** example still shows **`mmcblk0p4` / `p5`** (original TASK-108 spec). Add a **short note immediately after the fence** stating that **installed** layout is defined by **`meta-hmi-platform/recipes-images/files/system.conf`** on **`develop`** and was **corrected to `p2`/`p3`** per **`elevator-hmi-emmc.wks.in`** (**TASK-111**) — do **not** copy slot paths from the historical fence alone.
+2. No recipe or **`.wks`** changes in this task.
+
+**Acceptance:** One commit on task branch; PR for A1 review; **`git grep mmcblk0p4`** in **`AGENTS.md`** either gone from live guidance or clearly labeled historical-only.
+
+---
+
+### TASK-111 — [Phase 1] Align RAUC `system.conf` with on-eMMC GPT (`lsblk` evidence) *(archived — [DONE] 2026-04-18)*
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** First boot with shell access ✓ (2026-04-18)  
-**Branch:** `task/TASK-111-rauc-slot-paths` (A2)
+**Branch:** `task/TASK-111-rauc-slot-paths` (merged to **`develop`** @ **`7502d2b`**)
 
-**Context (BLK-009):** `meta-hmi-platform/recipes-images/files/system.conf` lists **`/dev/mmcblk0p4`** and **`/dev/mmcblk0p5`** as RAUC rootfs slots. Current WIC (`elevator-hmi-emmc.wks.in`) exposes **four** GPT partitions: boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**. Slots likely belong on **p2** / **p3** — **must not guess**; confirm against target.
+**Context (BLK-009):** Previously **`system.conf`** used **`mmcblk0p4` / `p5`** (legacy six-partition assumption). **`elevator-hmi-emmc.wks.in`** defines boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**. **TASK-111** set RAUC rootfs slots to **`p2` / `p3`** per WIC; **BLK-009** closed. Optional owner **`lsblk -f`** paste to **`diary/PROGRESS.md`** still welcome.
 
 **Spec:**
 
@@ -70,6 +85,8 @@ Tasks are sorted by dependency order. Do not reorder.
 - **`docs/BRINGUP-CHECKLIST.md`:** §3 pointer to **TASK-105** green deploy + **`PROGRESS.md`** flash block.  
 - **Parse smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** → **exit 0** (2026-04-18).  
 - **`lsblk` on target:** not re-pasted in this session — mapping taken from in-tree WIC as **documented equivalent** per task acceptance wording; owner to paste **`lsblk -f`** to **`PROGRESS.md`** to close the loop on hardware.
+
+**A1 review notes (`[DONE]` 2026-04-18):** Merged **`origin/task/TASK-111-rauc-slot-paths`** into **`develop`** (fast-forward **`7502d2b`**). **`system.conf`** **`p2`/`p3`** matches **`elevator-hmi-emmc.wks.in`**. **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** exit 0 on merged tree. **BLK-009** closure accepted (WIC authoritative; optional hardware **`lsblk`** audit).
 
 ---
 
