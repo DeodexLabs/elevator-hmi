@@ -15,3 +15,21 @@
 
 #include "rk3566-evb2-lp4x-v10-linux.dts"
 #include "elevator-hmi-lmt101sx006c-panel.dtsi"
+
+/*
+ * Override the Rockchip vendor chosen.bootargs inherited from rk3568-linux.dtsi.
+ *
+ * rk3568-linux.dtsi sets:
+ *   chosen { bootargs = "earlycon=... console=ttyFIQ0 root=PARTUUID=614e0000-0000 ..."; }
+ *
+ * U-Boot vendor board_fdt_chosen_bootargs() (board.c:1335) reads this static DTB
+ * value and calls env_update("bootargs", ...) which performs a key-match merge —
+ * replacing "root=" with PARTUUID even after sysboot/extlinux sets root=/dev/mmcblk0p2.
+ *
+ * Fix: override &chosen here so the compiled-in DTB carries the correct values.
+ * earlycon address 0xfe660000 is uart2 from rk356x.dtsi (shared RK3566/RK3568 base).
+ * ttyFIQ0 from BSP default is replaced by ttyS2 which is the EM3566 v3 debug UART.
+ */
+&chosen {
+	bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait";
+};
