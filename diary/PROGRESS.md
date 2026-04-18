@@ -14,7 +14,9 @@
 - **PASS** — no **`meta-rockchip` / `meta-qt6` / `meta-rauc`** edits. Owner **§2.1** on-target pastes correctly out of scope for **TASK-113**.  
 
 ### Next
-- Merge **`task/TASK-113-kas-build-105-logs`** → **`develop`** when convenient. A2: **`TASK-114`** on **`task/TASK-114-bringup-no-lcd`**.
+- A2: **`TASK-114`** on **`task/TASK-114-bringup-no-lcd`** (from current **`develop`**).
+
+**Merge:** **`task/TASK-113-kas-build-105-logs`** fast-forwarded into **`develop`** and pushed (**`b4eebf4`** on **`origin/develop`**).
 
 ---
 
