@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-18 (A1: **`TASK-111`** **`[DONE]`** — merged **`task/TASK-111-rauc-slot-paths`** → **`develop`** @ **`7502d2b`**; **`TASK-112`** **`[READY]`** — sprint doc hygiene)  
+**Last updated:** 2026-04-18 (A2: **`TASK-112`** **`[REVIEW]`** — archived TASK-108 RAUC fence labeled historical; **`TASK-106`** still **`[BLOCKED]`**)  
 
 ---
 
@@ -36,12 +36,12 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-04-18):** Pick **`TASK-112`** **`[READY]`** first (small doc hygiene — unblocks mis-copy from archived TASK-108 text). **`TASK-106`** remains **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Develop** tip: **`7502d2b`** includes RAUC **`p2`/`p3`** + diary/BRINGUP updates — **`git pull origin develop`** before new task branches. Owner: paste **`lsblk -f`** to **`diary/PROGRESS.md`** when convenient.
+**A2 sprint queue (2026-04-18):** **`TASK-112`** **`[REVIEW]`** on branch **`task/TASK-112-agents-rauc-doc`** (AGENTS archive note — PR for A1). **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Develop** includes RAUC **`p2`/`p3`** (**TASK-111**). Owner: paste **`lsblk -f`** to **`diary/PROGRESS.md`** when convenient.
 
 ---
 
 ### TASK-112 — [Phase 1] AGENTS archive hygiene after TASK-111 (RAUC slot paths)
-**Status:** `[READY]`  
+**Status:** `[REVIEW]`  
 **Phase:** 1  
 **Depends on:** TASK-111 ✓ (merged to `develop`)  
 **Branch:** `task/TASK-112-agents-rauc-doc` (A2)
@@ -52,6 +52,10 @@ Tasks are sorted by dependency order. Do not reorder.
 2. No recipe or **`.wks`** changes in this task.
 
 **Acceptance:** One commit on task branch; PR for A1 review; **`git grep mmcblk0p4`** in **`AGENTS.md`** either gone from live guidance or clearly labeled historical-only.
+
+**Output notes (A2):**  
+- Inserted **Historical fence only** paragraph immediately after the archived TASK-108 **`system.conf`** code fence — points readers to **`meta-hmi-platform/recipes-images/files/system.conf`**, **`elevator-hmi-emmc.wks.in`**, and **TASK-111** for current **`p2`/`p3`** RAUC rootfs slots.  
+- **`git grep mmcblk0p4`** in **`AGENTS.md`**: still present **only** inside the historical fenced example + the new note (explicitly “not current develop”).
 
 ---
 
@@ -134,6 +138,9 @@ Tasks are sorted by dependency order. Do not reorder.
    type=ext4
    bootname=b
    ```
+
+   **Historical fence only:** the **`p4` / `p5`** lines above are the original TASK-108 written spec (legacy six-partition story), **not** the RAUC slot paths on current **`develop`**. The **installed** `system.conf` is **`meta-hmi-platform/recipes-images/files/system.conf`**, corrected to **`/dev/mmcblk0p2`** / **`p3`** for A/B rootfs per **`elevator-hmi-emmc.wks.in`** (**TASK-111**). Do **not** copy slot devices from this archive block alone.
+
    Install to `/etc/rauc/system.conf` via a bbappend or new recipe — A2 chooses cleanest approach within `meta-hmi-platform`.
 
 2. **LAYERDEPENDS** — confirm `meta-hmi-platform/conf/layer.conf` includes `meta-rauc` in `LAYERDEPENDS`. Add it if missing.

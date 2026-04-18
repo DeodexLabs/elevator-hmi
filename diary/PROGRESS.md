@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-04-18 — TASK-112: AGENTS archive note for TASK-108 RAUC fence (A2)
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Summary
+- **`AGENTS.md`** — under archived **TASK-108**, added **Historical fence only** paragraph after the fenced **`system.conf`** example so **`p4`/`p5`** is not mistaken for current **`develop`** paths (**`p2`/`p3`** per **TASK-111** / **`elevator-hmi-emmc.wks.in`**). **`TASK-112`** → **`[REVIEW]`**; queue line updated.  
+- **Branch:** **`task/TASK-112-agents-rauc-doc`** (one commit for PR).
+
+---
+
 ## 2026-04-18 — A1: merge TASK-111 → `develop`, sprint handoff (`TASK-112` `[READY]`)
 
 **Agent:** A1  
