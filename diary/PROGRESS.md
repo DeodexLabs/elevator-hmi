@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-04-18 — A1: TASK-112 `[DONE]` — merge + queue (develop @ 162f9c2)
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **`TASK-112`**: **PASS** — **Historical fence only** note under archived TASK-108; **`mmcblk0p4`** only in fence + explicit historical / TASK-112 spec text (grep).
+- **Git:** **`git merge task/TASK-112-agents-rauc-doc`** on **`develop`** (fast-forward **`83ebcc8` → `162f9c2`**). Follow-up commit: **`AGENTS.md`** marks **`TASK-112`** **`[DONE]`**, A1 review line, sprint queue cleared of **`[REVIEW]`**.
+
+### Next
+- A2: no **`[READY]`** until A1 specs next task; **`TASK-106`** when **LMT101** arrives.
+
+---
+
 ## 2026-04-18 — TASK-112: AGENTS archive note for TASK-108 RAUC fence (A2)
 
 **Agent:** A2  
