@@ -41,6 +41,8 @@ Typical deploy directory (Yocto default layout under the kas build dir):
 
 Expect (among others) a **`.wic`** eMMC image and Rockchip **`rockchip-image`** artefacts (e.g. **`rootfs.img`** symlink to ext4 — see BitBake log on success). Exact filenames vary by **`IMAGE_NAME`** / version; use **`ls -la`** on that directory after **`do_image_complete`**.
 
+**TASK-105 / lab:** A green **`kas build`** on this manifest has produced **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`** plus **`loader.bin`**, **`idblock.img`**, **`uboot.img`** under the path above — see **`diary/PROGRESS.md`** (2026-04-18 lab milestone) for a stable **`rkdeveloptool`** command block using those symlinks.
+
 **Partition geometry** comes from **`meta-hmi-platform/wic/elevator-hmi-emmc.wks.in`** (TASK-003). Do **not** change the **`.wks`** file without an A1 task spec.
 
 ---
@@ -72,6 +74,13 @@ This checklist does **not** document **`rkdeveloptool` / `upgrade_tool` / RKDevT
 
 **Unknown until bench:** which single command-line invocation your lab standardizes on for flashing the **`.wic`** produced above — record the **working** command in [`diary/PROGRESS.md`](../diary/PROGRESS.md) after the first successful flash.
 
+### Lab-verified notes (2026-04-18)
+
+- **`rkdeveloptool db …loader.bin`** may return *“The device does not support this operation!”* on this kit while the device still enumerates as **`2207:350a`**. **`wl`** / **`rd`** can still succeed — **`db` is not always required** for **`wl 0` (WIC)**, **`wl 64` (idblock)**, **`wl 0x4000` (uboot)**. Full copy-paste block: **`diary/PROGRESS.md`** (2026-04-18 lab milestone entry).
+- **Deploy paths** (after `kas build` from repo root): **`build/tmp/deploy/images/elevator-hmi-em3566/`** — use symlinks **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`**, **`uboot.img`**, **`idblock.img`**, **`loader.bin`** so commands survive image timestamp bumps.
+- **U-Boot:** Vendor **`CONFIG_BOOTDELAY=0`** gives no time to interrupt; project fragment adds **`CONFIG_BOOTDELAY=5`** — rebuild **`u-boot-rockchip`** and reflash **`uboot.img`** to apply.
+- **Early shell (`init=/bin/sh`):** `tty` may be **not a tty** → interactive **`passwd`** fails silently; use **`chpasswd`** or fix **`/dev`** (single **`devtmpfs`** on **`/dev`**) or **`openssl passwd -6`** + **`/etc/shadow`** edit. Login banner may show **`ttyFIQ0`** while **`console=ttyS2`** is also on cmdline.
+
 ---
 
 ## 7. After boot
@@ -81,4 +90,4 @@ This checklist does **not** document **`rkdeveloptool` / `upgrade_tool` / RKDevT
 
 ---
 
-*TASK-107 — last updated 2026-04-15.*
+*TASK-107 — last updated 2026-04-18 (§6 lab notes: rkdeveloptool, deploy symlinks, U-Boot bootdelay, rescue shell).*

@@ -7,24 +7,6 @@
 
 ## Open Blockers
 
-### BLK-009 — RAUC system.conf slot device numbers not yet verified against WIC GPT layout
-**Opened:** 2026-04-18  
-**Severity:** MEDIUM — RAUC update will write to wrong partition if slot device paths are incorrect  
-**Owner:** A1 (verify at first boot)  
-**Details:**  
-`meta-hmi-platform/recipes-images/files/system.conf` assigns:
-- `slot.rootfs.0` → `/dev/mmcblk0p4`
-- `slot.rootfs.1` → `/dev/mmcblk0p5`
-
-These partition numbers were set at TASK-108 time based on the original Phase 0 WKS layout (boot, kernel_a, kernel_b, rootfs_a, rootfs_b, data = 6 partitions). The current WIC (`elevator-hmi-emmc.wks.in`) creates **4 partitions only**: boot (p1), rootfs_a (p2), rootfs_b (p3), data (p4). Under this layout:
-- rootfs_a is **p2**, not p4
-- rootfs_b is **p3**, not p5
-
-**Required action:** After first boot, run `lsblk` or `cat /proc/partitions` via UART to confirm partition numbering. Update `system.conf` if device paths are wrong — will require a new A2 task.  
-**Resolution criteria:** `system.conf` slot device paths confirmed correct against actual `lsblk` output from target, or corrected and committed.
-
----
-
 ### BLK-008 — DTS phandle validation required at bench (vcc3v3_lcd0_n / vcca_1v8 / backlight)
 **Opened:** 2026-04-16  
 **Severity:** MEDIUM — boot-time DTS parse failure risk until validated on real hardware  
@@ -56,6 +38,15 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 ---
 
 ## Closed Blockers
+
+### BLK-009 — RAUC system.conf slot device numbers vs WIC GPT layout
+**Opened:** 2026-04-18 — **Closed:** 2026-04-18  
+**Severity was:** MEDIUM  
+**Resolution:**  
+`system.conf` had **`mmcblk0p4` / `p5`** from the legacy **6-partition** story. Authoritative **`elevator-hmi-emmc.wks.in`** defines **four** GPT entries in order: **boot `p1`**, **rootfs_a `p2`**, **rootfs_b `p3`**, **data `p4`**. **TASK-111** (A2) updated **`meta-hmi-platform/recipes-images/files/system.conf`** to **`p2` / `p3`** for RAUC A/B slots and documented the mapping in-recipe. **`kas shell … -c "bitbake -p"`** passes.  
+**Follow-up (not a blocker):** paste target **`lsblk -f`** into **`diary/PROGRESS.md`** when convenient — if numbering ever diverges from WIC (unlikely on this image), reopen with evidence.
+
+---
 
 ### BLK-007 — Ubuntu 24.04 (Noble): `libegl1-mesa` missing from apt (TASK-002 host script)
 **Opened:** 2026-04-15 — **Closed:** 2026-04-15  

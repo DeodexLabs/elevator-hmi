@@ -4,6 +4,80 @@
 
 ---
 
+## 2026-04-18 — A2 handoff: `develop` synced, TASK-111 `[REVIEW]`, TASK-105 deploy note, checklist §3
+
+**Agent:** A2  
+**Phase:** 1  
+
+### Git / branch
+- **`git checkout develop && git pull origin develop`** — already up to date with **`origin/develop`** (**`3775012`**).
+- **`TASK-111`** work on **`task/TASK-111-rauc-slot-paths`** (not merged until A1 **`[DONE]`**).
+
+### TASK-105 deferred acceptance (host)
+- Green image artefacts present under **`build/tmp/deploy/images/elevator-hmi-em3566/`** (e.g. **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`** symlink, **`uboot.img`**, **`idblock.img`**, **`loader.bin`**, DTB) — matches 2026-04-18 lab milestone flash block.
+
+### TASK-111 / BLK-009
+- **`system.conf`:** RAUC rootfs slots **`/dev/mmcblk0p2`** (A) and **`/dev/mmcblk0p3`** (B) per **`elevator-hmi-emmc.wks.in`** (replaces legacy **`p4`/`p5`**). **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** OK.
+- **`diary/BLOCKERS.md`:** **BLK-009** closed with WIC-based resolution; optional **`lsblk -f`** from target still requested for audit trail.
+
+### Docs
+- **`docs/BRINGUP-CHECKLIST.md`** §3 — cross-link TASK-105 deploy + **`PROGRESS.md`** flash commands.
+
+---
+
+## 2026-04-18 — Phase 1 lab milestone: U-Boot shell, root login, bring-up learnings (A1 + owner)
+
+**Agent:** A1 (documentation); **execution:** owner on EM3566 v3  
+**Phase:** 1  
+
+### Vision / status
+
+End-to-end **reference-board bring-up** is now credible: **flash → SPL/U-Boot → Linux → `root` login** on serial has been demonstrated. Remaining Phase 1 lab work shifts from “can the stack boot?” to **partition/OTA correctness**, **DSI + LMT101** (TASK-106, BLK-006/008), and **image hardening** (password policy, RAUC slot paths).
+
+### Achievements (this cycle)
+
+1. **U-Boot interrupt window** — Root cause of “cannot stop autoboot”: vendor **`CONFIG_BOOTDELAY=0`**. **`meta-hmi-platform/recipes-bsp/u-boot/files/elevator-hmi-emmc-boot.cfg`** now sets **`CONFIG_BOOTDELAY=5`** (rebuild + reflash **`uboot.img`** at sector **`0x4000`** to apply).
+2. **Manual kernel boot from U-Boot** — **`booti ${kernel_addr_r} - ${fdt_addr_r}`** (not **`${0x00280000}`**); **`setenv bootargs`** with **`init=/bin/sh`** for one-time rescue when login was locked.
+3. **`rkdeveloptool`** — **`db`** may return *“The device does not support this operation!”* while **`wl`** / **`rd`** still succeed; **`db` is optional** for updating **`uboot.img`** / **`.wic`** on this kit (see diary flash block below).
+4. **Deploy paths** — Stable symlinks under **`build/tmp/deploy/images/elevator-hmi-em3566/`**: **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`**, **`loader.bin`**, **`idblock.img`**, **`uboot.img`** (no placeholder filenames in lab commands).
+5. **Root account** — **`core-image-minimal`** ships **`root:*:`** (locked). Early **`init=/bin/sh`** shell: **`tty` → not a tty** → interactive **`passwd`** exits immediately (reads empty password); **`echo 'root:…' | chpasswd`** works. Avoid stacking **`tmpfs` on `/dev`** over **`devtmpfs`** (hides **`/dev/ttyS2`**). Normal login banner: **`/dev/ttyFIQ0`** (kernel cmdline still uses **`ttyS2`** for UART2 — two consoles; expect interleaved logs if both are active).
+6. **Confirmed:** **`root`** login at **`elevator-hmi-em3566 login:`** on **`ttyFIQ0`** after password set.
+
+### Flash command block (copy-paste — repo on host)
+
+Host paths: **`/home/sener/Projects/elevator-hmi/build/tmp/deploy/images/elevator-hmi-em3566/`** (adjust **`REPO`** if clone differs).
+
+```bash
+# Optional (often fails in Loader mode — skip if error):
+sudo rkdeveloptool db /home/sener/Projects/elevator-hmi/build/tmp/deploy/images/elevator-hmi-em3566/loader.bin
+
+sudo rkdeveloptool wl 0 /home/sener/Projects/elevator-hmi/build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs.wic
+sudo rkdeveloptool wl 64 /home/sener/Projects/elevator-hmi/build/tmp/deploy/images/elevator-hmi-em3566/idblock.img
+sudo rkdeveloptool wl 0x4000 /home/sener/Projects/elevator-hmi/build/tmp/deploy/images/elevator-hmi-em3566/uboot.img
+sudo rkdeveloptool rd
+```
+
+**U-Boot-only** (after rebuilding **`u-boot-rockchip`**): omit **`wl 0`** line; keep **`wl 0x4000`** (and optionally **`wl 64`**).
+
+### Next steps on board (owner / A2 — ordered)
+
+| Priority | Check | Command / action | Feeds |
+|---:|---|---|---|
+| 1 | **Partition map vs RAUC** | `lsblk -f` and `cat /proc/partitions` on target; paste into diary or TASK-111 | **BLK-009**, **TASK-111** |
+| 2 | **GPT backup header** | `sgdisk -e /dev/mmcblk0` then `partprobe` (image includes **`gptfdisk`**) | clears **`GPT:… != …`** warning |
+| 3 | **Kernel / panel DTS** | Full **`dmesg`** after boot; grep for **`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`**, **DSI**, **`jd9365`** | **BLK-008**, **TASK-106** prep |
+| 4 | **Reflash U-Boot with bootdelay** | Rebuild **`u-boot-rockchip`** if not yet deployed; **`wl 0x4000 uboot.img`**; confirm countdown **5** | lab ergonomics |
+| 5 | **RAUC** | `rauc status` / D-Bus once **`system.conf`** matches real **`mmcblk0pN`** | **BLK-009** |
+| 6 | **Ethernet** | `ip link`, `dmesg \| grep -i eth` (expect caveats on dev kit PHY) | optional |
+| 7 | **LMT101** | Cable to **MIPI LCD**; power; capture **`dmesg`** + photo of output | **TASK-106**, **BLK-006** |
+
+### Product / process notes
+
+- **Security:** Bring-up passwords must be rotated before any network exposure; prefer **`passwd`** on a real TTY or **`EXTRA_IMAGE_FEATURES`** dev-only recipe for factory flows.
+- **Docs:** **`docs/BRINGUP-CHECKLIST.md`** updated with **`rkdeveloptool`** lab notes (see §6).
+
+---
+
 ## 2026-04-18 — root=PARTUUID override fix, GPT backup header fix, gptfdisk (A1)
 
 **Agent:** A1  

@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-18 (extlinux.conf fix: explicit fdt via WKS --configfile; flash-ready; no `[READY]` tasks — A1 to spec TASK-111 after first boot)  
+**Last updated:** 2026-04-18 (A2: **`TASK-111`** → **`[REVIEW]`** — RAUC **`system.conf`** **`p2`/`p3`** per WIC; **BLK-009** closed; branch **`task/TASK-111-rauc-slot-paths`** — A1 review)  
 
 ---
 
@@ -35,8 +35,41 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed this session:** **BLK-007** (Noble **`libegl1-mesa`** / TASK-002 host script — see `diary/BLOCKERS.md`). **BLK-005** closed 2026-04-15 (OV13850 — not in project scope). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 queue (2026-04-18):** No `[READY]` tasks. **TASK-106** `[BLOCKED]` (LMT101 hardware). WIC image rebuilt with explicit `fdt` extlinux.conf (commits `35a05fb`, `91a12a4`). **First boot** pending — re-flash with latest WIC per procedure in `diary/PROGRESS.md`. **TASK-111** to be spec'd by A1 after first boot confirms partition layout and RAUC slot device numbers.
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`**). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
+**A2 queue (2026-04-18):** **`TASK-111`** **`[REVIEW]`** (RAUC slots aligned to **`elevator-hmi-emmc.wks.in`**; **`kas shell … bitbake -p`** OK). **TASK-106** `[BLOCKED]` (LMT101). **Handoff:** A1 **`[DONE]`** / merge **`task/TASK-111-rauc-slot-paths`** → **`develop`** when accepted. **First boot + `root` login** — **`diary/PROGRESS.md`** (2026-04-18). Owner: paste **`lsblk -f`** when convenient (follow-up on BLK-009 closure note).
+
+---
+
+### TASK-111 — [Phase 1] Align RAUC `system.conf` with on-eMMC GPT (`lsblk` evidence)
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Depends on:** First boot with shell access ✓ (2026-04-18)  
+**Branch:** `task/TASK-111-rauc-slot-paths` (A2)
+
+**Context (BLK-009):** `meta-hmi-platform/recipes-images/files/system.conf` lists **`/dev/mmcblk0p4`** and **`/dev/mmcblk0p5`** as RAUC rootfs slots. Current WIC (`elevator-hmi-emmc.wks.in`) exposes **four** GPT partitions: boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**. Slots likely belong on **p2** / **p3** — **must not guess**; confirm against target.
+
+**Spec:**
+
+1. On **EM3566 v3** running the project image, capture (paste into task output notes + optional **`diary/PROGRESS.md`** line):
+   - `lsblk -f`
+   - `cat /proc/partitions`
+   - `blkid` (if present)
+2. Map **RAUC A/B rootfs** slot device paths to **actual** `mmcblk0pN` from (1). Update **`meta-hmi-platform/recipes-images/files/system.conf`** (and any comments in **`elevator-hmi-rauc-system-conf.bb`** if needed) so **`[slot.rootfs.*] device=`** matches GPT labels / layout **exactly**.
+3. **Do not** change **`.wks`** partition layout in this task (A1 task only if spec’d).
+4. Parse smoke: `kas shell kas/elevator-hmi.yml -c "bitbake -p"` exit 0; no new errors.
+
+**Acceptance:**
+
+- `system.conf` in Git matches **`lsblk`** evidence from this board (or documented equivalent machine).
+- **`diary/BLOCKERS.md`**: BLK-009 moved to **Closed** with one-line resolution **or** updated with “still wrong — rework” if hardware surprises.
+
+**Output notes (A2):**  
+- **`meta-hmi-platform/recipes-images/files/system.conf`:** **`slot.rootfs.0`** → **`/dev/mmcblk0p2`**, **`slot.rootfs.1`** → **`/dev/mmcblk0p3`** (matches **`elevator-hmi-emmc.wks.in`** order: boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**). Header comment documents legacy **p4/p5** mistake vs current WIC.  
+- **`meta-hmi-platform/recipes-images/elevator-hmi-rauc-system-conf/elevator-hmi-rauc-system-conf.bb`:** one-line comment cross-ref WIC.  
+- **`diary/BLOCKERS.md`:** **BLK-009** → **Closed** (WIC-authoritative alignment; optional target **`lsblk`** paste still welcome in **`PROGRESS.md`**).  
+- **`docs/BRINGUP-CHECKLIST.md`:** §3 pointer to **TASK-105** green deploy + **`PROGRESS.md`** flash block.  
+- **Parse smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** → **exit 0** (2026-04-18).  
+- **`lsblk` on target:** not re-pasted in this session — mapping taken from in-tree WIC as **documented equivalent** per task acceptance wording; owner to paste **`lsblk -f`** to **`PROGRESS.md`** to close the loop on hardware.
 
 ---
 
