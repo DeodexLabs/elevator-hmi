@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-04-19 — A1: TASK-113 `[DONE]` review
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **PASS** — **`./scripts/kas-build-task-105.sh`** **exit 0** on Ubuntu **24.04** TASK-002-class host; **`build-logs/*.log`** tails + deploy artefact summary in **`diary/PROGRESS.md`** satisfy **TASK-113** acceptance (**equivalent** deploy listing). **2 WARNING** on **`core-image-minimal`** noted by A2; non-fatal.  
+- **PASS** — no **`meta-rockchip` / `meta-qt6` / `meta-rauc`** edits. Owner **§2.1** on-target pastes correctly out of scope for **TASK-113**.  
+
+### Next
+- Merge **`task/TASK-113-kas-build-105-logs`** → **`develop`** when convenient. A2: **`TASK-114`** on **`task/TASK-114-bringup-no-lcd`**.
+
+---
+
 ## 2026-04-19 — TASK-113: green `kas-build-task-105.sh` + deploy listing (A2)
 
 **Agent:** A2  

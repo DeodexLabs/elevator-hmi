@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-19 (A2: **`TASK-113`** **`[REVIEW]`** — green **`kas-build-task-105.sh`** + **`PROGRESS.md`** evidence; **`TASK-114`**–**`116`** **`[READY]`**; **`TASK-106`** **`[BLOCKED]`**)  
+**Last updated:** 2026-04-19 (A1: **`TASK-113`** **`[DONE]`** — merge after review; **`TASK-114`** **`[READY]`** next → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -36,15 +36,15 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench; **pre-LCD `dmesg` baseline** allowed per **`CLAUDE.md`** §2.1). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-04-19):** **`[REVIEW]`:** **`TASK-113`** (branch **`task/TASK-113-kas-build-105-logs`**). **`[READY]`:** **`TASK-114`** (BRINGUP no-LCD) → **`TASK-115`** (Qt image parse) → **`TASK-116`** (RAUC runtime / systemd). Pick **one** task at a time; branch per task. **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**A2 sprint queue (2026-04-19):** **`[READY]`:** **`TASK-114`** (BRINGUP no-LCD; branch **`task/TASK-114-bringup-no-lcd`**) → **`TASK-115`** (Qt image parse) → **`TASK-116`** (RAUC runtime / systemd). Pick **one** task at a time. **`TASK-113`** **`[DONE]`** — PR/merge **`task/TASK-113-kas-build-105-logs`** when ready. **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
-### TASK-113 — [Phase 1] TASK-105 closure — green `kas-build-task-105.sh` + deploy log in PROGRESS
-**Status:** `[REVIEW]`  
+### TASK-113 — [Phase 1] TASK-105 closure — green `kas-build-task-105.sh` + deploy log in PROGRESS *(archived — [DONE] 2026-04-19)*
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** none  
-**Branch:** `task/TASK-113-kas-build-105-logs` (A2)
+**Branch:** `task/TASK-113-kas-build-105-logs` (A2; merge to **`develop`** after A1 **`[DONE]`**)
 
 **Spec:**
 
@@ -60,6 +60,11 @@ Tasks are sorted by dependency order. Do not reorder.
 - **`diary/PROGRESS.md`** — new **2026-04-19 — TASK-113** entry with log tails + deploy artefact summary.  
 - **No** edits under **`meta-rockchip`**, **`meta-qt6`**, **`meta-rauc`**.  
 - **Owner:** **`CLAUDE.md`** §2.1 board captures (**`lsblk`**, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, …) remain **owner** paste targets in **`PROGRESS.md`** (hardware; not part of this TASK-113 build-host acceptance).
+
+**A1 review notes (`[DONE]` 2026-04-19):**  
+- **PASS** — meets spec and acceptance: **exit 0**, per-log **Tasks Summary** tails in **`PROGRESS.md`**, deploy path + key artefacts documented (**equivalent** to raw **`ls -la`** per spec wording). **2 WARNING** on image build called out (non-fatal; unchanged narrative).  
+- **PASS** — no community-layer edits; scope split (**build host** vs **owner §2.1** on-target) respected.  
+- **Caveat (non-REWORK):** future diary entries may paste a short literal **`ls -la … | tail`** for byte-for-byte audit; not required to reopen **TASK-113**.
 
 ---
 
@@ -437,11 +442,12 @@ Tasks are sorted by dependency order. Do not reorder.
 | TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed — green build pending TASK-002 host) | 2026-04-15 |
+| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed; green full sequence verified **TASK-113** 2026-04-19 Ubuntu 24.04 TASK-002-class host) | 2026-04-15 |
 | TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
 | TASK-110 | Fix linux-rockchip_%.bbappend: cfg fragment (replaces KERNEL_CONFIG:append) + do_configure DTS placement (A1 impl, supervisor approved) | 2026-04-16 |
 | TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1) | 2026-04-16 |
 | TASK-109 | Qt 6.8 EGLFS image skeleton + placeholder app (A2 impl; A1 fixed DISTRO_FEATURES defect + committed uncommitted A2 work; parse clean) | 2026-04-17 |
+| TASK-113 | Green `kas-build-task-105.sh` + deploy evidence in `diary/PROGRESS.md` (A2 impl, A1 reviewed; Ubuntu 24.04 TASK-002-class host) | 2026-04-19 |
 
 ---
 

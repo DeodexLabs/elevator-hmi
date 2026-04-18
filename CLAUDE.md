@@ -38,7 +38,22 @@
 | **Phase gate** | All risks resolved or accepted. Hardware ordered. Dev environment operational. |
 | **Current week** | Week 1 |
 | **Blocking risks** | R-01 / R-02 mitigated (2026-04-15/16); **production** carrier still needs schematic sign-off + formal −20°C acceptance — **EM3566 v3** is the agreed Phase 0/1 reference board |
-| **Phase 1 lab (2026-04-18)** | **EM3566 v3:** serial boot chain validated; **`root` login** on **`ttyFIQ0`**; **`rkdeveloptool`** flash path recorded; **`CONFIG_BOOTDELAY=5`** in U-Boot cfg fragment. **TASK-111** merged: RAUC **`system.conf`** slots **`mmcblk0p2`/`p3`** per WIC (**BLK-009** closed). **Open:** DSI/panel **`dmesg`** (**BLK-008**), LMT101 bench (**TASK-106** / **BLK-006**). Optional: owner **`lsblk -f`** in **`diary/PROGRESS.md`**. |
+| **Phase 1 lab (2026-04-19)** | **EM3566 v3:** serial boot chain validated; **`root` login** on **`ttyFIQ0`**; **`rkdeveloptool`** flash path recorded; **`CONFIG_BOOTDELAY=5`** in U-Boot cfg fragment. **TASK-111** merged: RAUC **`system.conf`** slots **`mmcblk0p2`/`p3`** per WIC (**BLK-009** closed). **TASK-113:** green **`kas-build-task-105.sh`** + deploy evidence on TASK-002-class host (**`diary/PROGRESS.md`**). **Open:** DSI/panel **`dmesg`** (**BLK-008**), LMT101 bench (**TASK-106** / **BLK-006**). Optional: owner **`lsblk -f`** in **`diary/PROGRESS.md`** (§2.1). |
+
+### §2.1 — Lab without LCD (owner checklist)
+
+**Context:** **LMT101** not on **MIPI LCD** yet — **BLK-008** / **TASK-106** cannot close **display** validation. **Linux on board** is still useful for **disk, RAUC, logs, and a pre-panel baseline** (feeds **TASK-106** / **BLK-008** “before” when the panel arrives).
+
+1. **Image** — Run a **`develop`** build **at or after TASK-111** (RAUC **`p2`/`p3`**, extlinux / DTS fixes). **Reflash** if the running image is older.
+2. **Partition audit** — On target: **`lsblk -f`**, **`cat /proc/partitions`**; paste into **`diary/PROGRESS.md`** (optional **BLK-009** audit trail).
+3. **GPT** — If **`dmesg`** still reports **backup GPT / header mismatch**: **`sgdisk -e /dev/mmcblk0`** (image includes **`gptfdisk`**), then reboot once.
+4. **UART baseline** — Save **one** clean capture: U-Boot → Linux → login (single file or **`PROGRESS.md`** section) for **TASK-106** / **BLK-008** diff later.
+5. **Pre-LCD `dmesg`** — Capture **`dmesg`** (or **`dmesg | egrep -i`** for **`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`**, **`jd9365`**, **`dsi`**, **`panel`**). In **`diary/PROGRESS.md`**, label the block **`pre-LCD baseline`** — expect some **`-EPROBE_DEFER` / “no panel”** noise with nothing connected; compare after cable-up (**BLK-008**).
+6. **RAUC** — **`rauc status`**; note **D-Bus** / **systemd** errors for **TASK-116** (A2) if any.
+7. **Optional** — **`ip link`**, **`lsusb`** — documents carrier bring-up without display.
+8. **U-Boot countdown** — If **`Hit key to stop autoboot`** still shows **`0`**, rebuild **`u-boot-rockchip`** and reflash **`uboot.img`** so **`CONFIG_BOOTDELAY=5`** applies.
+
+**When LCD arrives:** resume **TASK-106** (power / **MIPI LCD** per Boardcon); repeat **`dmesg`** + photo; **BLK-006** / **BLK-008** only with **cited** schematic or logs (**no invented GPIO**).
 
 ### Phase 0 Checklist
 
@@ -58,9 +73,11 @@
 - [x] Boardcon **EM3566 v3** reference dev kit (**CM3566**) **on hand** — owner 2026-04-15
 - [ ] LMT101SX006C panel ordered
 - [x] **First serial boot + `root` login** on **EM3566 v3** with **`core-image-minimal`** — **validated 2026-04-18** (see **`diary/PROGRESS.md`**); flash procedure + **`rkdeveloptool`** quirks documented  
-- [ ] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** — green **`./scripts/kas-build-task-105.sh`** on **TASK-002** host: append final **`exit 0`** + deploy **`ls`** to **`diary/PROGRESS.md`** when convenient (not a blocker for lab login)  
+- [x] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** — green **`./scripts/kas-build-task-105.sh`** on **TASK-002-class** host + evidence in **`diary/PROGRESS.md`** — **TASK-113 DONE** 2026-04-19  
 - [ ] **LMT101** on **MIPI LCD** + **`dmesg`** / stability — still pending hardware (**TASK-106**); not BLK-001/002  
-- [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15
+- [ ] **Owner — no-LCD lab** (§2.1): **`lsblk`**, optional **GPT** repair, **UART** baseline log, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, optional **eth/USB** — capture in **`diary/PROGRESS.md`**  
+- [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15  
+- [ ] **TASK-114** — **`docs/BRINGUP-CHECKLIST.md`** “no LCD yet” section (**[READY]** in **`AGENTS.md`**)  
 
 ---
 
