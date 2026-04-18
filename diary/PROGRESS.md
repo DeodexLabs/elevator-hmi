@@ -13,7 +13,7 @@
 - **PASS** — **`docs/BRINGUP-CHECKLIST.md`** **§8** mirrors **`CLAUDE.md`** §2.1; cross-links valid; no **`.wks`** / partition edits; **§6** / **§5** closure rules consistent with project rules.
 
 ### Next
-- A2: **`TASK-115`** on **`task/TASK-115-qt-image-parse`** (from **`develop`** @ **`bc9ff05`**).
+- A2: **`TASK-115`** on **`task/TASK-115-qt-image-parse`** (from **`develop`** @ **`46778ac`**).
 
 **Merge:** **`task/TASK-114-bringup-no-lcd`** fast-forwarded into **`develop`** and pushed (**`bc9ff05`** on **`origin/develop`**).
 
