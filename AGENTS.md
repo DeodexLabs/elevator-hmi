@@ -126,7 +126,7 @@ Tasks are sorted by dependency order. Do not reorder.
 **A1 preflight (2026-04-19) — for A2 and owner:**
 
 - **Current spec (above)** is complete: (1) analyse **`rauc status`** / D-Bus on **`core-image-minimal`**; (2) smallest **`meta-hmi-platform`** fix or doc; (3) **`bitbake -p`** clean after changes.
-- **Owner §2.1** (`**rauc status**` paste in **`PROGRESS.md`**) is **optional** for TASK-116. If missing, A2 must use **`bitbake -e`**, image inspection, and/or **`runqemu`/docs**-style reasoning per spec line 1 — **do not block the task** on the owner.
+- **Owner §2.1** — optional `rauc status` paste in **`PROGRESS.md`** for TASK-116. If missing, A2 must use **`bitbake -e`**, image inspection, and/or docs-style analysis per spec line 1 — **do not block the task** on the owner.
 - **No dependency** on bench hardware for the recipe/D-Bus work; on-target output only **informs** behaviour if available.
 - **After TASK-116:** if **`rauc status`** on hardware still shows issues, add a one-line **owner follow-up** in **`PROGRESS.md`**; consider a tiny follow-on task only if a new defect appears.
 
