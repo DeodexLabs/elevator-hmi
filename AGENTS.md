@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-19 (A1: **`TASK-114`** **`[DONE]`**; **`[READY]`:** **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-04-19 (A1: **`CLAUDE.md`** §5 = 4-part WIC; **`[READY]`:** **`TASK-115`** → **`TASK-116`**; TASK-116 preflight: A2 need not wait for owner §2.1; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -122,6 +122,13 @@ Tasks are sorted by dependency order. Do not reorder.
 3. **`kas shell … -c "bitbake -p"`** exit **0** after any recipe change.
 
 **Acceptance:** Clear behaviour for developers; no **`meta-rauc`** edits; no partition layout changes.
+
+**A1 preflight (2026-04-19) — for A2 and owner:**
+
+- **Current spec (above)** is complete: (1) analyse **`rauc status`** / D-Bus on **`core-image-minimal`**; (2) smallest **`meta-hmi-platform`** fix or doc; (3) **`bitbake -p`** clean after changes.
+- **Owner §2.1** (`**rauc status**` paste in **`PROGRESS.md`**) is **optional** for TASK-116. If missing, A2 must use **`bitbake -e`**, image inspection, and/or **`runqemu`/docs**-style reasoning per spec line 1 — **do not block the task** on the owner.
+- **No dependency** on bench hardware for the recipe/D-Bus work; on-target output only **informs** behaviour if available.
+- **After TASK-116:** if **`rauc status`** on hardware still shows issues, add a one-line **owner follow-up** in **`PROGRESS.md`**; consider a tiny follow-on task only if a new defect appears.
 
 ---
 

@@ -4,6 +4,32 @@
 
 ---
 
+## 2026-04-19 — A1: state review — `CLAUDE.md` §5 layout + TASK-116 preflight
+
+**Agent:** A1  
+**Phase:** 1  
+
+### What is working
+- **Yocto / kas:** green **`./scripts/kas-build-task-105.sh`** (TASK-113) on Ubuntu **24.04** TASK-002-class host; deploy under **`build/tmp/deploy/images/elevator-hmi-em3566/`**.  
+- **Board:** **EM3566 v3** boots to **Linux login** on serial — validated **2026-04-18** (earlier entries).  
+- **RAUC / WIC:** **`system.conf`** rootfs slots **`/dev/mmcblk0p2`** / **`p3`** match **4-part** GPT in **`meta-hmi-platform/wic/elevator-hmi-emmc.wks.in`** (TASK-111, BLK-009 closed).  
+- **Docs:** **TASK-114** BRINGUP §8 no-LCD checklist in tree.  
+
+### What was wrong (fixed this session)
+- **`CLAUDE.md` §5** still described a **6-part** eMMC plan. **Implemented** layout is **4 partitions:** **`p1`** boot (vfat), **`p2`** rootfs_a, **`p3`** rootfs_b, **`p4`** data — per **WIC** + **RAUC**. **§5** updated; **Phase 2** size expansion called out in §5 (WKS already comments larger rootfs/data for later).  
+
+### What is pending
+- **Owner — §2.1 / BRINGUP §8:** **`lsblk -f`**, **`/proc/partitions`**, UART baseline, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, optional **`ip link`** / **`lsusb`**.  
+- **A2 — TASK-115** **`[READY]`:** Qt image **`bitbake -p`** parse (branch **`task/TASK-115-qt-image-parse`**).  
+- **A2 — TASK-116** **`[READY]`:** RAUC / D-Bus / systemd on **`core-image-minimal`** — **may start without** owner paste; see **`AGENTS.md`** A1 preflight.  
+- **Hardware:** **LMT101** + **MIPI LCD** (TASK-106; BLK-006 / BLK-008).  
+
+### Next
+- Merge **`task/TASK-115-qt-image-parse`** if open PR; then A2 **TASK-116** on **`task/TASK-116-rauc-systemd-minimal`**.  
+- Owner: run §2.1; order **LMT101SX006C**.  
+
+---
+
 ## 2026-04-19 — A1: TASK-114 `[DONE]` review
 
 **Agent:** A1  
