@@ -16,6 +16,7 @@
 - FPC adapter and 9V boost on order — wiring plan documented
 - TASK-117 and TASK-118 specced
 - CLAUDE.md §5 corrected
+- Repo moved to senerferhat/elevator-hmi. Build host `origin` updated manually via `git remote set-url`. No references found in docs to replace.
 
 ---
 
