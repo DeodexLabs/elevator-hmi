@@ -60,6 +60,45 @@ Expect (among others) a **`.wic`** eMMC image and Rockchip **`rockchip-image`** 
 - Attach **LMT101SX006C** (when available) to the carrier **`MIPI LCD`** connector — **not** a generic “LVDS-only” assumption; see [`library/EM3566/README.md`](../library/EM3566/README.md) and **`BLK-002`** in [`diary/BLOCKERS.md`](../diary/BLOCKERS.md).
 - **JD9365 XRES / `reset-gpios`:** open **`BLK-006`** — do **not** invent a **`reset-gpios`** line without a **traced** net / cited GPIO.
 
+### 5.1 — On-board: DRM modeset with `modetest` (panel power / rails)
+
+Linux may not modeset the DSI panel by default; **LMT101 800×1280** bring-up images ship **`modetest`** (`libdrm-tests`) so you can force a modeset from the shell (this runs **`panel` `prepare()`**, which can bring up rails such as **`vcc3v3_lcd0_n`**).
+
+** Preconditions (typical):**
+
+- Log in as **`root`** on serial (or SSH if enabled).
+- If **`/sys/kernel/debug`** is empty: `mount -t debugfs none /sys/kernel/debug`
+
+**Quick smoke (bundled script, if the image includes it):**
+
+```sh
+test-display
+```
+
+**Equivalent manual commands:**
+
+```sh
+# See which connectors exist and their status
+for c in /sys/class/drm/card*-*/status; do echo "$c: $(cat "$c")"; done
+
+# List CRTCs, connectors, and modes (pick connector / CRTC IDs if the defaults differ)
+modetest -M rockchip
+
+# Force modeset: connector 1 @ 800×1280 (adjust -s <connector_id>:<WxH> to match modetest -p output)
+modetest -M rockchip -s 1:800x1280
+
+# Optional: confirm LCD rail enable after modeset (debugfs)
+cat /sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable
+```
+
+**Check framebuffer (if `CONFIG_DRM_FBDEV_EMULATION=y`):**
+
+```sh
+ls -l /dev/fb0
+```
+
+If **`modetest`** reports **permission denied** on **`/dev/dri/card0`**, run as **`root`** or fix device node permissions for your test user.
+
 ---
 
 ## 6. Flashing / upgrade tools (no invented offsets)
