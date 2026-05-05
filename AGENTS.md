@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-05 (TASK-120 / TASK-119 / TASK-117 → **`[DONE]`**; **`[READY]`:** **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-05-06 (**`TASK-106`** lab **DSI**/`modetest` **→** **`[IN PROGRESS]`**; **`TASK-118`** / **`TASK-115`** **`[READY]`**; **`BLK-010`** closed — see **`diary/BLOCKERS.md`**)  
 
 ---
 
@@ -35,8 +35,8 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **BLK-008** (DTS phandles — bench; **pre-LCD `dmesg` baseline** allowed per **`CLAUDE.md`** §2.1). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: validate DSI on **EM3566 v3** + LMT101; production carrier schematic + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-04-19):** **`[READY]`:** **`TASK-115`** (Qt image parse; branch **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-113`** / **`TASK-114`** **`[DONE]`** (merged **`develop`**). **`TASK-106`** **`[BLOCKED]`** until **LMT101** on **`MIPI LCD`**. **Owner / lab (no panel):** follow **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** §8 — reflash **post–TASK-111** image, **`lsblk`**, GPT, UART baseline, **`pre-LCD baseline`** **`dmesg`** (**before** cable-up for **BLK-008** diff), **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see **`diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — **`vcc3v3_lcd0_n`**, **`modetest`** verified; **`pwm-backlight`** **`power-supply`** in **`elevator-hmi-boardcon-em3566-v3.dts`**). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** **`[IN PROGRESS]`** (**LMT101** + **DSI-1** modeset); **TASK-118** (**LCD_BL_PWM**); production carrier + formal −20°C acceptance before shipping hardware.  
+**A2 sprint queue (2026-05-06):** **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** — photo/stable backlight + **`PROGRESS`**. **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
@@ -744,7 +744,7 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 ---
 
 ### TASK-106 — [Phase 1] Bench: EM3566 v3 + LMT101 MIPI LCD (DSI / BLK-006)
-**Status:** `[BLOCKED — needs LMT101SX006C panel on hand]`  
+**Status:** `[IN PROGRESS]`  
 **Phase:** 1  
 **Depends on:** TASK-104 ✓, **LMT101SX006C** panel received and cabled to **`MIPI LCD`**, dev kit on hand ✓  
 
@@ -753,6 +753,14 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 - Capture **UART** boot + **`dmesg`** excerpts (DRM / panel / dsi).  
 - **BLK-006:** confirm display stable without **`reset-gpios`** or add **`reset-gpios`** with **cited** GPIO + update DTS + **`diary/BLOCKERS.md`**.  
 - Log results in **`diary/PROGRESS.md`**; no partition layout changes.
+
+**Output notes (2026-05-06 lab):**  
+- **`modetest -M rockchip -s 191:#0`** → **`setting mode 800x1280-60.22Hz on connectors 191, crtc 112`** (**DSI-1**).  
+- **`/sys/class/backlight/backlight`** and **`backlight1`** present; **`brightness`** **200** (confirm **`max`** / write **`max`** per **`docs/BRINGUP-CHECKLIST.md`**).  
+- **`/sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable`** → **1**.  
+- **`dmesg`:** early **`-517`** defer; **`pwm-backlight … dummy regulator`** — **DTS fix** in **`elevator-hmi-boardcon-em3566-v3.dts`** (**`power-supply = <&vcc3v3_lcd0_n>;`** on **`&backlight`** / **`&backlight1`**); **reflash** to validate.  
+- **`GPT`** touch errors on **`gt1x`** — ignore for LCD.  
+- **Next:** stable visible image / backlight (**TASK-118**), **`dd`/`fb0`** smoke, photo **`PROGRESS`**, close **BLK-006** when XRES story resolved.
 
 ---
 

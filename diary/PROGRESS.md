@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-05-06 — Display bring-up docs, `test-display` package, pwm-backlight `power-supply` (A2 / lab)
+
+**Agent:** A2 (Cursor) + owner on **EM3566 v3**  
+**Phase:** 1  
+
+### Summary
+- **`docs/BRINGUP-CHECKLIST.md` §5.1:** Document correct **`modetest -s`** target — **connector id** for **DSI-1** (lab **191**), *not* encoder (**190**) or CRTC (**112**); prefer **`-s <id>:#0`** when WxH matching fails; black-panel checklist (**sysfs** backlight **`max`**, **`fb0`**, debugfs **`vcc3v3_lcd0_n`**); **kernel log** notes (**`pwm-backlight` dummy regulator**, **`-517`** defer, **`vcc3v3_lcd1_n: disabling`**); **external ~9 V** LED feed vs board **LCD_BL_PWM** / **`LCD_PWREN_H`** (LMT101-style).
+- **`test-display.sh`:** Resolve **DSI-1** connector from **`modetest -M rockchip`**, modeset **`:#0`**, dump backlight **`brightness`/`max`**, set **max**, **`vcc3v3_lcd0_n`** debugfs. Shipped via **`meta-hmi-platform/recipes-core/test-display/test-display_1.0.bb`**; **`core-image-minimal.bbappend`** installs **`test-display`**, **`libdrm-tests`**, **`util-linux`** ( **`dd`** for **`fb0`** smoke).
+- **`elevator-hmi-boardcon-em3566-v3.dts`:** **`&backlight`** and **`&backlight1`** — **`power-supply = <&vcc3v3_lcd0_n>;`** to address **`supply power not found, using dummy regulator`** after **TASK-120** PMIC/rail edits (full **LCD_BL_PWM** pin still **TASK-118**).
+- **On-target (owner):** **`modetest -M rockchip -s 191:#0`** → **`setting mode 800x1280-60.22Hz on connectors 191, crtc 112`**; **`/sys/class/backlight/backlight`** and **`backlight1`** present; **`vcc3v3_lcd0_n/enable`** **1**. Reflash DTB/kernel image to pick up **`power-supply`** overlay.
+
+### Next
+- Rebuild/reflash; confirm **`dmesg`** no longer warns on **pwm-backlight** supply (or reduced to one node).
+- **TASK-118:** trace **LCD_BL_PWM** to **`pwms =`** in DT; **TASK-106:** photo + BLK-006/008 closure when stable.
+
+---
+
 ## 2026-05-06 — Distro `libdrm-tests` + kernel `CONFIG_FB`/`DRM_FBDEV_EMULATION`
 
 **Agent:** A2 (Cursor)  

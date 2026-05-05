@@ -150,3 +150,18 @@
 &saradc {
 	vref-supply = <&vcca_1v8>;
 };
+
+/*
+ * BSP rk3568-evb.dtsi pwm-backlight nodes often reference a supply label that does not
+ * resolve on CM3566 (BOARDCON deletes/replaces PMIC children — TASK-120). Kernel then
+ * uses a dummy regulator and logs "supply power not found". Tie the backlight supply to
+ * the same LCD rail the panel uses so enable/disable sequencing matches real hardware.
+ * TASK-118 may still refine pwms = <> routing for LCD_BL_PWM specifically.
+ */
+&backlight {
+	power-supply = <&vcc3v3_lcd0_n>;
+};
+
+&backlight1 {
+	power-supply = <&vcc3v3_lcd0_n>;
+};

@@ -104,6 +104,40 @@ ls -l /dev/fb0
 
 If **`modetest`** reports **permission denied** on **`/dev/dri/card0`**, run as **`root`** or fix device node permissions for your test user.
 
+### Black panel after a successful `modetest -s` line
+
+If you see **`setting mode 800x1280-… on connectors 191, crtc 112`** but the LCD stays **pitch black**, the DSI link and timings are often fine; the **backlight** may still be off (`brightness` **0**) or the **`pwm-backlight`** / **`LCD_PWREN_H`** path may not match this build (see **`TASK-118`**, **BLK-008**).
+
+**Try on the running image (no reflash required):**
+
+```sh
+# 1) Turn backlight up everywhere the kernel exposes it
+for b in /sys/class/backlight/*; do
+  echo "--- $b ---"
+  cat "$b/brightness" "$b/max" 2>/dev/null || true
+  [ -r "$b/max" ] && [ -w "$b/brightness" ] && cat "$b/max" > "$b/brightness"
+done
+
+# 2) Re-run modeset, then paint test (optional — needs CONFIG_DRM_FBDEV_EMULATION + fbcon not stealing)
+modetest -M rockchip -s 191:#0
+# If /dev/fb0 exists and maps to the panel:
+# dd if=/dev/zero bs=1024 count=1 | tr '\0' '\377' | dd of=/dev/fb0 conv=notrunc 2>/dev/null
+```
+
+**Also check:** regulators via debugfs (**`vcc3v3_lcd0_n`** — see above) and **`dmesg | egrep -i 'backlight|pwm|panel|jd9365|dsi'`** for probe errors. If there is **no** **`/sys/class/backlight/**`** device, userspace cannot turn the LED string on until the DT maps **`LCD_BL_PWM`** / **`backlight`** correctly (**`TASK-118`**).
+
+**Kernel log:** **`pwm-backlight … supply power not found, using dummy regulator`** means the BSP **`pwm-backlight`** node’s **`power-supply`** phandle did not resolve (common after PMIC/rail changes on CM3566). The board DTS should set **`power-supply`** to the real LCD rail (e.g. **`vcc3v3_lcd0_n`**) so enable order matches hardware — rebuild and reflash the DTB. Early **`dw-mipi-dsi-rockchip … -517`** is **`EPROBE_DEFER`** until the panel registers; **`vcc3v3_lcd1_n: disabling`** is often an **unused** second LCD rail releasing, not necessarily the LMT101 path.
+
+Confirm brightness headroom: **`cat /sys/class/backlight/backlight/max`** — if **`max`** is above **`200`**, write **`max`** into **`brightness`** for both **`backlight`** and **`backlight1`**.
+
+### External 9 V backlight supply vs board pins (LMT101-style wiring)
+
+It is **normal** for the **LED string** to be fed from a **bench or on-panel ~9 V supply** (boost / driver), while the **EM3566 carrier** only brings **logic-level control** over the **`MIPI LCD`** connector — e.g. **`LCD_BL_PWM`** (dimming) and **`LCD_PWREN_H`** (panel / rail enable per Boardcon schematic — **cite traced nets**, do not guess polarity).
+
+**Implication:** 9 V present at the LED driver does **not** guarantee light. Many drivers need **enable** and/or a **non-stuck PWM** from the SoM. Linux **`/sys/class/backlight/*`** only works if **`pwm-backlight`** in DT drives **`LCD_BL_PWM`** (**`TASK-118`** / **BLK-008**). If that driver is missing, you may still need a **scope or meter** on **`LCD_BL_PWM`** and **`LCD_PWREN_H`** during **`modetest`** and after writing **`brightness`**.
+
+**Bench sanity (hardware):** 9 V at the driver input (per your assembly), **`VCC3V3_LCD`** / panel digital rails as per schematic, FPC pins seated, and **no** conflict between a “always-on” bench 9 V and an **enable** line that keeps the driver in shutdown.
+
 ---
 
 ## 6. Flashing / upgrade tools (no invented offsets)

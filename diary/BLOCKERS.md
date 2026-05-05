@@ -7,20 +7,6 @@
 
 ## Open Blockers
 
-### BLK-010 — Jadard panel driver fails to probe (no dmesg output)
-**Opened:** 2026-05-06
-**Severity:** HIGH — display bring-up blocked
-**Owner:** A1
-**Details:**
-The Rockchip MIPI DSI host successfully binds to DRM, but the `jadard` panel driver fails to probe silently (zero `dmesg` output). Investigation confirmed `dw-mipi-dsi.c` correctly auto-registers child nodes via `mipi_dsi_host_register`, and `panel-jadard-jd9365da-h3.c` correctly matches as a `mipi_dsi_driver`.
-The likely cause is a missing `reg = <0>;` property or similar OF node attribute in `elevator-hmi-lmt101sx006c-panel.dtsi` preventing the child node from being properly instantiated as a `mipi_dsi_device`.
-**Required action:**
-- Fix the panel node structure in `elevator-hmi-lmt101sx006c-panel.dtsi` (e.g. add `reg = <0>;`).
-**Resolution criteria:** Panel driver probe sequence is initiated in `dmesg`.
-
----
----
-
 ### BLK-006 — JD9365 / LMT101 panel reset (XRES) not documented on EM3566 CON1
 **Opened:** 2026-04-15  
 **Severity:** MEDIUM — display bring-up risk until bench-validated  
@@ -35,11 +21,20 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 
 ## Closed Blockers
 
+### BLK-010 — Jadard panel driver fails to probe (no dmesg output)
+**Opened:** 2026-05-06 — **Closed:** 2026-05-06  
+**Severity was:** HIGH  
+**Resolution:**  
+On-target bring-up (**`elevator-hmi-em3566`**): **DSI-1** connected, **`modetest -M rockchip -s 191:#0`** achieves **800×1280@~60 Hz** on **CRTC 112**; DRM/panel path operational. Earlier failure mode addressed by **`reg`**, **`dsi-lanes`**, **`dsi-format`** on **`panel@0`** (see **`diary/PROGRESS.md`** 2026-05-05 entries), not a silent `jadard` match bug.  
+**Follow-up (not this blocker):** **pwm-backlight** **`power-supply`** / **TASK-118** (**LCD_BL_PWM**), visible backlight vs external 9 V LED driver — tracked as display polish, not “no panel probe”.
+
+---
+
 ### BLK-008 — DTS phandle validation required at bench (vcc3v3_lcd0_n / vcca_1v8 / backlight)
 **Opened:** 2026-04-16 — **Closed:** 2026-05-06
 **Severity was:** MEDIUM
 **Resolution:**
-Verified via `strings` on the built DTB that all fixed regulators and phandles correctly match the DSI host and panel nodes. The missing panel driver probe is now tracked under BLK-010 (missing OF properties) instead of phandle resolution errors.
+Verified via `strings` on the built DTB that fixed regulators and phandles match the DSI host and panel nodes. **2026-05-06 on-target:** **`vcc3v3_lcd0_n/enable`** **1** after modeset; **DSI** **`800×1280`** on connector **191**. **`pwm-backlight`** dummy-regulator warnings addressed in tree (**`power-supply`** on **`&backlight`** / **`&backlight1`** — reflash to confirm **`dmesg`**). Full **LCD_BL_PWM** map remains **TASK-118**.
 
 ---
 
