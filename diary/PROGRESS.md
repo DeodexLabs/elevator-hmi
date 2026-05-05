@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-05-05 — A1: Review and merge TASK-120 (and TASK-119)
+
+**Agent:** A1 (Claude Code)
+**Phase:** 1
+
+### Summary
+- **TASK-119 / TASK-120 `[DONE]`:** Reviewed A2's implementation of fixed regulators for the display pipeline (VOP/DSI/GPU/VPU/MMC/SARADC) and `pmu_io_domains`.
+- Verified DTB strings contain all required regulators (`vdd_logic`, `vdd_gpu`, `vdd_npu`, `vccio_sd`, `vcca_1v8`).
+- Confirmed `rk809` node correctly deletes PMIC children to prevent duplicate phandles.
+- Merged `task/TASK-120-fix-vop-dsi-supply-regulators` into `develop`.
+
+---
+
 ## 2026-05-05 — A2: TASK-120 fixed regulators + RK809 /delete-node/ for VOP/GPU/VPU/MMC/SARADC
 
 **Agent:** A2 (Cursor)  
