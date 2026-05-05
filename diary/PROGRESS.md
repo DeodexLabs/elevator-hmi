@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-05-05 — docs: FLASH-PROCEDURE.md (rkdeveloptool / EM3566 v3)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- Added **`docs/FLASH-PROCEDURE.md`** — Maskrom vs Loader USB IDs, **`db`/`wl`** offsets (`0`, `64`, `0x4000`), deploy-dir **`WIC`** resolution, **`minicom`** 1.5 M, post-flash **`lsblk`/`sgdisk`/`dmesg`/`rauc`**, known issues (container **`sudo`**, **`db`** quirk, GPT, **`dialout`**).
+- Cross-links: **`CLAUDE.md`**, **`BRINGUP-CHECKLIST.md`**, **`diary/PROGRESS.md`**.
+- Committed on **`develop`**: **`[docs] add FLASH-PROCEDURE.md for EM3566 v3 rkdeveloptool`**.
+
+---
+
 ## 2026-05-05 — A2: TASK-117 chosen.bootargs — root=/dev/mmcblk0p2 in board DTB
 
 **Agent:** A2 (Composer)  
