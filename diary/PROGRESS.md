@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-05-06 — Distro `libdrm-tests` + kernel `CONFIG_FB`/`DRM_FBDEV_EMULATION`
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi.conf`:** `IMAGE_INSTALL:append = " libdrm-tests"` (modetest).
+- **`elevator-hmi.cfg`:** `CONFIG_FB=y` (required for `DRM_FBDEV_EMULATION` on 6.1 Kconfig), `CONFIG_DRM_FBDEV_EMULATION=y`, `CONFIG_DRM_FBDEV_OVERALLOC=100`. Vendor **`rockchip_linux_defconfig`** has **no** `DRM_FBDEV` symbols.
+- **Build:** `virtual/kernel` configure+compile+deploy `-f`, `core-image-minimal` `image_complete` `-f`; final `.config` shows **`CONFIG_FB=y`**, **`CONFIG_DRM_FBDEV_EMULATION=y`**.
+- **WIC:** `core-image-minimal-elevator-hmi-em3566.rootfs-20260505212829.wic`.
+- **modetest:** e.g. `build/tmp/work/cortexa55-poky-linux/libdrm/2.4.120/packages-split/libdrm-tests/usr/bin/modetest`.
+- **Git:** `develop` `[phase1][image] add modetest + DRM_FBDEV_EMULATION for panel test`.
+
+---
+
 ## 2026-05-05 — A2: panel@0 `dsi-lanes` / `dsi-format` (MIPI-DSI device registration)
 
 **Agent:** A2 (Cursor)  
