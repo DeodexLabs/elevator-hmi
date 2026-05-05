@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-05-05 — A2: TASK-120 fixed regulators + RK809 /delete-node/ for VOP/GPU/VPU/MMC/SARADC
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi-boardcon-em3566-v3.dts`:** Board-scope fixed rails **`vdd_logic`**, **`vdd_gpu`**, **`vdd_npu`**, **`vccio_sd`**, **`vcca_1v8`** (TASK-119 **`vcc_*_fixed`** retained); **`&rk809` `regulators`** **`/delete-node/`** for five PMIC children that reused those labels in **`rk3568-evb.dtsi`** (avoids duplicate-label DTC failure; **`meta-hmi-platform` only**). Consumer overrides **`&vop`**, **`&gpu`**, **`&rknpu`**, **`&rkvenc`**, **`&rkvdec`**, **`&dmc`**, **`&sdmmc0`**, **`&saradc`** per spec.
+- **Build:** `virtual/kernel` compile+deploy `-f`, then `core-image-minimal` `image_wic` + `image_complete` — exit 0 (BitBake taint warnings from `-f`).
+- **DTB:** `strings` on **`elevator-hmi-boardcon-em3566-v3.dtb`** shows all five regulator names; no DTC warnings in latest **`log.do_compile`** for board DTB.
+- **WIC:** `core-image-minimal-elevator-hmi-em3566.rootfs-20260505191305.wic`.
+- **Git:** branch **`task/TASK-120-fix-vop-dsi-supply-regulators`**; **`AGENTS.md`** TASK-120 → **`[REVIEW]`**.
+
+---
+
 ## 2026-05-05 — docs: FLASH-PROCEDURE.md (rkdeveloptool / EM3566 v3)
 
 **Agent:** A2 (Cursor)  
