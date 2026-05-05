@@ -109,9 +109,9 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ---
 
-### TASK-117 — [Phase 1] Fix chosen.bootargs — override PARTUUID with mmcblk0p2
+### TASK-117 — [Phase 1] Fix chosen.bootargs — override PARTUUID with mmcblk0p2 *(archived — [DONE] 2026-05-05)*
 
-**Status:** `[REVIEW]`
+**Status:** `[DONE]`
 **Phase:** 1
 **Priority:** CRITICAL — blocks all autoboot; every reflash test requires
   manual U-Boot intervention until this is fixed
@@ -171,7 +171,11 @@ Boot hangs at "Waiting for root device PARTUUID=614e0000-0000...".
   `core-image-minimal-elevator-hmi-em3566.rootfs-20260505171448.wic` (**May 5 20:15** 2026, ~3.1 GiB) + symlink `core-image-minimal-elevator-hmi-em3566.rootfs.wic` → that file.  
 - **Branch:** `task/TASK-117-fix-chosen-bootargs` — commits: DTS fix, AGENTS `[REVIEW]`, **`diary/PROGRESS.md`** entry.
 
-**A1 review notes:** [to be filled]  
+**A1 review notes (`[DONE]` 2026-05-05):**  
+- **PASS** — Explicit `/ { chosen { ... } };` applied in `elevator-hmi-boardcon-em3566-v3.dts`.  
+- **PASS** — Verified DTB `strings` output shows `root=/dev/mmcblk0p2` and no `PARTUUID`.  
+- **PASS** — Clean builds for kernel and WIC (expected taint warnings on forced runs).  
+- **Process:** Task meets all acceptance criteria.
 
 ---
 

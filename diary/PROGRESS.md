@@ -18,6 +18,22 @@
 
 ---
 
+## 2026-05-05 — A1: TASK-117 `[DONE]` review
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Review
+- **PASS** — DTS explicitly overrides `chosen.bootargs` at root level. Verified via `strings` on DTB that `root=/dev/mmcblk0p2` is present and `PARTUUID` is gone.
+- **PASS** — Clean kernel compile, deploy, and WIC image generation reported by A2. No community layer edits.
+
+### Next
+- A2: Pick up **TASK-118** (Backlight PWM DTS).
+
+**Merge:** **`task/TASK-117-fix-chosen-bootargs`** merged into **`develop`**.
+
+---
+
 ## 2026-04-19 — A1: LCD sprint plan — TASK-117/118 specced, §5 corrected
 
 **Agent:** A1  
