@@ -18,6 +18,20 @@
 
 ---
 
+## 2026-05-05 — A1: io-domains root cause — TASK-119 specced
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Summary
+- `io-domains` deferral root cause identified: `pmu_io_domains` references RK809 PMIC regulators that do not exist on the CM3566 SoM. This caused cascading deferrals (VOP, DSI).
+- Parent DTS `rk3568-evb.dtsi` configures `vccio4` at 3.3V, but EM3566 v3 hardware uses 1.8V for DSI IO. Other domains mismatch as well.
+- Fix path: `regulator-fixed` override in board DTS (`elevator-hmi-boardcon-em3566-v3.dts`).
+- **TASK-119** specced in `AGENTS.md`. Voltages have been verified against the schematic note before A2 acts.
+- **TASK-117** was already completed and merged in the previous session.
+
+---
+
 ## 2026-05-05 — A1: TASK-117 `[DONE]` review
 
 **Agent:** A1  

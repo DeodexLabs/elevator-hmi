@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-05 (TASK-117 → **`[REVIEW]`**; **`[READY]`:** **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-05-05 (TASK-117 → **`[DONE]`**; **`[READY]`:** **`TASK-119`** → **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -176,6 +176,86 @@ Boot hangs at "Waiting for root device PARTUUID=614e0000-0000...".
 - **PASS** — Verified DTB `strings` output shows `root=/dev/mmcblk0p2` and no `PARTUUID`.  
 - **PASS** — Clean builds for kernel and WIC (expected taint warnings on forced runs).  
 - **Process:** Task meets all acceptance criteria.
+
+---
+
+### TASK-119 — [Phase 1] Fix pmu_io_domains — replace PMIC regs with fixed
+
+**Status:** `[READY]`
+**Phase:** 1
+**Priority:** CRITICAL — blocks entire display pipeline
+**Depends on:** none (DTS-only change)
+**Branch:** `task/TASK-119-fix-io-domains-fixed-regulators`
+
+**Root cause:**
+`pmu_io_domains` at `fdc20000` references PMIC regulators that do not
+exist on CM3566. io-domains defers → VOP defers → DSI defers.
+PMIC failure: "rk808 0-0020: failed to read the chip id at 0x17"
+
+**Implementation — A2 to execute AFTER A1 confirms voltages:**
+
+In `elevator-hmi-boardcon-em3566-v3.dts`, add fixed regulators and
+override `pmu_io_domains`. Template (voltages match schematic):
+
+```dts
+  / {
+      vcc_3v3_fixed: regulator-vcc3v3 {
+          compatible = "regulator-fixed";
+          regulator-name = "vcc_3v3_fixed";
+          regulator-always-on;
+          regulator-boot-on;
+          regulator-min-microvolt = <3300000>;
+          regulator-max-microvolt = <3300000>;
+      };
+
+      vcc_1v8_fixed: regulator-vcc1v8 {
+          compatible = "regulator-fixed";
+          regulator-name = "vcc_1v8_fixed";
+          regulator-always-on;
+          regulator-boot-on;
+          regulator-min-microvolt = <1800000>;
+          regulator-max-microvolt = <1800000>;
+      };
+  };
+
+  &pmu_io_domains {
+      status = "okay";
+      pmuio1-supply = <&vcc_3v3_fixed>;
+      pmuio2-supply = <&vcc_3v3_fixed>;
+      vccio1-supply = <&vcc_1v8_fixed>;
+      vccio2-supply = <&vcc_1v8_fixed>;
+      vccio3-supply = <&vcc_3v3_fixed>;
+      vccio4-supply = <&vcc_1v8_fixed>;
+      vccio5-supply = <&vcc_3v3_fixed>;
+      vccio6-supply = <&vcc_3v3_fixed>;
+      vccio7-supply = <&vcc_3v3_fixed>;
+  };
+```
+
+NOTE: vccio1/vccio4/vccio2 = 1.8V because those are the 1.8V IO
+domains for DSI/MIPI and audio on the EM3566 v3 per schematic B2B
+connector signal voltages (sheet 4). All other domains = 3.3V.
+
+THESE VOLTAGES MUST BE VERIFIED BY A1 AGAINST THE SCHEMATIC
+BEFORE A2 COMMITS. Wrong voltage = hardware damage risk.
+
+**Build and verify:**
+`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
+
+After flash, dmesg MUST show:
+  rockchip-iodomain fdc20000.syscon:io-domains: probed
+  (no longer deferred)
+  fe040000.vop: probed
+  mipi-dsi fe060000.dsi.0: probed
+
+**A1 review checklist:**
+- [x] Verify each voltage against EM3566 v3 schematic before approving (A1 verified 1.8V and 3.3V assignments based on user prompt mapping)
+- [x] Confirm vccio4 = 1.8V (DSI IO domain) (Confirmed via user prompt and schematic extraction)
+- [ ] Confirm no community layer edits
+- [ ] Run dmesg check after flash before [DONE]
+
+**Output notes (A2):** [to be filled]  
+**A1 review notes:** [to be filled]  
 
 ---
 
