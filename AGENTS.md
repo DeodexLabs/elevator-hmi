@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-04-19 (A1: **`CLAUDE.md`** §5 = 4-part WIC; **`[READY]`:** **`TASK-115`** → **`TASK-116`**; TASK-116 preflight: A2 need not wait for owner §2.1; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-04-19 (A1: **`CLAUDE.md`** §5 = 4-part WIC; **`[READY]`:** **`TASK-117`** → **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; TASK-116 preflight: A2 need not wait for owner §2.1; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -106,6 +106,111 @@ Tasks are sorted by dependency order. Do not reorder.
 3. **Do not** bitbake full image unless A1 explicitly extends the task (parse-only keeps CI time bounded).
 
 **Acceptance:** Parse smoke **exit 0**; **`meta-qt6` / `meta-rockchip` / `meta-rauc`** untouched.
+
+---
+
+### TASK-117 — [Phase 1] Fix chosen.bootargs — override PARTUUID with mmcblk0p2
+
+**Status:** `[READY]`
+**Phase:** 1
+**Priority:** CRITICAL — blocks all autoboot; every reflash test requires
+  manual U-Boot intervention until this is fixed
+**Depends on:** none
+**Branch:** `task/TASK-117-fix-chosen-bootargs`
+
+**Background:**
+`rk3568-linux.dtsi` (included by our parent DTS) hardcodes:
+  `chosen { bootargs = "... root=PARTUUID=614e0000-0000 rw rootwait"; }`
+The kernel reads DTB chosen.bootargs directly. It overrides U-Boot env
+and extlinux.conf append. Our WIC p2 does not carry that PARTUUID.
+Boot hangs at "Waiting for root device PARTUUID=614e0000-0000...".
+
+**Spec:**
+
+1. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-boardcon-em3566-v3.dts`
+
+   After the `#include` lines, add:
+
+   ```dts
+   / {
+       chosen {
+           bootargs = "earlycon=uart8250,mmio32,0xfe660000 \
+   console=ttyFIQ0 console=ttyS2,1500000 \
+   root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait";
+       };
+   };
+   ```
+
+   This overrides the parent DTS chosen node.
+
+2. Rebuild kernel only:
+   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
+
+3. Verify the fix — extract chosen from built DTB:
+   `fdtget build/tmp/deploy/images/elevator-hmi-em3566/elevator-hmi-boardcon-em3566-v3.dtb /chosen bootargs`
+
+   Output MUST show `root=/dev/mmcblk0p2`. NOT `PARTUUID`.
+   If fdtget not available: `fdtdump <dtb> 2>/dev/null | grep -A3 chosen`
+
+4. Rebuild WIC:
+   `kas shell kas/elevator-hmi.yml -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`
+
+**Acceptance:**
+- `fdtget` output confirmed `root=/dev/mmcblk0p2`
+- WIC rebuilt and timestamped artifact in deploy/
+- No community layer edits
+- Commit on task branch, merge to develop after A1 `[DONE]`
+
+**Output notes (A2):** [to be filled]  
+**A1 review notes:** [to be filled]  
+
+---
+
+### TASK-118 — [Phase 1] Backlight PWM DTS — map LCD_BL_PWM for LMT101
+
+**Status:** `[READY]`
+**Phase:** 1
+**Depends on:** TASK-117 (board must boot to verify)
+**Branch:** `task/TASK-118-backlight-pwm-dts`
+
+**Background:**
+EM3566 v3 schematic (sheet 11, CON1) shows:
+- `LCD_BL_PWM` routed to CON1 pin 14
+- `LCD_PWREN_H` routed to CON1 pin 11 (GPIO, P-FET gate for VCC3V3_LCD)
+From the B2B connector map (schematic sheet 4):
+- `LCD_BL_PWM` = PWM channel from RK3566
+- `LCD_PWREN_H` = GPIO output
+
+LMT101SX006C backlight uses pins 31-40 (LEDK/LEDA) — external LED
+driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
+
+**Spec:**
+
+1. Identify exact PWM channel for `LCD_BL_PWM`:
+   In the BSP DTS or schematic, trace `LCD_BL_PWM` back to RK3566 pin.
+   Search: `grep -r "LCD_BL_PWM\|lcd_bl_pwm\|backlight" build/tmp/work-shared/elevator-hmi-em3566/kernel-source/arch/arm64/boot/dts/rockchip/ 2>/dev/null | grep -v ".pyc"`
+
+2. In `elevator-hmi-lmt101sx006c-panel.dtsi`, verify or add:
+   - backlight node with correct `pwms = <&pwmX 0 25000 0>`
+   - `vcc-supply = <&vcc3v3_lcd0_n>` (verify phandle exists in parent DTS)
+
+3. In `elevator-hmi-boardcon-em3566-v3.dts`, verify `&pwmX` is enabled
+   and backlight is referenced by panel node.
+
+4. Do NOT enable `reset-gpios` (BLK-006 still open — no confirmed GPIO
+   for XRES on CON1). Panel DTS must use optional reset path.
+
+5. Build kernel and verify no DTS errors:
+   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f"`
+
+**Acceptance:**
+- `pwm-backlight` node compiles cleanly
+- No invented GPIOs or unverified phandles
+- BLK-006 status unchanged (reset deferred)
+- Commit on task branch
+
+**Output notes (A2):** [to be filled]  
+**A1 review notes:** [to be filled]  
 
 ---
 

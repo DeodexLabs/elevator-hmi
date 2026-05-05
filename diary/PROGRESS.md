@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-04-19 — A1: LCD sprint plan — TASK-117/118 specced, §5 corrected
+
+**Agent:** A1  
+**Phase:** 1  
+
+### Summary
+- Board boots to root login (validated)
+- chosen.bootargs root cause identified (rk3568-linux.dtsi PARTUUID)
+- LMT101 panel physically on hand — TASK-106 unblocking
+- FPC adapter and 9V boost on order — wiring plan documented
+- TASK-117 and TASK-118 specced
+- CLAUDE.md §5 corrected
+
+---
+
 ## 2026-04-19 — A1: state review — `CLAUDE.md` §5 layout + TASK-116 preflight
 
 **Agent:** A1  

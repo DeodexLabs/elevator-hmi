@@ -127,14 +127,14 @@ meta-hmi-app           # Application layer:
 
 The shipping WIC defines a **four-partition GPT** on eMMC (not six). **Phase 1 bring-up** uses reduced sizes for reliable flashing; see the WKS file header. **Planned for Phase 2 image build:** expand rootfs and `/data` per WKS comments (e.g. **rootfs 2048 MiB**, **data 4096 MiB**) — **slot device numbers stay `p2` / `p3` for RAUC** unless a new TASK explicitly changes the layout.
 
-| Device | Label / role | FS | Bring-up size (WIC) | Notes |
-|---|---|---|---|---|
-| `/dev/mmcblk0p1` | `boot` | vfat | 64 MiB | Firmware / boot image delivery (`rockchip-image`, `bootimg-partition`); first partition after layout gap (WKS: `--offset 16M` from disk start). |
-| `/dev/mmcblk0p2` | `rootfs_a` | ext4 | 1024 MiB | **RAUC rootfs slot A** — active root filesystem. |
-| `/dev/mmcblk0p3` | `rootfs_b` | ext4 | 1024 MiB | **RAUC rootfs slot B** — OTA update target. |
-| `/dev/mmcblk0p4` | `data` | ext4 | 512 MiB | **Persistent** — not erased by OTA. Application config, content, logs, OTA staging. |
+  /dev/mmcblk0p1   boot      vfat  64M   (U-Boot + SPL + kernel + DTB)
+  /dev/mmcblk0p2   rootfs_a  ext4  1024M (RAUC slot 0 — active)
+  /dev/mmcblk0p3   rootfs_b  ext4  1024M (RAUC slot 1 — OTA target)
+  /dev/mmcblk0p4   data      ext4  512M  (persistent — never erased by OTA)
 
-**Historical:** An older **six-partition** story (separate `kernel_a` / `kernel_b` plus two rootfs and `data` at `p6`) was **not** implemented in this WIC. If you see that narrative elsewhere, treat it as obsolete.
+Bring-up sizes. Production expansion: rootfs → 2048M, data → 4096M, planned Phase 2.
+
+Note — CLAUDE.md previously described a 6-partition layout (with separate kernel_a/kernel_b partitions) that was never implemented. Corrected 2026-04-19.
 
 **RAUC:** Rootfs slots in `system.conf` are `/dev/mmcblk0p2` and `/dev/mmcblk0p3` (**TASK-111**); must stay aligned with the WKS part order.
 
