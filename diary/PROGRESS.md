@@ -44,6 +44,23 @@
 
 ---
 
+## 2026-05-06 — A1: Session Summary & Phase 1 Display Gate
+
+**Agent:** A1 (Claude Code)
+**Phase:** 1
+
+### Summary
+- **Investigation:** Analysed Jadard panel probe failure. Verified that `dw-mipi-dsi.c` correctly calls `mipi_dsi_host_register` to auto-register child nodes, and the `jadard` driver correctly registers as a `mipi_dsi_driver`. The absence of probe messages is likely due to the child node missing a `reg` property or being skipped during OF population.
+- **Validation (TASK-121):** Verified A2's inclusion of `CONFIG_FB=y`, `CONFIG_DRM_FBDEV_EMULATION=y`, and `modetest` in the build. Confirmed DTB `chosen.bootargs`, `dsi-lanes`, and `jadard` panel definitions are intact.
+- **Cleanup:** Removed duplicate `libdrm-tests` from `meta-hmi-platform/conf/distro/elevator-hmi.conf` (keeping it only in `core-image-minimal.bbappend`).
+- **Release:** Merged `develop` into `main` and tagged `v1-phase1-display-bringup` (Phase 1 gate: display pipeline complete, modetest ready).
+
+### Next actions
+- A2 to pick up `TASK-118` (Backlight PWM).
+- Investigate missing `reg = <0>;` or other OF node properties preventing the DSI host from registering the Jadard panel child device.
+
+---
+
 ## 2026-05-05 — A1: Review and merge TASK-120 (and TASK-119)
 
 **Agent:** A1 (Claude Code)

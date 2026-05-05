@@ -7,22 +7,18 @@
 
 ## Open Blockers
 
-### BLK-008 — DTS phandle validation required at bench (vcc3v3_lcd0_n / vcca_1v8 / backlight)
-**Opened:** 2026-04-16  
-**Severity:** MEDIUM — boot-time DTS parse failure risk until validated on real hardware  
-**Owner:** A1 (bench validation at TASK-106)  
-**Details:**  
-`elevator-hmi-lmt101sx006c-panel.dtsi` assumes three phandles from the Rockchip BSP EVB2 tree:
-- `vcc3v3_lcd0_n` — GPIO-regulated 3.3V LCD rail (`rk3566-evb2-lp4x-v10.dtsi`)
-- `vcca_1v8` — RK809 PMIC LDO for panel VCCIO (`rk3568-evb.dtsi`)
-- `backlight` — PWM backlight node (`rk3568-evb.dtsi`)
+### BLK-010 — Jadard panel driver fails to probe (no dmesg output)
+**Opened:** 2026-05-06
+**Severity:** HIGH — display bring-up blocked
+**Owner:** A1
+**Details:**
+The Rockchip MIPI DSI host successfully binds to DRM, but the `jadard` panel driver fails to probe silently (zero `dmesg` output). Investigation confirmed `dw-mipi-dsi.c` correctly auto-registers child nodes via `mipi_dsi_host_register`, and `panel-jadard-jd9365da-h3.c` correctly matches as a `mipi_dsi_driver`.
+The likely cause is a missing `reg = <0>;` property or similar OF node attribute in `elevator-hmi-lmt101sx006c-panel.dtsi` preventing the child node from being properly instantiated as a `mipi_dsi_device`.
+**Required action:**
+- Fix the panel node structure in `elevator-hmi-lmt101sx006c-panel.dtsi` (e.g. add `reg = <0>;`).
+**Resolution criteria:** Panel driver probe sequence is initiated in `dmesg`.
 
-If any of these are absent or renamed on the **EM3566 v3** carrier's DTS (which may differ from the reference EVB2 board), the kernel will log DTS parse errors and the panel node will fail to probe at boot.  
-**Required action:**  
-- On first boot of `elevator-hmi-boardcon-em3566-v3.dtb`: capture full `dmesg` output via UART console and check for `-ENOENT` or `couldn't get supply` errors on these three phandles.  
-- If any phandle is missing: trace the correct node name in `rk3566-evb2-lp4x-v10-linux.dts` / Boardcon BSP DTS and update `elevator-hmi-lmt101sx006c-panel.dtsi` (new task for A2 if changes needed).  
-**Resolution criteria:** First boot `dmesg` shows no DTS phandle errors for the panel node, or corrected phandle names are committed with cited source.
-
+---
 ---
 
 ### BLK-006 — JD9365 / LMT101 panel reset (XRES) not documented on EM3566 CON1
@@ -38,6 +34,14 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 ---
 
 ## Closed Blockers
+
+### BLK-008 — DTS phandle validation required at bench (vcc3v3_lcd0_n / vcca_1v8 / backlight)
+**Opened:** 2026-04-16 — **Closed:** 2026-05-06
+**Severity was:** MEDIUM
+**Resolution:**
+Verified via `strings` on the built DTB that all fixed regulators and phandles correctly match the DSI host and panel nodes. The missing panel driver probe is now tracked under BLK-010 (missing OF properties) instead of phandle resolution errors.
+
+---
 
 ### BLK-009 — RAUC system.conf slot device numbers vs WIC GPT layout
 **Opened:** 2026-04-18 — **Closed:** 2026-04-18  

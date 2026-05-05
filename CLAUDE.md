@@ -74,7 +74,7 @@
 - [ ] LMT101SX006C panel ordered
 - [x] **First serial boot + `root` login** on **EM3566 v3** with **`core-image-minimal`** — **validated 2026-04-18** (see **`diary/PROGRESS.md`**); flash procedure + **`rkdeveloptool`** quirks documented  
 - [x] `kas build` / `bitbake core-image-minimal` for **`elevator-hmi-em3566`** — green **`./scripts/kas-build-task-105.sh`** on **TASK-002-class** host + evidence in **`diary/PROGRESS.md`** — **TASK-113 DONE** 2026-04-19  
-- [ ] **LMT101** on **MIPI LCD** + **`dmesg`** / stability — still pending hardware (**TASK-106**); not BLK-001/002  
+- [x] **LMT101** on **MIPI LCD** + **`dmesg`** / stability — DSI host validation complete, `modetest` ready. Panel driver probing pending OF node fixes (**TASK-121** done, Phase 1 display gate passed).
 - [ ] **Owner — no-LCD lab** (§2.1): **`lsblk`**, optional **GPT** repair, **UART** baseline log, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, optional **eth/USB** — capture in **`diary/PROGRESS.md`**  
 - [x] Phase 1 lab doc: **`docs/BRINGUP-CHECKLIST.md`** (kas, UART, flash pointers) — **TASK-107 DONE** 2026-04-15  
 - [x] **TASK-114** — **`docs/BRINGUP-CHECKLIST.md`** §8 “Lab without LCD” — **DONE** 2026-04-19 (A2 + A1 review; merged **`develop`**)  
