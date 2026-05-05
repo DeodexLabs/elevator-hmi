@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-05-05 — A2: TASK-117 chosen.bootargs — root=/dev/mmcblk0p2 in board DTB
+
+**Agent:** A2 (Composer)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi-boardcon-em3566-v3.dts`:** `/ { chosen { bootargs = "… root=/dev/mmcblk0p2 …"; }; };` after includes (replaces vendor PARTUUID in DTB).
+- **Build:** `virtual/kernel` compile+deploy `-f`, then `core-image-minimal` `image_wic` + `image_complete` — exit 0 (expected BitBake taint warnings from `-f`).
+- **DTB check:** `fdtget`/`fdtdump` not on host; **`strings`…`|grep `root=`** shows full line with **`root=/dev/mmcblk0p2`**, no **`PARTUUID`**.
+- **WIC:** `core-image-minimal-elevator-hmi-em3566.rootfs-20260505171448.wic` (deploy dir symlink `*.rootfs.wic`).
+- **Git:** branch **`task/TASK-117-fix-chosen-bootargs`** pushed; **`AGENTS.md`** TASK-117 → **`[REVIEW]`**.
+
+---
+
 ## 2026-04-19 — A1: LCD sprint plan — TASK-117/118 specced, §5 corrected
 
 **Agent:** A1  

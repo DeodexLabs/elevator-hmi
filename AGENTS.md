@@ -169,7 +169,7 @@ Boot hangs at "Waiting for root device PARTUUID=614e0000-0000...".
 - **Kernel:** `bitbake virtual/kernel -c compile -f` + `-c deploy -f` — **exit 0**; **warnings only:** recipe taint from `-f` forced runs (expected).  
 - **WIC:** `bitbake core-image-minimal -c image_wic -f && -c image_complete -f` — **exit 0**; same taint warnings. **`ls -la …/*.wic | tail -3`:**  
   `core-image-minimal-elevator-hmi-em3566.rootfs-20260505171448.wic` (**May 5 20:15** 2026, ~3.1 GiB) + symlink `core-image-minimal-elevator-hmi-em3566.rootfs.wic` → that file.  
-- **Branch:** `task/TASK-117-fix-chosen-bootargs` — commits: DTS fix + AGENTS `[REVIEW]`.
+- **Branch:** `task/TASK-117-fix-chosen-bootargs` — commits: DTS fix, AGENTS `[REVIEW]`, **`diary/PROGRESS.md`** entry.
 
 **A1 review notes:** [to be filled]  
 
