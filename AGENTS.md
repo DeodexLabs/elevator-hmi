@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-05 (TASK-117 → **`[DONE]`**; **`[READY]`:** **`TASK-119`** → **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
+**Last updated:** 2026-05-05 (TASK-117 → **`[DONE]`**; **TASK-120** → **`[REVIEW]`**; **`[READY]`:** **`TASK-119`** → **`TASK-118`** → **`TASK-115`** → **`TASK-116`**; **`TASK-106`** **`[BLOCKED]`** until LMT101)  
 
 ---
 
@@ -256,6 +256,206 @@ After flash, dmesg MUST show:
 
 **Output notes (A2):** [to be filled]  
 **A1 review notes:** [to be filled]  
+
+---
+
+### TASK-120 — [Phase 1] Add fixed regulators for VOP/DSI/GPU/VPU pipeline *(CRITICAL; `[REVIEW]` 2026-05-05)*
+
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Priority:** CRITICAL — VOP, DSI, GPU, VPU, DMC, MMC, SARADC deferred on missing RK809 supply phandles  
+**Depends on:** TASK-117 (board DT); TASK-119 content may land in same file (pmu_io_domains)  
+**Branch:** `task/TASK-120-fix-vop-dsi-supply-regulators` (A2)
+
+**Spec summary:** Fixed regulators `vdd_logic`, `vdd_gpu`, `vdd_npu`, `vccio_sd`, `vcca_1v8` under `/ { };`; consumer overrides `&vop`, `&gpu`, `&rknpu`, `&rkvenc`, `&rkvdec`, `&dmc`, `&sdmmc0`, `&saradc` after root node. No second `/ { };`. No community-layer edits.
+
+**Deviation from literal spec (justification):** BSP `rk3568-evb.dtsi` already defines labels **`vdd_logic`**, **`vdd_gpu`**, **`vdd_npu`**, **`vccio_sd`**, **`vcca_1v8`** as **`rk809`** PMIC regulator children. Adding duplicate labels at **`/`** without removal causes DTC **duplicate label** failure. **A2 added** a board-local **`&rk809`** fragment with **`/delete-node/`** for **`DCDC_REG1`**, **`DCDC_REG2`**, **`DCDC_REG4`**, **`LDO_REG5`**, **`LDO_REG7`** only — **`meta-hmi-platform` only**, no edits under **`meta-rockchip`**.
+
+**Node labels:** **`&gpu`**, **`&rknpu`**, **`&rkvenc`**, **`&rkvdec`** in **`rk356x.dtsi`** — build succeeded with spec **`&...`** names (no rename needed).
+
+**Output notes (A2):**
+
+- **DTB `strings` verification** (all five **`regulator-name`** strings present):
+```
+vdd_logic
+vdd_gpu
+vdd_npu
+vccio_sd
+vcca_1v8
+vdd_logic
+vdd_gpu
+vdd_npu
+vccio_sd
+vcca_1v8
+```
+  (Duplicates are expected — names appear more than once in the flattened DTB.)
+
+- **DTC:** No **`Warning`** lines in **`log.do_compile.*`** for **`elevator-hmi-boardcon-em3566-v3.dtb`** on this build host (kernel **linux-rockchip-6.1** forced recompile **exit 0**). BitBake **taint** warnings only from **`-f`** forced tasks (**`do_compile`** / **`do_deploy`** / **`do_image_wic`** / **`do_image_complete`**).
+
+- **Kernel / WIC:**  
+  **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**.  
+  **`kas shell … -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** — **exit 0**.
+
+- **WIC filename:** **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260505191305.wic`** (~3.1 GiB); symlink **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`** → same.
+
+- **Modified file (complete content — `elevator-hmi-boardcon-em3566-v3.dts`):**
+
+```dts
+// SPDX-License-Identifier: (GPL-2.0 OR MIT)
+/*
+ * Elevator HMI — Boardcon EM3566 v3 reference + LMT101SX006C (JD9365) on MIPI-DSI0.
+ *
+ * Extends the Rockchip BSP baseline:
+ *   arch/arm64/boot/dts/rockchip/rk3566-evb2-lp4x-v10-linux.dts
+ * from the linux-rockchip_6.1 kernel (SRCREV in meta-rockchip linux-rockchip_6.1.bb
+ * at the kas-pinned commit).
+ *
+ * Panel overlay: elevator-hmi-lmt101sx006c-panel.dtsi (replaces stock EVB
+ * simple-panel-dsi child under &dsi0).
+ */
+
+/dts-v1/;
+
+#include "rk3566-evb2-lp4x-v10-linux.dts"
+#include "elevator-hmi-lmt101sx006c-panel.dtsi"
+
+/*
+ * TASK-120: CM3566 has no RK809 at 0x20. rk3568-evb.dtsi defines vdd_logic, vdd_gpu,
+ * vdd_npu, vccio_sd, vcca_1v8 as PMIC children — duplicate labels if we only add fixed
+ * rails. Delete those PMIC regulator nodes, then define the same labels at board scope.
+ */
+&rk809 {
+	regulators {
+		/delete-node/ DCDC_REG1;
+		/delete-node/ DCDC_REG2;
+		/delete-node/ DCDC_REG4;
+		/delete-node/ LDO_REG5;
+		/delete-node/ LDO_REG7;
+	};
+};
+
+/*
+ * TASK-117: rk3568-linux.dtsi hardcodes root=PARTUUID=614e0000-0000; WIC rootfs is
+ * /dev/mmcblk0p2. Override chosen.bootargs in this board DTB (kernel uses DT chosen).
+ */
+/ {
+	chosen {
+		bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait";
+	};
+
+	/* TASK-119: CM3566 — pmu_io_domains cannot use PMIC supplies. */
+	vcc_3v3_fixed: regulator-vcc3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_3v3_fixed";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	vcc_1v8_fixed: regulator-vcc1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_1v8_fixed";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+
+	/* TASK-120: replace PMIC rails inherited from rk3568-evb (see &rk809 delete-node). */
+	vdd_logic: regulator-vdd-logic {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_logic";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <900000>;
+	};
+
+	vdd_gpu: regulator-vdd-gpu {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_gpu";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <900000>;
+	};
+
+	vdd_npu: regulator-vdd-npu {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_npu";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <900000>;
+	};
+
+	vccio_sd: regulator-vccio-sd {
+		compatible = "regulator-fixed";
+		regulator-name = "vccio_sd";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+	};
+
+	vcca_1v8: regulator-vcca-1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcca_1v8";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+	};
+};
+
+&pmu_io_domains {
+	status = "okay";
+	pmuio1-supply = <&vcc_3v3_fixed>;
+	pmuio2-supply = <&vcc_3v3_fixed>;
+	vccio1-supply = <&vcc_1v8_fixed>;
+	vccio2-supply = <&vcc_1v8_fixed>;
+	vccio3-supply = <&vcc_3v3_fixed>;
+	vccio4-supply = <&vcc_1v8_fixed>;
+	vccio5-supply = <&vcc_3v3_fixed>;
+	vccio6-supply = <&vcc_3v3_fixed>;
+	vccio7-supply = <&vcc_3v3_fixed>;
+};
+
+&vop {
+	vop-supply = <&vdd_logic>;
+};
+
+&gpu {
+	mali-supply = <&vdd_gpu>;
+};
+
+&rknpu {
+	rknpu-supply = <&vdd_npu>;
+};
+
+&rkvenc {
+	venc-supply = <&vdd_logic>;
+};
+
+&rkvdec {
+	vdec-supply = <&vdd_logic>;
+};
+
+&dmc {
+	center-supply = <&vdd_logic>;
+};
+
+&sdmmc0 {
+	vqmmc-supply = <&vccio_sd>;
+};
+
+&saradc {
+	vref-supply = <&vcca_1v8>;
+};
+```
+
+**A1 review notes:** _pending_
 
 ---
 
