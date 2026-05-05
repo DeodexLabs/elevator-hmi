@@ -69,6 +69,8 @@ Linux may not modeset the DSI panel by default; **LMT101 800×1280** bring-up im
 - Log in as **`root`** on serial (or SSH if enabled).
 - If **`/sys/kernel/debug`** is empty: `mount -t debugfs none /sys/kernel/debug`
 
+**Important — use the *connector* id, not encoder or CRTC.** In `modetest -M rockchip` output, under **`Connectors:`**, **`DSI-1`** has a line like `191 190 connected DSI-1 …`. The **`191`** is the **connector id** for `-s`. The **`190`** is the **encoder** id; **`112`** in **`CRTCs:`** is the **CRTC** id — those are **wrong** for `modetest -s` and yield `failed to find mode "800x1280"`.
+
 **Quick smoke (bundled script, if the image includes it):**
 
 ```sh
@@ -81,11 +83,14 @@ test-display
 # See which connectors exist and their status
 for c in /sys/class/drm/card*-*/status; do echo "$c: $(cat "$c")"; done
 
-# List CRTCs, connectors, and modes (pick connector / CRTC IDs if the defaults differ)
+# Full topology: encoders, connectors (note connector id = column 1 on DSI-1 line), CRTCs, planes
 modetest -M rockchip
 
-# Force modeset: connector 1 @ 800×1280 (adjust -s <connector_id>:<WxH> to match modetest -p output)
-modetest -M rockchip -s 1:800x1280
+# Force modeset: DSI-1 connector id @ 800×1280 (example from lab: connector 191, not 190 nor 112)
+modetest -M rockchip -s 191:800x1280
+
+# If WxH matching fails, try mode by index (here #0 is 800x1280 in modetest):
+# modetest -M rockchip -s 191:#0
 
 # Optional: confirm LCD rail enable after modeset (debugfs)
 cat /sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable
