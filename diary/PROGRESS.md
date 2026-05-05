@@ -4,6 +4,31 @@
 
 ---
 
+## 2026-05-05 — A2: panel@0 `dsi-lanes` / `dsi-format` (MIPI-DSI device registration)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** after `reg = <0>;` add **`dsi-lanes = <4>;`**, **`dsi-format = <0>;`** (RGB888) so **`of_mipi_dsi_device_add()`** gets required **`dsi-lanes`**.
+- **Build:** `virtual/kernel` compile+deploy `-f`; **`strings`…dtb** shows **`dsi-lanes`** and **`dsi-format`**.
+- **WIC:** `core-image-minimal-elevator-hmi-em3566.rootfs-20260505203732.wic` (+ symlink `*.rootfs.wic`).
+- **Git:** **`develop`** `[phase1][dts] panel dtsi: add dsi-lanes=4 dsi-format=RGB888 to panel@0`.
+
+---
+
+## 2026-05-05 — DSI panel fragment: `&dsi0` vs `&dsi` (RK3566 linux-rockchip 6.1)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **BSP:** `rk356x.dtsi` defines **`dsi0: dsi@fe060000`**. **`rk3566-evb2-lp4x-v10.dtsi`** / **`rk3568-evb.dtsi`** use **`&dsi0 {`**. Changing **`elevator-hmi-lmt101sx006c-panel.dtsi`** to **`&dsi {`** fails DTC: **`Label or path dsi not found`** (no `dsi` node label on RK3566 in this tree).
+- **DTB:** **`dtc -I dtb -O dts`** on deploy **`elevator-hmi-boardcon-em3566-v3.dtb`** shows **`panel@0`** under **`dsi@fe060000`** with **`jadard,jd9365da-h3`**. On-target empty sysfs path → likely wrong DTB flashed or different boot artifact, not **`&dsi0`** naming.
+- **No commit** for requested **`&dsi`** rename (invalid for pinned BSP).
+
+---
+
 ## 2026-05-05 — A1: Review and merge TASK-120 (and TASK-119)
 
 **Agent:** A1 (Claude Code)
