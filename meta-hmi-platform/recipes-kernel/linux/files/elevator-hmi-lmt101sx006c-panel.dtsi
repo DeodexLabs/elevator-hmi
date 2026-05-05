@@ -35,6 +35,8 @@
 	panel_lmt101: panel@0 {
 		compatible = "elevator-hmi,lmt101sx006c", "jadard,jd9365da-h3";
 		reg = <0>;
+		dsi-lanes = <4>;
+		dsi-format = <0>;
 		vdd-supply = <&vcc3v3_lcd0_n>;
 		vccio-supply = <&vcca_1v8>;
 		backlight = <&backlight>;
