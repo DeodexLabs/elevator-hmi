@@ -15,8 +15,12 @@
  *   library/EM3566/Usermanual/EM3566_hardware_manual.md §2.8 CON1
  *   library/EM3566/Schematic/em3566_v3sch.md
  *
- * BLK-006: reset-gpios omitted until JD9365 XRES is traced to an RK GPIO.
+ * BLK-006 / TASK-121: reset-gpios on gpio0 RK_PB6 (CON1 TOUCH_RST repurposed as
+ * panel XRES; `gt1x` disabled in board DTS).
  */
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/rockchip.h>
 
 &dsi0 {
 	/delete-node/ panel@0;
@@ -40,6 +44,7 @@
 		vdd-supply = <&vcc3v3_lcd0_n>;
 		vccio-supply = <&vcca_1v8>;
 		backlight = <&backlight>;
+		reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;
 
 		port {
 			panel_in_dsi: endpoint {

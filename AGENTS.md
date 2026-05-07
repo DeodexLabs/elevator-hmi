@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-06 (**`TASK-106`** lab **DSI**/`modetest` **→** **`[IN PROGRESS]`**; **`TASK-118`** / **`TASK-115`** **`[READY]`**; **`BLK-010`** closed — see **`diary/BLOCKERS.md`**)  
+**Last updated:** 2026-05-07 (**`TASK-121`** → **`[REVIEW]`**; sprint next **`TASK-118`** **`[READY]`**; **`TASK-106`** **`[IN PROGRESS]`**)  
 
 ---
 
@@ -36,7 +36,50 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see **`diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — **`vcc3v3_lcd0_n`**, **`modetest`** verified; **`pwm-backlight`** **`power-supply`** in **`elevator-hmi-boardcon-em3566-v3.dts`**). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** **`[IN PROGRESS]`** (**LMT101** + **DSI-1** modeset); **TASK-118** (**LCD_BL_PWM**); production carrier + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-05-06):** **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** — photo/stable backlight + **`PROGRESS`**. **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**A2 sprint queue (2026-05-07):** **`TASK-121`** → **`[REVIEW]`** (branch **`task/TASK-121-panel-reset`**). **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** — photo/stable backlight + **`PROGRESS`**. **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+
+---
+
+### TASK-121 — [Phase 1] Automate Panel Reset via TOUCH_RST
+
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Priority:** CRITICAL — LCD Panel ignores Sleep Out commands without proper hardware reset pulse. Blocks BLK-006 closure.  
+**Depends on:** None  
+**Branch:** `task/TASK-121-panel-reset` (A2)
+
+**Spec:**
+
+1. The EM3566 **CON1 Pin 11** is `TOUCH_RST`, which maps to `<&gpio0 RK_PB6>` (currently claimed by the `gt1x` touch driver in the base `rk3568-evb.dtsi`). We are temporarily hijacking it for the LCD Panel `RESET` wire.
+2. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-boardcon-em3566-v3.dts`:
+   Add a node to disable the `gt1x` driver so it releases the GPIO:
+   ```dts
+   &gt1x {
+       status = "disabled";
+   };
+   ```
+3. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-lmt101sx006c-panel.dtsi`:
+   Inside the `panel@0` node, add the following property so the `jadard` driver automatically pulses the line low before sending the MIPI DCS init sequence:
+   ```dts
+   reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;
+   ```
+4. Build the kernel and verify no DTS compilation errors:
+   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
+   
+**Acceptance:**  
+- `&gt1x` disabled in the board overlay.
+- `reset-gpios` correctly assigned to `RK_PB6` in the panel overlay.
+- No community layer edits.
+- Commit on task branch.
+
+**Output notes (A2):**  
+- **`elevator-hmi-boardcon-em3566-v3.dts`:** **`&gt1x { status = "disabled"; };`** (releases **`gpio0`** **`RK_PB6`** from Goodix per **TASK-121** / **rk3568-evb.dtsi** **`gt1x@14`**).  
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`#include`** **`dt-bindings/gpio/gpio.h`** + **`dt-bindings/pinctrl/rockchip.h`**; **`panel@0`** **`reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;`** as spec.  
+- **Build:** **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**; BitBake **taint** warnings from **`-f`** only (expected).  
+- **No** edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.  
+- **Bench:** A1/owner — reflash DTB; confirm **jadard** init + **BLK-006** closure criteria (touch **`gt1x`** intentionally off on this image).
+
+**A1 review notes:** [to be filled]  
 
 ---
 

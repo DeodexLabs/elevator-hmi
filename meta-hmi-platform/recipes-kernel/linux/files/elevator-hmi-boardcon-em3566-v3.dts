@@ -152,6 +152,14 @@
 };
 
 /*
+ * TASK-121: CON1 pin maps TOUCH_RST to gpio0 RK_PB6 (Boardcon); touch `gt1x` claims it
+ * in BSP — disable so `jadard` panel can drive panel reset (temporary hijack per spec).
+ */
+&gt1x {
+	status = "disabled";
+};
+
+/*
  * BSP rk3568-evb.dtsi pwm-backlight nodes often reference a supply label that does not
  * resolve on CM3566 (BOARDCON deletes/replaces PMIC children — TASK-120). Kernel then
  * uses a dummy regulator and logs "supply power not found". Tie the backlight supply to
