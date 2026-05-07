@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-05-07 — TASK-121: panel reset via CON1 `TOUCH_RST` / `gpio0` `RK_PB6` (A2)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi-boardcon-em3566-v3.dts`:** **`&gt1x { status = "disabled"; };`** so **`RK_PB6`** is not claimed by Goodix (BSP **`rk3568-evb.dtsi`**).
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`#include`** gpio + rockchip pinctrl bindings; **`panel@0`** **`reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;`** for **jadard** reset pulse before DCS init.
+- **Build:** `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"` — exit **0** (forced-run taint warnings only).
+- **Git:** branch **`task/TASK-121-panel-reset`**; **`AGENTS.md`** — **TASK-121** **`[REVIEW]`**.
+
+### Next
+- Owner: reflash image/DTB; validate **jadard** / display and **BLK-006**; note **`gt1x`** touch off on this configuration.
+
+---
+
 ## 2026-05-06 — Display bring-up docs, `test-display` package, pwm-backlight `power-supply` (A2 / lab)
 
 **Agent:** A2 (Cursor) + owner on **EM3566 v3**  
