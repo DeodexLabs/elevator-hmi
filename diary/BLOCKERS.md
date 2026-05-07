@@ -15,6 +15,7 @@
 Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manual.md` §2.8 CON1, `library/EM3566/Schematic/em3566_v3sch.md`) name **VCC3V3_LCD**, **LCD_PWREN_H**, **LCD_BL_PWM**, and MIPI DSI lanes, but do **not** map **JD9365 XRES** (driver `reset-gpios`) to a specific RK3566 GPIO. TASK-101 therefore ships a **DSI fragment** without `reset-gpios`, and kernel patch **0002** makes `reset-gpios` **optional** in the binding/driver so the node can parse and probe when reset is hard-wired or tolerates software-only sequencing.  
 **Required action:**  
 - On first **EM3566 v3 + LMT101** bench session: confirm display init; if unstable, trace **XRES** on the carrier / flex and add `reset-gpios` to `elevator-hmi-lmt101sx006c-panel.dtsi` (or board DTS) with a cited source (schematic or Boardcon BSP `.dts`).  
+  **Update (2026-05-07):** Hardwiring XRES to 3.3V failed to initialize the panel. **TASK-121** implemented a fix to map `reset-gpios` to `<&gpio0 RK_PB6>` (hijacking the `TOUCH_RST` pin on CON1) to allow the `jadard` driver to provide the precise 5ms reset pulse before DCS commands. Awaiting hardware validation.
 **Resolution criteria:** `reset-gpios` added with documented GPIO **or** bench log confirms stable operation without it and blocker closed with rationale.
 
 ---

@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-05-07 — Session Summary: Panel Reset Automation & Display Debugging (A1)
+
+**Agent:** A1
+**Phase:** 1
+
+### Summary
+- Diagnosed the cause of the LMT101SX006C black screen: Hardwiring `RESET` to 3.3V locked the panel's internal logic, preventing it from executing the MIPI DCS initialization commands (`Sleep Out`, `Display On`).
+- Advised the owner on the precise manual reset sequence and confirmed the external 9V backlight driver requires its `PWM/EN` pin to be tied to 3.3V for visibility.
+- Specced and created **TASK-121** to map the panel `reset-gpios` to `TOUCH_RST` (CON1 Pin 11, `gpio0 RK_PB6`), allowing the `jadard` driver to handle the strict 5ms reset pulse sequence automatically.
+- Reviewed and merged **TASK-121** (completed by A2).
+- Provided the user with exact instructions for rebuilding the WIC image, flashing the board, and a "Plan B" if the reset timing doesn't completely resolve the issue (Init array matching, lane polarity, etc).
+
+### Next
+- Owner to flash the latest image, wire the reset pin to `TOUCH_RST`, and validate display output.
+
+---
+
 ## 2026-05-07 — TASK-121: panel reset via CON1 `TOUCH_RST` / `gpio0` `RK_PB6` (A2)
 
 **Agent:** A2 (Cursor)  
