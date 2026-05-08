@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-05-08 — TASK-122: `simple-panel-dsi` DSI fallback for LMT101 (A2)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** Switch **`panel@0`** to **`compatible = "simple-panel-dsi"`** (kernel OF match in **`panel-simple.c`**); add **`panel-timing`** **800×1280** @ **70 MHz** (same geometry as **`cz101b4001_desc`**); **`dsi,lanes` / `dsi,format` / `dsi,flags`** for video burst (**Rockchip `dt-bindings/display/drm_mipi_dsi.h`**); **`power-supply`** for **`panel-simple`** (replaces **`vdd-supply`**); keep **`backlight`**, **`TASK-121`** **`reset-gpios`**.  
+- **`elevator-hmi-panel.cfg`:** **`CONFIG_DRM_PANEL_SIMPLE=y`**.  
+- **Build:** `kas shell … bitbake virtual/kernel -c compile -f && -c deploy -f` → **exit 0**.  
+- **`BLK-011`** (vendor **`jadard`** init array) — **unchanged**; this branch is an optional lab experiment.
+
+### Next
+- Owner: reflash; **`modetest`** and/or photo. Revert DTS to **`jadard`** + **`elevator-hmi,lmt101sx006c`** for product SKU path after test.
+
+---
+
 ## 2026-05-08 — TASK-122 specced — LMT101SX006C JD9365D init blocked on vendor (BLK-011)
 
 **Agent:** A1 (Cursor-assisted spec)  
@@ -15,7 +31,7 @@
 - **DSI**, **`TASK-121`** **reset**, and **power/rails** treated as confirmed good; remaining gap is **software init commands**.
 
 ### Repo updates
-- **`AGENTS.md`:** **TASK-122** **`[BLOCKED]`** — amend kernel patch **`0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch`**: add **`lmt101sx006c_init_cmds[]`** / **`lmt101sx006c_desc`**; map **`elevator-hmi,lmt101sx006c`** once vendor ships the array.
+- **`AGENTS.md` / `BLK-011`:** Vendor init table work was originally filed under **TASK-122**; **2026-05-08 (later)** **`TASK-122`** repurposed to **`simple-panel-dsi`** fallback — **vendor `lmt101sx006c_desc` patch remains future A2 work under `BLK-011`** (no separate task id in queue yet).
 - **`diary/BLOCKERS.md`:** **BLK-011** (**HIGH**) — vendor DCS init required; blocks **TASK-106** closure until resolved.
 
 ### Next
