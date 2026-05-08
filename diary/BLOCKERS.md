@@ -7,6 +7,17 @@
 
 ## Open Blockers
 
+### BLK-011 — LMT101SX006C JD9365D DCS init sequence required from LCD Mall
+**Opened:** 2026-05-08  
+**Severity:** HIGH — blocks **TASK-106** closure (no confirmed visible panel image without correct MIPI DCS init)  
+**Owner:** Vendor (LCD Mall) / project owner procurement  
+**Details:**  
+Bench: DSI link (**`modetest`** 800×1280), **`TASK-121`** **`reset-gpios`**, and power/rails are in good shape; panel stays **black** when the **`jadard`** driver applies the in-tree **`cz101b4001_desc`** (~**195** DCS steps) bundled with **`jadard,jd9365da-h3`**. **LMT101SX006C** requires a **panel-specific** JD9365D register init array (proprietary; not in repo). Obtaining the authoritative table from **LCD Mall** (or equivalent authorized init code) is prerequisite to kernel integration (**`AGENTS.md`** **TASK-122** **`[BLOCKED]`**).  
+
+**Resolution criteria:** Vendor-supplied init integrated per **TASK-122** (`lmt101sx006c_desc`); on-target confirms non-black picture; **TASK-106** bench can close visible-image criteria.
+
+---
+
 ### BLK-006 — JD9365 / LMT101 panel reset (XRES) not documented on EM3566 CON1
 **Opened:** 2026-04-15  
 **Severity:** MEDIUM — display bring-up risk until bench-validated  

@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-05-08 — TASK-122 specced — LMT101SX006C JD9365D init blocked on vendor (BLK-011)
+
+**Agent:** A1 (Cursor-assisted spec)  
+**Phase:** 1  
+
+### Finding
+- **LMT101SX006C** stays **black** with the in-driver **`cz101b4001_desc`** DCS init table (**jadard,jd9365da-h3**): wrong panel SKU, not a dead DSI stack.
+- **~195-entry** JD9365D init sequence for this LCD is **proprietary panel data** — must come from **LCD Mall** (or equivalent authorized dump).
+- **DSI**, **`TASK-121`** **reset**, and **power/rails** treated as confirmed good; remaining gap is **software init commands**.
+
+### Repo updates
+- **`AGENTS.md`:** **TASK-122** **`[BLOCKED]`** — amend kernel patch **`0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch`**: add **`lmt101sx006c_init_cmds[]`** / **`lmt101sx006c_desc`**; map **`elevator-hmi,lmt101sx006c`** once vendor ships the array.
+- **`diary/BLOCKERS.md`:** **BLK-011** (**HIGH**) — vendor DCS init required; blocks **TASK-106** closure until resolved.
+
+### Next
+- Obtain init table from vendor → unblock **TASK-122** for A2 kernel work → reflash and validate visible image.
+
+---
+
 ## 2026-05-07 — Session Summary: Panel Reset Automation & Display Debugging (A1)
 
 **Agent:** A1

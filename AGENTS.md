@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-07 (**`TASK-121`** → **`[REVIEW]`**; sprint next **`TASK-118`** **`[READY]`**; **`TASK-106`** **`[IN PROGRESS]`**)  
+**Last updated:** 2026-05-08 (**TASK-122** **`[BLOCKED]`** vendor LMT101 init — **`BLK-011`**)  
 
 ---
 
@@ -35,8 +35,8 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; see `diary/BLOCKERS.md`). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see **`diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — **`vcc3v3_lcd0_n`**, **`modetest`** verified; **`pwm-backlight`** **`power-supply`** in **`elevator-hmi-boardcon-em3566-v3.dts`**). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** **`[IN PROGRESS]`** (**LMT101** + **DSI-1** modeset); **TASK-118** (**LCD_BL_PWM**); production carrier + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-05-07):** **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-121`**, **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** — photo/stable backlight + **`PROGRESS`**. **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**Open:** **BLK-011** (LMT101SX006C JD9365D DCS init from LCD Mall — **HIGH**; blocks **TASK-106** closure — **`diary/BLOCKERS.md`**). **BLK-006** (JD9365 `reset-gpios` / XRES — medium; **`TASK-121`** **`[DONE]`**). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see **`diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — **`vcc3v3_lcd0_n`**, **`modetest`** verified; **`pwm-backlight`** **`power-supply`** in **`elevator-hmi-boardcon-em3566-v3.dts`**). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** **`[IN PROGRESS]`** (**LMT101**; visible image gated on **BLK-011** / **TASK-122**); **TASK-118** (**LCD_BL_PWM**); production carrier + formal −20°C acceptance before shipping hardware.  
+**A2 sprint queue (2026-05-08):** **`TASK-122`** **`[BLOCKED]`** (vendor LCD Mall DCS init — **`BLK-011`**). **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-121`**, **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** — blocked on **`TASK-122`** until vendor init table arrives. **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
@@ -83,6 +83,31 @@ Tasks are sorted by dependency order. Do not reorder.
 - **PASS** — Verified `elevator-hmi-boardcon-em3566-v3.dts` disables `&gt1x`.
 - **PASS** — Verified `elevator-hmi-lmt101sx006c-panel.dtsi` maps `reset-gpios` to `<&gpio0 RK_PB6 GPIO_ACTIVE_LOW>`.
 - **PASS** — `kas shell` build exits cleanly. Task branch merged. Hardware flash pending!
+
+---
+
+### TASK-122 — [Phase 1] LMT101SX006C custom JD9365D init sequence
+
+**Status:** `[BLOCKED]` — waiting for vendor DCS init table from LCD Mall  
+**Phase:** 1  
+**Priority:** CRITICAL — panel stays black without correct init commands  
+**Depends on:** Vendor-supplied JD9365D register init array for LMT101SX006C  
+
+**Root cause confirmed:**  
+- **`cz101b4001_desc`** init commands sent to **LMT101SX006C** → panel black.  
+- **~195-line** DCS command array is panel-specific proprietary data.  
+- DSI link, reset, and power all confirmed working.
+
+**When vendor supplies the init table, A2 must:**  
+1. Create new struct **`lmt101sx006c_init_cmds[]`** in **`meta-hmi-platform/recipes-kernel/linux/files/0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch`** — amend the patch to add **`lmt101sx006c_desc`** alongside **`cz101b4001_desc`**.  
+2. Map **`elevator-hmi,lmt101sx006c`** compatible to **`lmt101sx006c_desc`**.  
+3. Rebuild kernel and flash.
+
+**Acceptance:** Init table wired; kernel rebuild clean; bench shows visible image (**TASK-106** / **`BLK-011`** closure path).
+
+**Output notes (A2):** *[blocked — awaiting vendor]*  
+
+**A1 review notes:** [to be filled]
 
 ---
 
@@ -806,7 +831,8 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 - **`/sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable`** → **1**.  
 - **`dmesg`:** early **`-517`** defer; **`pwm-backlight … dummy regulator`** — **DTS fix** in **`elevator-hmi-boardcon-em3566-v3.dts`** (**`power-supply = <&vcc3v3_lcd0_n>;`** on **`&backlight`** / **`&backlight1`**); **reflash** to validate.  
 - **`GPT`** touch errors on **`gt1x`** — ignore for LCD.  
-- **Next:** stable visible image / backlight (**TASK-118**), **`dd`/`fb0`** smoke, photo **`PROGRESS`**, close **BLK-006** when XRES story resolved.
+- **Update (2026-05-08):** **`cz101b4001_desc`** init ≠ **LMT101SX006C** — panel black with good DSI/reset/power; **`BLK-011`** / **`TASK-122`** **`[BLOCKED]`** pending vendor DCS init from LCD Mall (see **`diary/PROGRESS.md`** **2026-05-08**).  
+- **Next:** vendor init table → **`TASK-122`** → visible image; **`TASK-118`** (backlight PWM polish); photo **`PROGRESS`**; **`BLK-006`** per XRES validation.
 
 ---
 
