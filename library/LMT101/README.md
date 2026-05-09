@@ -1,6 +1,6 @@
 # LMT101 class panel — library notes (Elevator HMI)
 
-Project product panel is **LMT101SX006C** (portrait 800×1280, JD9365D) per [`CLAUDE.md`](../../CLAUDE.md). This folder holds **vendor connector and electrical notes** extracted from datasheets when available.
+Project product panel is **LMT101SX006C** (portrait 800×1280; **3‑lane DSI** MIPI mode per vendor JD9365 init), JD9365D per [`CLAUDE.md`](../../CLAUDE.md). This folder holds **vendor connector and electrical notes** extracted from datasheets when available.
 
 | File | Contents |
 |------|----------|
