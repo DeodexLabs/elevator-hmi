@@ -14,7 +14,7 @@
 | Production volume | 500–1,000 units/year |
 | SoM | Compulab CM3566 (RK3566, 2 GB LPDDR4, 16 GB eMMC) |
 | Reference carrier (bring-up) | **Boardcon EM3566 v3** — development kit / carrier for CM3566 (sources under `library/EM3566/`: schematic, Linux 6.1 manual, block diagram). Not the production elevator PCB; use it to validate kernel, panel, and RAUC flow. |
-| Display | LMT101SX006C — 10.1" portrait, 800×1280, 4-lane MIPI-DSI, JD9365D driver IC — **attach to EM3566 v3 `MIPI LCD` connector** for bench work (see §6 R-02) |
+| Display | LMT101SX006C — 10.1" portrait, 800×1280, **3-lane** MIPI-DSI (vendor `0x80=0x03` in `library/LMT101/LMT101SX006C initial codes.txt`), JD9365D driver IC — **attach to EM3566 v3 `MIPI LCD` connector** for bench work (see §6 R-02) |
 | Build system | Yocto Scarthgap 5.0 LTS |
 | Kernel | Linux 6.1.99 (Rockchip vendor fork) + JD9365D backport |
 | UI | Qt 6.8 LTS — QML only, EGLFS backend, Mali-G52 GPU |

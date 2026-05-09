@@ -7,17 +7,6 @@
 
 ## Open Blockers
 
-### BLK-011 — LMT101SX006C JD9365D DCS init sequence required from LCD Mall
-**Opened:** 2026-05-08  
-**Severity:** HIGH — blocks **TASK-106** closure (no confirmed visible panel image without correct MIPI DCS init)  
-**Owner:** Vendor (LCD Mall) / project owner procurement  
-**Details:**  
-Bench: DSI link (**`modetest`** 800×1280), **`TASK-121`** **`reset-gpios`**, and power/rails are in good shape; panel stays **black** when the **`jadard`** driver applies the in-tree **`cz101b4001_desc`** (~**195** DCS steps) bundled with **`jadard,jd9365da-h3`**. **LMT101SX006C** requires a **panel-specific** JD9365D register init array (proprietary; not in repo). Obtaining the authoritative table from **LCD Mall** (or equivalent authorized init code) is prerequisite to product **`jadard`** kernel integration. **Optional (2026-05-08):** **`TASK-122`** **`simple-panel-dsi`** lab path does **not** replace this — it is a generic DCS experiment only.  
-
-**Resolution criteria:** Vendor-supplied init integrated in **`jadard`** / kernel patch **`0002`** (**`lmt101sx006c_desc`**); on-target confirms non-black picture on **product** compatible; **TASK-106** bench can close visible-image criteria.
-
----
-
 ### BLK-006 — JD9365 / LMT101 panel reset (XRES) not documented on EM3566 CON1
 **Opened:** 2026-04-15  
 **Severity:** MEDIUM — display bring-up risk until bench-validated  
@@ -32,6 +21,15 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 ---
 
 ## Closed Blockers
+
+### BLK-011 — LMT101SX006C JD9365D DCS init sequence required from LCD Mall
+**Opened:** 2026-05-08 — **Closed:** 2026-05-09  
+**Severity was:** HIGH  
+**Resolution:**  
+LCD Mall supplied the authoritative register table in-repo as **`library/LMT101/LMT101SX006C initial codes.txt`**. **TASK-125** ports it to **`jadard`** as **`0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`**: **`lmt101sx006c_init_cmds[]`** (**196** two-byte writes, vendor order through **`0xE7,0x0C`**, excluding **`0x11` / `0x29`** and delays — handled by **`jadard_panel_enable()`**). Descriptor uses vendor timings + **`.lanes = 3`**; DTS **`dsi-lanes = <3>`**. On-target visible image remains **TASK-106** / owner reflash validation.  
+**Follow-up:** Full command list reference: **`diary/TASK-125-lmt101sx006c-init_cmds.txt`**.
+
+---
 
 ### BLK-010 — Jadard panel driver fails to probe (no dmesg output)
 **Opened:** 2026-05-06 — **Closed:** 2026-05-06  

@@ -1,16 +1,18 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-08 (**TASK-122** **`[REVIEW]`** — **`simple-panel-dsi`** LMT101 probe; **`BLK-011`** unchanged)  
+**Last updated:** 2026-05-09 (**TASK-125** `**[REVIEW]**` — vendor LMT101 init ported; **TASK-118** `**[DEFERRED]**` — owner sprint still favors **TASK-115** first)  
 
 ---
 
 ## Agent Roster
 
-| ID | Agent | Tool | Role |
-|---|---|---|---|
-| A1 | Claude Code | Claude Code CLI | Lead — architecture, review, state tracking, diary |
-| A2 | Composer2 | Cursor Composer | Implementation — code, recipes, patches, configs |
+
+| ID  | Agent       | Tool            | Role                                               |
+| --- | ----------- | --------------- | -------------------------------------------------- |
+| A1  | Claude Code | Claude Code CLI | Lead — architecture, review, state tracking, diary |
+| A2  | Composer2   | Cursor Composer | Implementation — code, recipes, patches, configs   |
+
 
 ---
 
@@ -34,13 +36,124 @@
 
 Tasks are sorted by dependency order. Do not reorder.
 
-**Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → **`MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Open:** **BLK-011** (LMT101SX006C JD9365D DCS init from LCD Mall — **HIGH**; blocks **TASK-106** closure — **`diary/BLOCKERS.md`**). **BLK-006** (JD9365 `reset-gpios` / XRES — medium; **`TASK-121`** **`[DONE]`**). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see **`diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — **`vcc3v3_lcd0_n`**, **`modetest`** verified; **`pwm-backlight`** **`power-supply`** in **`elevator-hmi-boardcon-em3566-v3.dts`**). **Closed 2026-04-18:** **BLK-009** (RAUC **`system.conf`** vs WIC — **`TASK-111`** merged). **BLK-007** (Noble **`libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** **`[IN PROGRESS]`** (**LMT101** — **`TASK-122`** probes **`simple-panel-dsi`**; visible product image still gated on **`BLK-011`**); **TASK-118** (**LCD_BL_PWM**); production carrier + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-05-08):** **`TASK-122`** **`[REVIEW]`** (panel-simple DSI — **`task/TASK-122-panel-simple-test`**). **`[READY]`:** **`TASK-118`** (Backlight PWM; **`task/TASK-118-backlight-pwm-dts`**) → **`TASK-115`** (Qt image parse; **`task/TASK-115-qt-image-parse`**) → **`TASK-116`** (RAUC / systemd). Pick **one** task at a time. **`TASK-121`**, **`TASK-113`** / **`TASK-114`** **`[DONE]`**. **`TASK-106`** **`[IN PROGRESS]`** (`**simple-panel-dsi`** test does not supersede **`BLK-011`** vendor init). **Owner / lab:** **`CLAUDE.md`** §2.1 and **`docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — **`lsblk`**, **`dmesg`**, **`rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → `**MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
+**Closed 2026-05-09:** **BLK-011** — LCD Mall vendor init (`**library/LMT101/LMT101SX006C initial codes.txt**`) ported via **TASK-125** (see **`diary/BLOCKERS.md`**).  
+**Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; `**TASK-121`** `**[DONE]**`). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see `**diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — `**vcc3v3_lcd0_n`**, `**modetest**` verified; `**pwm-backlight**` `**power-supply**` in `**elevator-hmi-boardcon-em3566-v3.dts**`). **Closed 2026-04-18:** **BLK-009** (RAUC `**system.conf`** vs WIC — `**TASK-111**` merged). **BLK-007** (Noble `**libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** `**[IN PROGRESS]`** (**LMT101** bench); **TASK-118** (**LCD_BL_PWM**) `**[DEFERRED]`** — owner prioritized **TASK-115** (`**elevator-hmi-image`** parse / app layer) ahead of backlight DTS; revisit **TASK-118** when display bring-up scheduling allows. Production carrier + formal −20°C acceptance before shipping hardware.  
+**A2 sprint queue (2026-05-09):** **TASK-125** `**[REVIEW]**` (vendor LMT101 init; branch `**task/TASK-125-vendor-lmt101-init**`). Next `**[READY]**`: `**TASK-115`** (`**elevator-hmi-image**` parse; `**task/TASK-115-qt-image-parse**`) → `**TASK-116**` (RAUC / systemd). `**TASK-118**` (**backlight PWM**) is `**[DEFERRED]**`. `**TASK-123`** / `**TASK-124**` **`[SUPERSEDED]`** by **TASK-125**. Pick **one** task at a time. `**TASK-122`**, `**TASK-121**`, `**TASK-113**` / `**TASK-114**` `**[DONE]**`. `**TASK-106**` `**[IN PROGRESS]**`. **Owner / lab:** `**CLAUDE.md`** §2.1 and `**docs/BRINGUP-CHECKLIST.md**` (**§5** display, **§8** no-LCD) — `**lsblk`**, `**dmesg`**, `**rauc status**`, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
-### TASK-121 — [Phase 1] Automate Panel Reset via TOUCH_RST *(archived — [DONE] 2026-05-07)*
+### TASK-125 — [Phase 1] Vendor LMT101SX006C JD9365 init (LCD Mall authoritative table)
+
+**Status:** `[REVIEW]`  
+**Phase:** 1  
+**Depends on:** Vendor file in-repo (`**library/LMT101/LMT101SX006C initial codes.txt**`)  
+**Branch:** `task/TASK-125-vendor-lmt101-init` (A2)
+
+**Summary:** Replaces **TASK-123 / TASK-124** ESP32-derived **`lmt101sx006c_init_cmds[]`** with the **official vendor** sequence. **Critical:** vendor **`0x80, 0x03`** → **3 MIPI lanes** (not 4). **`0x11` / `0x29`** and post-command delays are **not** in the init array — **`jadard_panel_enable()`** already performs sleep-out + **120 ms** + display on.
+
+**Delivered in tree:**
+
+- **`meta-hmi-platform/recipes-kernel/linux/files/0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`** — **`lmt101sx006c_init_cmds[]`**: **196** `{ .data = { reg, val } }` entries (**`0xE0,0x00`** … **`0xE7,0x0C`**, stops before vendor **`0x11`**). **`lmt101sx006c_desc`**: **800×1280**, **70 MHz** **`clock`**, timings **H** hfp**40** / hs**20** / hb**20**; **V** vfp**30** / vs**4** / vb**10**; **`.lanes = 3`**, **`MIPI_DSI_FMT_RGB888`**. **`of_match`:** **`elevator-hmi,lmt101sx006c`** → **`&lmt101sx006c_desc`**.
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`dsi-lanes = <3>`** + product **`jadard`** compatible (revert simple-panel path).
+- **`elevator-hmi-panel.cfg`:** **`CONFIG_DRM_PANEL_SIMPLE`** removed (jadard product path).
+- **`linux-rockchip_%.bbappend`:** **`SRC_URI`** **`0003`** after **`0002`**.
+
+**Output notes (A2):**
+
+- Full **`lmt101sx006c_init_cmds[]`** as committed: **`diary/TASK-125-lmt101sx006c-init_cmds.txt`** (**196** `{ .data = { … } }` pairs plus short file header — extracted from **`0003`**).
+- **`dsi-lanes = <3>`** confirmed in **`elevator-hmi-lmt101sx006c-panel.dtsi`**.
+- **Kernel:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** → **exit 0** (BitBake **`-f`** taint warnings only).
+- **WIC:** `**kas shell … -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** → **exit 0**; artefact **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509065530.wic`** (+ symlink **`…rootfs.wic`**).
+- **No** edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.
+
+**A1 review notes:** [to be filled]
+
+---
+
+### TASK-123 — [SUPERSEDED by TASK-125] [Phase 1] Port ESP32 JD9365D array to `jadard` driver
+
+**Status:** `[SUPERSEDED]` *(product init is **TASK-125** — **`library/LMT101/LMT101SX006C initial codes.txt`**; ESP32 path retained below for history)*  
+**Phase:** 1  
+**Priority:** CRITICAL — this is the final hurdle to getting the LMT101 screen to turn on. We have the 10.1-inch initialization array!  
+**Depends on:** TASK-122 completion (must revert simple-panel first)  
+**Branch:** `task/TASK-123-jadard-esp32-array` (A2)
+
+**Spec:**
+
+1. **Revert the `panel-simple` test:** First, ensure the `elevator-hmi-lmt101sx006c-panel.dtsi` goes back to using `compatible = "elevator-hmi,lmt101sx006c"`, removes `panel-timing`, and restores the normal `jadard` bindings. Drop `CONFIG_DRM_PANEL_SIMPLE` from the `.cfg` if you wish, or leave it.
+2. **Examine the source array:** Open `library/LMT101/esp32_jd9365_init.c`. Starting at line 147, you will see `vendor_specific_init_default`. This array uses the exact same `0xE0` page switches and `E1 93 E2 65` unlock codes as the JD9365D requires, but the payload is specifically for a 10.1-inch 800x1280 panel.
+3. **Port to Linux driver:** Create a new kernel patch (e.g., `0003-drm-panel-jadard-add-lmt101sx006c-array.patch`) that amends `drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c`.
+  - Create a new array `static const struct jadard_init_cmd lmt101sx006c_init_cmds[] = { ... }`.
+  - Translate the ESP32 commands into the Linux format `{ .data = { 0x..., 0x... } },`. For commands with delays, the ESP32 struct has the delay at the end; in the Linux driver, you represent it using the driver's delay mechanisms (or `msleep` calls in the enable function, though the `jadard` struct doesn't have a delay field natively, check how `cz101b4001` handles delays like `msleep(120)`).
+  - Create a new struct `static const struct jadard_panel_desc lmt101sx006c_desc` that points its `.init_cmds` to `lmt101sx006c_init_cmds` and uses the 800x1280 timings.
+  - Map `"elevator-hmi,lmt101sx006c"` in the `of_match_table` to `lmt101sx006c_desc`.
+4. **Lane configuration:** Ensure the `.lanes = 4` property is respected in the descriptor so the JD9365D is clocked for 4 lanes.
+5. **Build:** Cleanly build the kernel.
+
+**Acceptance:**  
+
+- The `jadard` driver now natively supports the LMT101 panel utilizing the ESP32 array.
+- Kernel compiles cleanly.
+
+**Output notes (A2):**  
+
+- `**0003-drm-panel-jadard-lmt101sx006c-esp32-init.patch`:** Adds `**lmt101sx006c_init_cmds`** (**168** DCS writes from `**library/LMT101/esp32_jd9365_init.c`** `**vendor_specific_init_default**`) — excludes trailing `**0x11` / `0x29` / `0x35**` ( `**jadard_enable()**` already `**msleep(120)**`, `**mipi_dsi_dcs_exit_sleep_mode**`, `**mipi_dsi_dcs_set_display_on**`). `**lmt101sx006c_desc**` — **800×1280** timings match `**cz101b4001_desc`**, `**.lanes = 4**`, `**elevator-hmi,lmt101sx006c**` → `**lmt101sx006c_desc**`.  
+- `**linux-rockchip_%.bbappend`:** `**SRC_URI`** `**0003**` after `**0002**`.  
+- `**elevator-hmi-lmt101sx006c-panel.dtsi`:** Reverted to `**elevator-hmi,lmt101sx006c`** + `**jadard,jd9365da-h3**`, `**vdd-supply**` / `**vccio-supply**` / `**dsi-***`, `**reset-gpios**` (**pre–TASK-122** content).  
+- `**elevator-hmi-panel.cfg`:** `**CONFIG_DRM_PANEL_SIMPLE`** removed (**optional per spec**).  
+- **Build:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f"`** → **exit 0** (expected `**-f`** taint warnings only).
+
+**A1 review notes:** [to be filled]  
+
+---
+
+### TASK-124 — [SUPERSEDED by TASK-125] [Phase 1] Fix JD9365D Missing Lane & Color Configuration
+
+**Status:** `[SUPERSEDED]` *(vendor **TASK-125** supersedes ESP32 **4-lane** **`0x80,0x11`** experiment; LMT101SX006C is **3-lane** **`0x80,0x03`** per LCD Mall init)*  
+**Phase:** 1  
+**Priority:** CRITICAL — The ESP32 array missed the dynamic lane configurations.  
+**Depends on:** TASK-123  
+**Branch:** `task/TASK-124-jd9365-lane-config` (A2)
+
+**Spec:**
+
+1. The previous patch (`0003-drm-panel-jadard-lmt101sx006c-esp32-init.patch`) faithfully copied the static array from the ESP32 driver. However, the ESP32 driver dynamically injects the MIPI lane count (`0x80`) and Pixel Format (`0x3A`) directly into the DSI bus *before* it sends the array! Because these were omitted in the Linux array, the JD9365D is defaulting to a 2-lane setup, causing total desynchronization with our 4-lane Rockchip video stream.
+2. Edit `meta-hmi-platform/recipes-kernel/linux/files/0003-drm-panel-jadard-lmt101sx006c-esp32-init.patch` (or regenerate it).
+3. Inside `lmt101sx006c_init_cmds[]`, exactly after the unlock sequence (`0xE3, 0xF8`), inject the following two commands into Page 0:
+  ```c
+   	{ .data = { 0x80, 0x11 } }, /* JD9365_CMD_DSI_INT0: 4 Lanes */
+   	{ .data = { 0x3A, 0x77 } }, /* LCD_CMD_COLMOD: RGB888 */
+  ```
+4. The array should now look like this at the top:
+  ```c
+   	{ .data = { 0xE0, 0x00 } },
+   	{ .data = { 0xE1, 0x93 } },
+   	{ .data = { 0xE2, 0x65 } },
+   	{ .data = { 0xE3, 0xF8 } },
+   	{ .data = { 0x80, 0x11 } },
+   	{ .data = { 0x3A, 0x77 } },
+   	{ .data = { 0xE0, 0x01 } },
+  ```
+5. Build the kernel: `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`.
+
+**Acceptance:**  
+
+- `0x80, 0x11` and `0x3A, 0x77` are injected correctly into the array.  
+- Kernel compiles cleanly.
+
+**Output notes (A2):**  
+
+- `**0003-drm-panel-jadard-lmt101sx006c-esp32-init.patch`:** After `**{ 0xE3, 0xF8 }`**, `**lmt101sx006c_init_cmds**` includes `**{ 0x80, 0x11 }**` (4-lane DSI) and `**{ 0x3A, 0x77 }**` (**RGB888** `**COLMOD`**) before `**{ 0xE0, 0x01 }**` — **170** DCS pairs total (was **168** in **TASK-123**). Driver comment block notes **TASK-124**; unified-diff hunks `**+395,210`** / `**+661,7**`.  
+- **Verify:** `**patch -p1 --dry-run`** on `**panel-jadard-jd9365da-h3.c**` (post–**0002** only) — clean apply.  
+- **Build:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0** (BitBake `**-f`** taint warnings only).  
+- **No** edits under `**meta-rockchip`** / `**meta-qt6**` / `**meta-rauc**`.
+
+**A1 review notes:** [to be filled]
+
+---
+
+### TASK-121 — [Phase 1] LCD panel reset GPIO (CON1 hijack) *(archived — [DONE] 2026-05-07)*
 
 **Status:** `[DONE]`  
 **Phase:** 1  
@@ -52,34 +165,29 @@ Tasks are sorted by dependency order. Do not reorder.
 
 1. The EM3566 **CON1 Pin 11** is `TOUCH_RST`, which maps to `<&gpio0 RK_PB6>` (currently claimed by the `gt1x` touch driver in the base `rk3568-evb.dtsi`). We are temporarily hijacking it for the LCD Panel `RESET` wire.
 2. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-boardcon-em3566-v3.dts`:
-   Add a node to disable the `gt1x` driver so it releases the GPIO:
-   ```dts
-   &gt1x {
-       status = "disabled";
-   };
-   ```
+  Add a node to disable the `gt1x` driver so it releases the GPIO:
 3. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-lmt101sx006c-panel.dtsi`:
-   Inside the `panel@0` node, add the following property so the `jadard` driver automatically pulses the line low before sending the MIPI DCS init sequence:
-   ```dts
-   reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;
-   ```
+  Inside the `panel@0` node, add the following property so the `jadard` driver automatically pulses the line low before sending the MIPI DCS init sequence:
 4. Build the kernel and verify no DTS compilation errors:
-   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
-   
+  `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
+
 **Acceptance:**  
+
 - `&gt1x` disabled in the board overlay.
 - `reset-gpios` correctly assigned to `RK_PB6` in the panel overlay.
 - No community layer edits.
 - Commit on task branch.
 
 **Output notes (A2):**  
-- **`elevator-hmi-boardcon-em3566-v3.dts`:** **`&gt1x { status = "disabled"; };`** (releases **`gpio0`** **`RK_PB6`** from Goodix per **TASK-121** / **rk3568-evb.dtsi** **`gt1x@14`**).  
-- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`#include`** **`dt-bindings/gpio/gpio.h`** + **`dt-bindings/pinctrl/rockchip.h`**; **`panel@0`** **`reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;`** as spec.  
-- **Build:** **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**; BitBake **taint** warnings from **`-f`** only (expected).  
-- **No** edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.  
-- **Bench:** A1/owner — reflash DTB; confirm **jadard** init + **BLK-006** closure criteria (touch **`gt1x`** intentionally off on this image).
+
+- `**elevator-hmi-boardcon-em3566-v3.dts`:** `**&gt1x { status = "disabled"; };`** (releases `**gpio0**` `**RK_PB6**` from Goodix per **TASK-121** / **rk3568-evb.dtsi** `**gt1x@14`**).  
+- `**elevator-hmi-lmt101sx006c-panel.dtsi`:** `**#include`** `**dt-bindings/gpio/gpio.h**` + `**dt-bindings/pinctrl/rockchip.h**`; `**panel@0**` `**reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>;**` as spec.  
+- **Build:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**; BitBake **taint** warnings from `**-f`** only (expected).  
+- **No** edits under `**meta-rockchip`** / `**meta-qt6**` / `**meta-rauc**`.  
+- **Bench:** A1/owner — reflash DTB; confirm **jadard** init + **BLK-006** closure criteria (touch `**gt1x`** intentionally off on this image).
 
 **A1 review notes (`[DONE]` 2026-05-07):**  
+
 - **PASS** — Verified `elevator-hmi-boardcon-em3566-v3.dts` disables `&gt1x`.
 - **PASS** — Verified `elevator-hmi-lmt101sx006c-panel.dtsi` maps `reset-gpios` to `<&gpio0 RK_PB6 GPIO_ACTIVE_LOW>`.
 - **PASS** — `kas shell` build exits cleanly. Task branch merged. Hardware flash pending!
@@ -90,21 +198,19 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Status:** `[REVIEW]`  
 **Phase:** 1  
-**Priority:** HIGH — test if panel shows output with **`simple-panel-dsi`** generic DCS (Sleep Out / Display On) vs proprietary **`jadard`** init.  
+**Priority:** HIGH — test if panel shows output with `**simple-panel-dsi`** generic DCS (Sleep Out / Display On) vs proprietary `**jadard**` init.  
 **Depends on:** None  
 **Branch:** `task/TASK-122-panel-simple-test` (A2)
 
-*(Vendor-specific JD9365D init array for SKU closure remains **`BLK-011`** / future kernel patch work — orthogonal to this bring-up probe.)*
+*(Product **`jadard`** path now carries LCD Mall vendor init — **TASK-125** (**`BLK-011`** closed 2026-05-09). **TASK-122** remains an optional historic lab probe vs **`simple-panel-dsi`**.)*
+
 
 **Spec:**
 
 1. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-lmt101sx006c-panel.dtsi`:
-   Change the `compatible` string in `panel@0` to the kernel DSI OF match (**`simple-panel-dsi`** — not `panel-simple-dsi`; there is no `panel-simple-dsi` driver match in **`panel-simple.c`**).
-   ```dts
-   compatible = "simple-panel-dsi";
-   ```
-2. Add a `panel-timing` node inside `panel@0` matching the **800×1280** **`cz101`**-equivalent mode:
-   ```dts
+  Change the `compatible` string in `panel@0` to the kernel DSI OF match (`**simple-panel-dsi*`* — not `panel-simple-dsi`; there is no `panel-simple-dsi` driver match in `**panel-simple.c**`).
+2. Add a `panel-timing` node inside `panel@0` matching the **800×1280** `**cz101`**-equivalent mode:
+  ```dts
    panel-timing {
        clock-frequency = <70000000>;
        hactive = <800>;
@@ -116,87 +222,101 @@ Tasks are sorted by dependency order. Do not reorder.
        vback-porch = <20>;
        vsync-len = <4>;
    };
-   ```
-3. **`panel-simple`** uses **`power-supply`** (maps to **`regulator`** name **`power`** — not **`vdd-supply`** / **`vccio-supply`**). Add DSI properties:
-   ```dts
+  ```
+3. `**panel-simple**` uses `**power-supply**` (maps to `**regulator**` name `**power**` — not `**vdd-supply**` / `**vccio-supply**`). Add DSI properties:
+  ```dts
    dsi,lanes = <4>;
    dsi,format = <0>; /* MIPI_DSI_FMT_RGB888 */
-   ```
-   (plus **`dsi,flags`** in-tree to mirror **`jadard`** video burst — see DTS implementation.)
-4. Enable **`CONFIG_DRM_PANEL_SIMPLE=y`** in **`elevator-hmi-panel.cfg`** alongside **`jadard`**.
+  ```
+   (plus `**dsi,flags**` in-tree to mirror `**jadard**` video burst — see DTS implementation.)
+4. Enable `**CONFIG_DRM_PANEL_SIMPLE=y**` in `**elevator-hmi-panel.cfg**` alongside `**jadard**`.
 5. Build the kernel:
-   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
+  `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
 
 **Acceptance:**  
-- **`compatible`** is **`simple-panel-dsi`** (kernel match string).  
-- **`panel-timing`** and **`dsi,*`** properties present; **`power-supply`** wired.  
+
+- `**compatible`** is `**simple-panel-dsi**` (kernel match string).  
+- `**panel-timing**` and `**dsi,***` properties present; `**power-supply**` wired.  
 - Kernel builds without errors.
 
 **Output notes (A2):**  
-- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`simple-panel-dsi`** + **`panel-timing`** + **`dsi,lanes`** / **`dsi,format`** / **`dsi,flags`** (video + burst + Rockchip **EOT** bit per **`dt-bindings/display/drm_mipi_dsi.h`**); **`power-supply`**, **`backlight`**, **`reset-gpios`** preserved (**TASK-121**).  
-- **`elevator-hmi-panel.cfg`:** **`CONFIG_DRM_PANEL_SIMPLE=y`**.  
-- **Build:** **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**; BitBake **taint** from **`-f`** only.  
-- **No** edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.  
-- **Bench / regression:** Owner reflash; **`modetest`** / picture test. Revert **`compatible`** + supplies to restore **`jadard`** + **`elevator-hmi,lmt101sx006c`** for product path.
 
-**A1 review notes:** [to be filled]
+- `**elevator-hmi-lmt101sx006c-panel.dtsi`:** `**simple-panel-dsi`** + `**panel-timing**` + `**dsi,lanes**` / `**dsi,format**` / `**dsi,flags**` (video + burst + Rockchip **EOT** bit per `**dt-bindings/display/drm_mipi_dsi.h`**); `**power-supply**`, `**backlight**`, `**reset-gpios**` preserved (**TASK-121**).  
+- `**elevator-hmi-panel.cfg`:** `**CONFIG_DRM_PANEL_SIMPLE=y`**.  
+- **Build:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**; BitBake **taint** from `**-f`** only.  
+- **No** edits under `**meta-rockchip`** / `**meta-qt6**` / `**meta-rauc**`.  
+- **Bench / regression:** Owner reflash; `**modetest`** / picture test. Revert `**compatible**` + supplies to restore `**jadard**` + `**elevator-hmi,lmt101sx006c**` for product path.
+
+**A1 review notes (`[DONE]` 2026-05-08):**  
+
+- **PASS** — Verified `panel-simple-dsi` fallback implemented correctly in DTS and Kernel Config.
+- **PASS** — Verified successful kernel build and branch merge.
+- **DIAGNOSTIC NOTE:** The owner test will result in a black screen because the JD9365D has no internal GRAM and requires a proprietary `0xE0` paginated array to turn on its analog drivers (AVDD, VGH, VGL). The generic `panel-simple` DCS `Sleep Out` commands are mathematically insufficient. 
+- **NEXT STEP:** However, we successfully extracted the 10.1-inch JD9365 initialization array from the Waveshare ESP32 driver! TASK-123 is now specced to port this array into the `jadard` driver.
 
 ---
 
 ### TASK-113 — [Phase 1] TASK-105 closure — green `kas-build-task-105.sh` + deploy log in PROGRESS *(archived — [DONE] 2026-04-19)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** none  
-**Branch:** `task/TASK-113-kas-build-105-logs` (A2; merged **`develop`** 2026-04-19)
+**Branch:** `task/TASK-113-kas-build-105-logs` (A2; merged `**develop`** 2026-04-19)
 
 **Spec:**
 
-1. On **TASK-002-class** host (Ubuntu 22.04 or 24.04, **`setup-build-host.sh`** applied), from repo root run **`./scripts/kas-build-task-105.sh`** and capture **exit 0**.
-2. Append to **`diary/PROGRESS.md`**: short tail of each **`build-logs/*.log`**, plus **`ls -la build/tmp/deploy/images/elevator-hmi-em3566/`** (or equivalent deploy listing).
+1. On **TASK-002-class** host (Ubuntu 22.04 or 24.04, `**setup-build-host.sh`** applied), from repo root run `**./scripts/kas-build-task-105.sh**` and capture **exit 0**.
+2. Append to `**diary/PROGRESS.md`**: short tail of each `**build-logs/*.log**`, plus `**ls -la build/tmp/deploy/images/elevator-hmi-em3566/**` (or equivalent deploy listing).
 3. No recipe changes unless the script exposes a real defect (then document in output notes and stop for A1).
 
-**Acceptance:** **`PROGRESS.md`** contains evidence of green **`kas-build-task-105.sh`** + deploy listing; no community-layer edits.
+**Acceptance:** `**PROGRESS.md`** contains evidence of green `**kas-build-task-105.sh**` + deploy listing; no community-layer edits.
 
 **Output notes (A2):**  
-- **Host:** Ubuntu **24.04**, **`lz4c`** present, **`kas` 5.2** — TASK-002-class.  
-- **`./scripts/kas-build-task-105.sh`** — **exit 0**; logs **`build-logs/u-boot-rockchip.log`**, **`build-logs/virtual-kernel.log`**, **`build-logs/core-image-minimal.log`**. Each ends with **Tasks Summary … all succeeded**; **`core-image-minimal`** run reports **2 WARNING** messages (non-fatal).  
-- **`diary/PROGRESS.md`** — new **2026-04-19 — TASK-113** entry with log tails + deploy artefact summary.  
-- **No** edits under **`meta-rockchip`**, **`meta-qt6`**, **`meta-rauc`**.  
-- **Owner:** **`CLAUDE.md`** §2.1 board captures (**`lsblk`**, **`pre-LCD baseline`** **`dmesg`**, **`rauc status`**, …) remain **owner** paste targets in **`PROGRESS.md`** (hardware; not part of this TASK-113 build-host acceptance).
+
+- **Host:** Ubuntu **24.04**, `**lz4c`** present, `**kas` 5.2** — TASK-002-class.  
+- `**./scripts/kas-build-task-105.sh`** — **exit 0**; logs `**build-logs/u-boot-rockchip.log`**, `**build-logs/virtual-kernel.log**`, `**build-logs/core-image-minimal.log**`. Each ends with **Tasks Summary … all succeeded**; `**core-image-minimal`** run reports **2 WARNING** messages (non-fatal).  
+- `**diary/PROGRESS.md`** — new **2026-04-19 — TASK-113** entry with log tails + deploy artefact summary.  
+- **No** edits under `**meta-rockchip`**, `**meta-qt6**`, `**meta-rauc**`.  
+- **Owner:** `**CLAUDE.md`** §2.1 board captures (`**lsblk**`, `**pre-LCD baseline**` `**dmesg**`, `**rauc status**`, …) remain **owner** paste targets in `**PROGRESS.md`** (hardware; not part of this TASK-113 build-host acceptance).
 
 **A1 review notes (`[DONE]` 2026-04-19):**  
-- **PASS** — meets spec and acceptance: **exit 0**, per-log **Tasks Summary** tails in **`PROGRESS.md`**, deploy path + key artefacts documented (**equivalent** to raw **`ls -la`** per spec wording). **2 WARNING** on image build called out (non-fatal; unchanged narrative).  
+
+- **PASS** — meets spec and acceptance: **exit 0**, per-log **Tasks Summary** tails in `**PROGRESS.md`**, deploy path + key artefacts documented (**equivalent** to raw `**ls -la`** per spec wording). **2 WARNING** on image build called out (non-fatal; unchanged narrative).  
 - **PASS** — no community-layer edits; scope split (**build host** vs **owner §2.1** on-target) respected.  
-- **Caveat (non-REWORK):** future diary entries may paste a short literal **`ls -la … | tail`** for byte-for-byte audit; not required to reopen **TASK-113**.
+- **Caveat (non-REWORK):** future diary entries may paste a short literal `**ls -la … | tail`** for byte-for-byte audit; not required to reopen **TASK-113**.
 
 ---
 
 ### TASK-114 — [Phase 1] BRINGUP — “No LCD yet” lab checklist *(archived — [DONE] 2026-04-19)*
+
 **Status:** `[DONE]`
 **Phase:** 1
 **Depends on:** none (docs only)
-**Branch:** `task/TASK-114-bringup-no-lcd` (A2; merge to **`develop`** when PR lands)
+**Branch:** `task/TASK-114-bringup-no-lcd` (A2; merge to `**develop`** when PR lands)
 
 **Spec:**
 
-1. Extend **`docs/BRINGUP-CHECKLIST.md`** with a new section (e.g. **§8** or renumber consistently) **“Lab without LCD (EM3566 v3)”** that mirrors **`CLAUDE.md`** §2.1: reflash **post–TASK-111** image, **`lsblk -f`** / **`/proc/partitions`**, **`sgdisk -e`** if GPT warning, UART baseline log, **`dmesg`** grep list (**`vcc3v3_lcd0_n`**, **`vcca_1v8`**, **`backlight`**, **`jd9365`**, **`dsi`**, **`panel`**) with **pre-LCD baseline** note, **`rauc status`**, optional **`ip link`** / **`lsusb`**, **U-Boot bootdelay** if autoboot **0**.
-2. Cross-link **`CLAUDE.md`** §2.1 and **`diary/PROGRESS.md`** for paste targets.
-3. No partition / **`.wks`** changes.
+1. Extend `**docs/BRINGUP-CHECKLIST.md`** with a new section (e.g. **§8** or renumber consistently) **“Lab without LCD (EM3566 v3)”** that mirrors `**CLAUDE.md`** §2.1: reflash **post–TASK-111** image, `**lsblk -f`** / `**/proc/partitions**`, `**sgdisk -e**` if GPT warning, UART baseline log, `**dmesg**` grep list (`**vcc3v3_lcd0_n**`, `**vcca_1v8**`, `**backlight**`, `**jd9365**`, `**dsi**`, `**panel**`) with **pre-LCD baseline** note, `**rauc status`**, optional `**ip link**` / `**lsusb**`, **U-Boot bootdelay** if autoboot **0**.
+2. Cross-link `**CLAUDE.md`** §2.1 and `**diary/PROGRESS.md**` for paste targets.
+3. No partition / `**.wks**` changes.
 
 **Acceptance:** Doc PR only; links resolve; no invented flash offsets beyond existing diary block.
 
 **Output notes (A2):**
-- Added **`docs/BRINGUP-CHECKLIST.md`** **§8 — Lab without LCD (EM3566 v3)** — numbered steps mirror **`CLAUDE.md`** §2.1 (image ≥ TASK-111, **`lsblk -f`** / **`/proc/partitions`**, **`sgdisk -e`**, UART baseline, **`pre-LCD baseline`** **`dmesg`** with **`egrep -i`** pattern list, **`rauc status`**, optional **`ip link`** / **`lsusb`**, **U-Boot bootdelay**); cross-links to **`CLAUDE.md`** §2.1 and **`diary/PROGRESS.md`** paste targets; pointer to **§6** for bootdelay detail; **§5** / no-invented-GPIO reminder for when LCD arrives.
-- **No** **`.wks`** / partition / flash-offset edits.
-- **`AGENTS.md`** / **`CLAUDE.md`** / **`diary/PROGRESS.md`** — status lines updated for A1 review (**`[DONE]`** 2026-04-19).
+
+- Added `**docs/BRINGUP-CHECKLIST.md`** **§8 — Lab without LCD (EM3566 v3)** — numbered steps mirror `**CLAUDE.md`** §2.1 (image ≥ TASK-111, `**lsblk -f**` / `**/proc/partitions**`, `**sgdisk -e**`, UART baseline, `**pre-LCD baseline**` `**dmesg**` with `**egrep -i**` pattern list, `**rauc status**`, optional `**ip link**` / `**lsusb**`, **U-Boot bootdelay**); cross-links to `**CLAUDE.md`** §2.1 and `**diary/PROGRESS.md**` paste targets; pointer to **§6** for bootdelay detail; **§5** / no-invented-GPIO reminder for when LCD arrives.
+- **No** `**.wks`** / partition / flash-offset edits.
+- `**AGENTS.md**` / `**CLAUDE.md**` / `**diary/PROGRESS.md**` — status lines updated for A1 review (`**[DONE]**` 2026-04-19).
 
 **A1 review notes (`[DONE]` 2026-04-19):**
-- **PASS** — **§8** matches **`CLAUDE.md`** §2.1 intent; **`../CLAUDE.md`** / **`../diary/PROGRESS.md`** links from **`docs/BRINGUP-CHECKLIST.md`** resolve; no new flash offsets; **§6** / **§5** pointers appropriate.
-- **PASS** — doc-only; no **`.wks`** or recipe edits.
+
+- **PASS** — **§8** matches `**CLAUDE.md`** §2.1 intent; `**../CLAUDE.md**` / `**../diary/PROGRESS.md**` links from `**docs/BRINGUP-CHECKLIST.md**` resolve; no new flash offsets; **§6** / **§5** pointers appropriate.
+- **PASS** — doc-only; no `**.wks`** or recipe edits.
 
 ---
 
 ### TASK-115 — [Phase 1] `elevator-hmi-image` parse smoke (Qt path off critical path)
+
 **Status:** `[READY]`  
 **Phase:** 1  
 **Depends on:** none  
@@ -204,11 +324,11 @@ Tasks are sorted by dependency order. Do not reorder.
 
 **Spec:**
 
-1. **`kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — exit **0**, no new parse errors.
-2. Append one-line result + recipe count tail to **`diary/PROGRESS.md`** (or TASK output notes only — A2 chooses; minimum is output notes in **`AGENTS.md`**).
+1. `**kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — exit **0**, no new parse errors.
+2. Append one-line result + recipe count tail to `**diary/PROGRESS.md`** (or TASK output notes only — A2 chooses; minimum is output notes in `**AGENTS.md**`).
 3. **Do not** bitbake full image unless A1 explicitly extends the task (parse-only keeps CI time bounded).
 
-**Acceptance:** Parse smoke **exit 0**; **`meta-qt6` / `meta-rockchip` / `meta-rauc`** untouched.
+**Acceptance:** Parse smoke **exit 0**; `**meta-qt6` / `meta-rockchip` / `meta-rauc`** untouched.
 
 ---
 
@@ -231,50 +351,37 @@ Boot hangs at "Waiting for root device PARTUUID=614e0000-0000...".
 **Spec:**
 
 1. In `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-boardcon-em3566-v3.dts`
-
-   After the `#include` lines, add:
-
-   ```dts
-   / {
-       chosen {
-           bootargs = "earlycon=uart8250,mmio32,0xfe660000 \
-   console=ttyFIQ0 console=ttyS2,1500000 \
-   root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait";
-       };
-   };
-   ```
-
+  After the `#include` lines, add:
    This overrides the parent DTS chosen node.
-
 2. Rebuild kernel only:
-   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
-
+  `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`
 3. Verify the fix — extract chosen from built DTB:
-   `fdtget build/tmp/deploy/images/elevator-hmi-em3566/elevator-hmi-boardcon-em3566-v3.dtb /chosen bootargs`
-
+  `fdtget build/tmp/deploy/images/elevator-hmi-em3566/elevator-hmi-boardcon-em3566-v3.dtb /chosen bootargs`
    Output MUST show `root=/dev/mmcblk0p2`. NOT `PARTUUID`.
    If fdtget not available: `fdtdump <dtb> 2>/dev/null | grep -A3 chosen`
-
 4. Rebuild WIC:
-   `kas shell kas/elevator-hmi.yml -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`
+  `kas shell kas/elevator-hmi.yml -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`
 
 **Acceptance:**
+
 - `fdtget` output confirmed `root=/dev/mmcblk0p2`
 - WIC rebuilt and timestamped artifact in deploy/
 - No community layer edits
 - Commit on task branch, merge to develop after A1 `[DONE]`
 
 **Output notes (A2):**  
+
 - **DTS:** root `/ { chosen { bootargs = "…"; }; };` in `elevator-hmi-boardcon-em3566-v3.dts` (includes `console=ttyFIQ0` + `console=ttyS2,1500000`, `root=/dev/mmcblk0p2`).  
 - **DTB verification:** host has no `fdtget`/`fdtdump`; used **Option C** — `strings …/elevator-hmi-boardcon-em3566-v3.dtb | grep root=` → single line:  
-  `earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait`  
-  No `PARTUUID` in DTB `strings`.  
+`earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 console=ttyS2,1500000 root=/dev/mmcblk0p2 rw rootfstype=ext4 rootwait`  
+No `PARTUUID` in DTB `strings`.  
 - **Kernel:** `bitbake virtual/kernel -c compile -f` + `-c deploy -f` — **exit 0**; **warnings only:** recipe taint from `-f` forced runs (expected).  
-- **WIC:** `bitbake core-image-minimal -c image_wic -f && -c image_complete -f` — **exit 0**; same taint warnings. **`ls -la …/*.wic | tail -3`:**  
-  `core-image-minimal-elevator-hmi-em3566.rootfs-20260505171448.wic` (**May 5 20:15** 2026, ~3.1 GiB) + symlink `core-image-minimal-elevator-hmi-em3566.rootfs.wic` → that file.  
-- **Branch:** `task/TASK-117-fix-chosen-bootargs` — commits: DTS fix, AGENTS `[REVIEW]`, **`diary/PROGRESS.md`** entry.
+- **WIC:** `bitbake core-image-minimal -c image_wic -f && -c image_complete -f` — **exit 0**; same taint warnings. `**ls -la …/*.wic | tail -3`:**  
+`core-image-minimal-elevator-hmi-em3566.rootfs-20260505171448.wic` (**May 5 20:15** 2026, ~3.1 GiB) + symlink `core-image-minimal-elevator-hmi-em3566.rootfs.wic` → that file.  
+- **Branch:** `task/TASK-117-fix-chosen-bootargs` — commits: DTS fix, AGENTS `[REVIEW]`, `**diary/PROGRESS.md*`* entry.
 
 **A1 review notes (`[DONE]` 2026-05-05):**  
+
 - **PASS** — Explicit `/ { chosen { ... } };` applied in `elevator-hmi-boardcon-em3566-v3.dts`.  
 - **PASS** — Verified DTB `strings` output shows `root=/dev/mmcblk0p2` and no `PARTUUID`.  
 - **PASS** — Clean builds for kernel and WIC (expected taint warnings on forced runs).  
@@ -352,13 +459,15 @@ After flash, dmesg MUST show:
   mipi-dsi fe060000.dsi.0: probed
 
 **A1 review checklist:**
-- [x] Verify each voltage against EM3566 v3 schematic before approving (A1 verified 1.8V and 3.3V assignments based on user prompt mapping)
-- [x] Confirm vccio4 = 1.8V (DSI IO domain) (Confirmed via user prompt and schematic extraction)
-- [ ] Confirm no community layer edits
-- [ ] Run dmesg check after flash before [DONE]
+
+- Verify each voltage against EM3566 v3 schematic before approving (A1 verified 1.8V and 3.3V assignments based on user prompt mapping)
+- Confirm vccio4 = 1.8V (DSI IO domain) (Confirmed via user prompt and schematic extraction)
+- Confirm no community layer edits
+- Run dmesg check after flash before [DONE]
 
 **Output notes (A2):** Implemented within TASK-120 branch.  
 **A1 review notes (`[DONE]` 2026-05-05):**  
+
 - **PASS** — Confirmed vcc_3v3_fixed and vcc_1v8_fixed regulators were added in elevator-hmi-boardcon-em3566-v3.dts.
 - **PASS** — Confirmed pmu_io_domains uses the correct voltages (1.8V for vccio1, vccio2, vccio4).
 - **PASS** — Merged as part of TASK-120.
@@ -375,13 +484,14 @@ After flash, dmesg MUST show:
 
 **Spec summary:** Fixed regulators `vdd_logic`, `vdd_gpu`, `vdd_npu`, `vccio_sd`, `vcca_1v8` under `/ { };`; consumer overrides `&vop`, `&gpu`, `&rknpu`, `&rkvenc`, `&rkvdec`, `&dmc`, `&sdmmc0`, `&saradc` after root node. No second `/ { };`. No community-layer edits.
 
-**Deviation from literal spec (justification):** BSP `rk3568-evb.dtsi` already defines labels **`vdd_logic`**, **`vdd_gpu`**, **`vdd_npu`**, **`vccio_sd`**, **`vcca_1v8`** as **`rk809`** PMIC regulator children. Adding duplicate labels at **`/`** without removal causes DTC **duplicate label** failure. **A2 added** a board-local **`&rk809`** fragment with **`/delete-node/`** for **`DCDC_REG1`**, **`DCDC_REG2`**, **`DCDC_REG4`**, **`LDO_REG5`**, **`LDO_REG7`** only — **`meta-hmi-platform` only**, no edits under **`meta-rockchip`**.
+**Deviation from literal spec (justification):** BSP `rk3568-evb.dtsi` already defines labels `**vdd_logic`**, `**vdd_gpu**`, `**vdd_npu**`, `**vccio_sd**`, `**vcca_1v8**` as `**rk809**` PMIC regulator children. Adding duplicate labels at `**/**` without removal causes DTC **duplicate label** failure. **A2 added** a board-local `**&rk809`** fragment with `**/delete-node/**` for `**DCDC_REG1**`, `**DCDC_REG2**`, `**DCDC_REG4**`, `**LDO_REG5**`, `**LDO_REG7**` only — `**meta-hmi-platform` only**, no edits under `**meta-rockchip`**.
 
-**Node labels:** **`&gpu`**, **`&rknpu`**, **`&rkvenc`**, **`&rkvdec`** in **`rk356x.dtsi`** — build succeeded with spec **`&...`** names (no rename needed).
+**Node labels:** `**&gpu`**, `**&rknpu**`, `**&rkvenc**`, `**&rkvdec**` in `**rk356x.dtsi**` — build succeeded with spec `**&...**` names (no rename needed).
 
 **Output notes (A2):**
 
-- **DTB `strings` verification** (all five **`regulator-name`** strings present):
+- **DTB `strings` verification** (all five `**regulator-name`** strings present):
+
 ```
 vdd_logic
 vdd_gpu
@@ -394,16 +504,14 @@ vdd_npu
 vccio_sd
 vcca_1v8
 ```
+
   (Duplicates are expected — names appear more than once in the flattened DTB.)
 
-- **DTC:** No **`Warning`** lines in **`log.do_compile.*`** for **`elevator-hmi-boardcon-em3566-v3.dtb`** on this build host (kernel **linux-rockchip-6.1** forced recompile **exit 0**). BitBake **taint** warnings only from **`-f`** forced tasks (**`do_compile`** / **`do_deploy`** / **`do_image_wic`** / **`do_image_complete`**).
-
+- **DTC:** No `**Warning`** lines in `**log.do_compile.***` for `**elevator-hmi-boardcon-em3566-v3.dtb**` on this build host (kernel **linux-rockchip-6.1** forced recompile **exit 0**). BitBake **taint** warnings only from `**-f`** forced tasks (`**do_compile**` / `**do_deploy**` / `**do_image_wic**` / `**do_image_complete**`).
 - **Kernel / WIC:**  
-  **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**.  
-  **`kas shell … -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** — **exit 0**.
-
-- **WIC filename:** **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260505191305.wic`** (~3.1 GiB); symlink **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`** → same.
-
+`**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** — **exit 0**.  
+`**kas shell … -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** — **exit 0**.
+- **WIC filename:** `**build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260505191305.wic`** (~3.1 GiB); symlink `**core-image-minimal-elevator-hmi-em3566.rootfs.wic**` → same.
 - **Modified file (complete content — `elevator-hmi-boardcon-em3566-v3.dts`):**
 
 ```dts
@@ -562,6 +670,7 @@ vcca_1v8
 ```
 
 **A1 review notes (`[DONE]` 2026-05-05):**
+
 - **PASS** — Board DTS extended with fixed rails + consumer supplies + RK809 delete-node applied as requested.
 - **PASS** — Kernel compiles cleanly with no missing phandles.
 - **PASS** — WIC rebuilt.
@@ -571,13 +680,16 @@ vcca_1v8
 
 ### TASK-118 — [Phase 1] Backlight PWM DTS — map LCD_BL_PWM for LMT101
 
-**Status:** `[READY]`
-**Phase:** 1
-**Depends on:** TASK-117 (board must boot to verify)
-**Branch:** `task/TASK-118-backlight-pwm-dts`
+**Status:** `[DEFERRED]`  
+**Phase:** 1  
+**Depends on:** TASK-117 (board must boot to verify)  
+**Branch:** `task/TASK-118-backlight-pwm-dts`  
+
+**Owner direction (2026-05-09):** Defer **TASK-118**; prioritize **TASK-115** (Qt `**elevator-hmi-image`** parse smoke) to advance the application layer. Re-set to `**[READY]**` in sprint when backlight DTS should return to the queue (A1).
 
 **Background:**
 EM3566 v3 schematic (sheet 11, CON1) shows:
+
 - `LCD_BL_PWM` routed to CON1 pin 14
 - `LCD_PWREN_H` routed to CON1 pin 11 (GPIO, P-FET gate for VCC3V3_LCD)
 From the B2B connector map (schematic sheet 4):
@@ -590,126 +702,129 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 **Spec:**
 
 1. Identify exact PWM channel for `LCD_BL_PWM`:
-   In the BSP DTS or schematic, trace `LCD_BL_PWM` back to RK3566 pin.
+  In the BSP DTS or schematic, trace `LCD_BL_PWM` back to RK3566 pin.
    Search: `grep -r "LCD_BL_PWM\|lcd_bl_pwm\|backlight" build/tmp/work-shared/elevator-hmi-em3566/kernel-source/arch/arm64/boot/dts/rockchip/ 2>/dev/null | grep -v ".pyc"`
-
 2. In `elevator-hmi-lmt101sx006c-panel.dtsi`, verify or add:
-   - backlight node with correct `pwms = <&pwmX 0 25000 0>`
-   - `vcc-supply = <&vcc3v3_lcd0_n>` (verify phandle exists in parent DTS)
-
+  - backlight node with correct `pwms = <&pwmX 0 25000 0>`
+  - `vcc-supply = <&vcc3v3_lcd0_n>` (verify phandle exists in parent DTS)
 3. In `elevator-hmi-boardcon-em3566-v3.dts`, verify `&pwmX` is enabled
-   and backlight is referenced by panel node.
-
+  and backlight is referenced by panel node.
 4. Do NOT enable `reset-gpios` (BLK-006 still open — no confirmed GPIO
-   for XRES on CON1). Panel DTS must use optional reset path.
-
+  for XRES on CON1). Panel DTS must use optional reset path.
 5. Build kernel and verify no DTS errors:
-   `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f"`
+  `kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f"`
 
 **Acceptance:**
+
 - `pwm-backlight` node compiles cleanly
 - No invented GPIOs or unverified phandles
 - BLK-006 status unchanged (reset deferred)
 - Commit on task branch
 
 **Output notes (A2):** [to be filled]  
-**A1 review notes:** [to be filled]  
+**A1 review notes:** [to be filled]
 
 ---
 
 ### TASK-116 — [Phase 1] RAUC CLI / D-Bus / systemd on `core-image-minimal`
+
 **Status:** `[READY]`  
 **Phase:** 1  
-**Depends on:** none (may use owner **`rauc status`** paste from **`PROGRESS.md`** if present)  
+**Depends on:** none (may use owner `**rauc status`** paste from `**PROGRESS.md**` if present)  
 **Branch:** `task/TASK-116-rauc-systemd-minimal` (A2)
 
 **Spec:**
 
-1. Reproduce or analyse **`rauc status`** / **D-Bus** behaviour on **`core-image-minimal`** (owner paste in **`diary/PROGRESS.md`** if available; if not, use **`bitbake -e`** / package inspection only).
-2. In **`meta-hmi-platform`** only: add **`SYSTEMD_AUTO_ENABLE`** / small **`bbappend`** / **`PACKAGECONFIG`** / doc note so **`rauc`** is usable where appropriate, **or** document **expected** limitations (e.g. no keys / no bundle) in **`docs/BRINGUP-CHECKLIST.md`** or recipe comment — A2 picks smallest fix.
-3. **`kas shell … -c "bitbake -p"`** exit **0** after any recipe change.
+1. Reproduce or analyse `**rauc status`** / **D-Bus** behaviour on `**core-image-minimal`** (owner paste in `**diary/PROGRESS.md**` if available; if not, use `**bitbake -e**` / package inspection only).
+2. In `**meta-hmi-platform**` only: add `**SYSTEMD_AUTO_ENABLE**` / small `**bbappend**` / `**PACKAGECONFIG**` / doc note so `**rauc**` is usable where appropriate, **or** document **expected** limitations (e.g. no keys / no bundle) in `**docs/BRINGUP-CHECKLIST.md`** or recipe comment — A2 picks smallest fix.
+3. `**kas shell … -c "bitbake -p"**` exit **0** after any recipe change.
 
-**Acceptance:** Clear behaviour for developers; no **`meta-rauc`** edits; no partition layout changes.
+**Acceptance:** Clear behaviour for developers; no `**meta-rauc`** edits; no partition layout changes.
 
 **A1 preflight (2026-04-19) — for A2 and owner:**
 
-- **Current spec (above)** is complete: (1) analyse **`rauc status`** / D-Bus on **`core-image-minimal`**; (2) smallest **`meta-hmi-platform`** fix or doc; (3) **`bitbake -p`** clean after changes.
-- **Owner §2.1** — optional `rauc status` paste in **`PROGRESS.md`** for TASK-116. If missing, A2 must use **`bitbake -e`**, image inspection, and/or docs-style analysis per spec line 1 — **do not block the task** on the owner.
+- **Current spec (above)** is complete: (1) analyse `**rauc status`** / D-Bus on `**core-image-minimal**`; (2) smallest `**meta-hmi-platform**` fix or doc; (3) `**bitbake -p**` clean after changes.
+- **Owner §2.1** — optional `rauc status` paste in `**PROGRESS.md`** for TASK-116. If missing, A2 must use `**bitbake -e**`, image inspection, and/or docs-style analysis per spec line 1 — **do not block the task** on the owner.
 - **No dependency** on bench hardware for the recipe/D-Bus work; on-target output only **informs** behaviour if available.
-- **After TASK-116:** if **`rauc status`** on hardware still shows issues, add a one-line **owner follow-up** in **`PROGRESS.md`**; consider a tiny follow-on task only if a new defect appears.
+- **After TASK-116:** if `**rauc status`** on hardware still shows issues, add a one-line **owner follow-up** in `**PROGRESS.md`**; consider a tiny follow-on task only if a new defect appears.
 
 ---
 
 ### TASK-112 — [Phase 1] AGENTS archive hygiene after TASK-111 (RAUC slot paths) *(archived — [DONE] 2026-04-18)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** TASK-111 ✓ (merged to `develop`)  
-**Branch:** `task/TASK-112-agents-rauc-doc` (merged to **`develop`** @ **`162f9c2`**)
+**Branch:** `task/TASK-112-agents-rauc-doc` (merged to `**develop*`* @ `**162f9c2**`)
 
 **Spec:**
 
-1. In **`AGENTS.md`**, under the **archived TASK-108** block, the fenced **`system.conf`** example still shows **`mmcblk0p4` / `p5`** (original TASK-108 spec). Add a **short note immediately after the fence** stating that **installed** layout is defined by **`meta-hmi-platform/recipes-images/files/system.conf`** on **`develop`** and was **corrected to `p2`/`p3`** per **`elevator-hmi-emmc.wks.in`** (**TASK-111**) — do **not** copy slot paths from the historical fence alone.
-2. No recipe or **`.wks`** changes in this task.
+1. In `**AGENTS.md`**, under the **archived TASK-108** block, the fenced `**system.conf`** example still shows `**mmcblk0p4` / `p5**` (original TASK-108 spec). Add a **short note immediately after the fence** stating that **installed** layout is defined by `**meta-hmi-platform/recipes-images/files/system.conf`** on `**develop**` and was **corrected to `p2`/`p3`** per `**elevator-hmi-emmc.wks.in**` (**TASK-111**) — do **not** copy slot paths from the historical fence alone.
+2. No recipe or `**.wks`** changes in this task.
 
-**Acceptance:** One commit on task branch; PR for A1 review; **`git grep mmcblk0p4`** in **`AGENTS.md`** either gone from live guidance or clearly labeled historical-only.
+**Acceptance:** One commit on task branch; PR for A1 review; `**git grep mmcblk0p4`** in `**AGENTS.md**` either gone from live guidance or clearly labeled historical-only.
 
 **Output notes (A2):**  
-- Inserted **Historical fence only** paragraph immediately after the archived TASK-108 **`system.conf`** code fence — points readers to **`meta-hmi-platform/recipes-images/files/system.conf`**, **`elevator-hmi-emmc.wks.in`**, and **TASK-111** for current **`p2`/`p3`** RAUC rootfs slots.  
-- **`git grep mmcblk0p4`** in **`AGENTS.md`**: still present **only** inside the historical fenced example + the new note (explicitly “not current develop”).
 
-**A1 review notes (`[DONE]` 2026-04-18):** **PASS** — meets TASK-112 spec and acceptance; **`mmcblk0p4`** remains only in historical / meta text (grep verified). Fast-forward merge **`task/TASK-112-agents-rauc-doc`** → **`develop`**.
+- Inserted **Historical fence only** paragraph immediately after the archived TASK-108 `**system.conf`** code fence — points readers to `**meta-hmi-platform/recipes-images/files/system.conf**`, `**elevator-hmi-emmc.wks.in**`, and **TASK-111** for current `**p2`/`p3`** RAUC rootfs slots.  
+- `**git grep mmcblk0p4**` in `**AGENTS.md**`: still present **only** inside the historical fenced example + the new note (explicitly “not current develop”).
+
+**A1 review notes (`[DONE]` 2026-04-18):** **PASS** — meets TASK-112 spec and acceptance; `**mmcblk0p4`** remains only in historical / meta text (grep verified). Fast-forward merge `**task/TASK-112-agents-rauc-doc**` → `**develop**`.
 
 ---
 
 ### TASK-111 — [Phase 1] Align RAUC `system.conf` with on-eMMC GPT (`lsblk` evidence) *(archived — [DONE] 2026-04-18)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** First boot with shell access ✓ (2026-04-18)  
-**Branch:** `task/TASK-111-rauc-slot-paths` (merged to **`develop`** @ **`7502d2b`**)
+**Branch:** `task/TASK-111-rauc-slot-paths` (merged to `**develop*`* @ `**7502d2b**`)
 
-**Context (BLK-009):** Previously **`system.conf`** used **`mmcblk0p4` / `p5`** (legacy six-partition assumption). **`elevator-hmi-emmc.wks.in`** defines boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**. **TASK-111** set RAUC rootfs slots to **`p2` / `p3`** per WIC; **BLK-009** closed. Optional owner **`lsblk -f`** paste to **`diary/PROGRESS.md`** still welcome.
+**Context (BLK-009):** Previously `**system.conf`** used `**mmcblk0p4` / `p5**` (legacy six-partition assumption). `**elevator-hmi-emmc.wks.in**` defines boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**. **TASK-111** set RAUC rootfs slots to `**p2` / `p3`** per WIC; **BLK-009** closed. Optional owner `**lsblk -f`** paste to `**diary/PROGRESS.md**` still welcome.
 
 **Spec:**
 
-1. On **EM3566 v3** running the project image, capture (paste into task output notes + optional **`diary/PROGRESS.md`** line):
-   - `lsblk -f`
-   - `cat /proc/partitions`
-   - `blkid` (if present)
-2. Map **RAUC A/B rootfs** slot device paths to **actual** `mmcblk0pN` from (1). Update **`meta-hmi-platform/recipes-images/files/system.conf`** (and any comments in **`elevator-hmi-rauc-system-conf.bb`** if needed) so **`[slot.rootfs.*] device=`** matches GPT labels / layout **exactly**.
-3. **Do not** change **`.wks`** partition layout in this task (A1 task only if spec’d).
+1. On **EM3566 v3** running the project image, capture (paste into task output notes + optional `**diary/PROGRESS.md`** line):
+  - `lsblk -f`
+  - `cat /proc/partitions`
+  - `blkid` (if present)
+2. Map **RAUC A/B rootfs** slot device paths to **actual** `mmcblk0pN` from (1). Update `**meta-hmi-platform/recipes-images/files/system.conf`** (and any comments in `**elevator-hmi-rauc-system-conf.bb**` if needed) so `**[slot.rootfs.*] device=**` matches GPT labels / layout **exactly**.
+3. **Do not** change `**.wks`** partition layout in this task (A1 task only if spec’d).
 4. Parse smoke: `kas shell kas/elevator-hmi.yml -c "bitbake -p"` exit 0; no new errors.
 
 **Acceptance:**
 
-- `system.conf` in Git matches **`lsblk`** evidence from this board (or documented equivalent machine).
-- **`diary/BLOCKERS.md`**: BLK-009 moved to **Closed** with one-line resolution **or** updated with “still wrong — rework” if hardware surprises.
+- `system.conf` in Git matches `**lsblk`** evidence from this board (or documented equivalent machine).
+- `**diary/BLOCKERS.md**`: BLK-009 moved to **Closed** with one-line resolution **or** updated with “still wrong — rework” if hardware surprises.
 
 **Output notes (A2):**  
-- **`meta-hmi-platform/recipes-images/files/system.conf`:** **`slot.rootfs.0`** → **`/dev/mmcblk0p2`**, **`slot.rootfs.1`** → **`/dev/mmcblk0p3`** (matches **`elevator-hmi-emmc.wks.in`** order: boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**). Header comment documents legacy **p4/p5** mistake vs current WIC.  
-- **`meta-hmi-platform/recipes-images/elevator-hmi-rauc-system-conf/elevator-hmi-rauc-system-conf.bb`:** one-line comment cross-ref WIC.  
-- **`diary/BLOCKERS.md`:** **BLK-009** → **Closed** (WIC-authoritative alignment; optional target **`lsblk`** paste still welcome in **`PROGRESS.md`**).  
-- **`docs/BRINGUP-CHECKLIST.md`:** §3 pointer to **TASK-105** green deploy + **`PROGRESS.md`** flash block.  
-- **Parse smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** → **exit 0** (2026-04-18).  
-- **`lsblk` on target:** not re-pasted in this session — mapping taken from in-tree WIC as **documented equivalent** per task acceptance wording; owner to paste **`lsblk -f`** to **`PROGRESS.md`** to close the loop on hardware.
 
-**A1 review notes (`[DONE]` 2026-04-18):** Merged **`origin/task/TASK-111-rauc-slot-paths`** into **`develop`** (fast-forward **`7502d2b`**). **`system.conf`** **`p2`/`p3`** matches **`elevator-hmi-emmc.wks.in`**. **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** exit 0 on merged tree. **BLK-009** closure accepted (WIC authoritative; optional hardware **`lsblk`** audit).
+- `**meta-hmi-platform/recipes-images/files/system.conf`:** `**slot.rootfs.0`** → `**/dev/mmcblk0p2**`, `**slot.rootfs.1**` → `**/dev/mmcblk0p3**` (matches `**elevator-hmi-emmc.wks.in**` order: boot **p1**, rootfs_a **p2**, rootfs_b **p3**, data **p4**). Header comment documents legacy **p4/p5** mistake vs current WIC.  
+- `**meta-hmi-platform/recipes-images/elevator-hmi-rauc-system-conf/elevator-hmi-rauc-system-conf.bb`:** one-line comment cross-ref WIC.  
+- `**diary/BLOCKERS.md`:** **BLK-009** → **Closed** (WIC-authoritative alignment; optional target `**lsblk`** paste still welcome in `**PROGRESS.md**`).  
+- `**docs/BRINGUP-CHECKLIST.md`:** §3 pointer to **TASK-105** green deploy + `**PROGRESS.md`** flash block.  
+- **Parse smoke:** `**kas shell kas/elevator-hmi.yml -c "bitbake -p"`** → **exit 0** (2026-04-18).  
+- `**lsblk` on target:** not re-pasted in this session — mapping taken from in-tree WIC as **documented equivalent** per task acceptance wording; owner to paste `**lsblk -f`** to `**PROGRESS.md**` to close the loop on hardware.
+
+**A1 review notes (`[DONE]` 2026-04-18):** Merged `**origin/task/TASK-111-rauc-slot-paths`** into `**develop**` (fast-forward `**7502d2b**`). `**system.conf**` `**p2`/`p3**` matches `**elevator-hmi-emmc.wks.in**`. `**kas shell kas/elevator-hmi.yml -c "bitbake -p"**` exit 0 on merged tree. **BLK-009** closure accepted (WIC authoritative; optional hardware `**lsblk`** audit).
 
 ---
 
 ### TASK-110 — [Phase 1] Fix linux-rockchip_%.bbappend: cfg fragment + DTS placement *(archived — [DONE] 2026-04-16)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Branch:** `task/TASK-110-bbappend-fix` (from `develop` 2026-04-16)
 
 **Defects fixed (supervisor-identified):**
 
-1. **FIX 1 — `KERNEL_CONFIG:append` removed; replaced with `.cfg` fragment.**  
-   `KERNEL_CONFIG:append` is not a valid Yocto mechanism for setting kernel config options on `linux-rockchip`. Replaced with `file://elevator-hmi-panel.cfg` in `SRC_URI:append`; the fragment is processed by `kernel_configme` / `merge_config.sh` during `do_kernel_configme`.
-
-2. **FIX 2 — `do_configure:append()` added to copy DTS/DTSI into kernel source tree.**  
-   Non-patch `SRC_URI` files land in `WORKDIR`, not `${S}/arch/arm64/boot/dts/rockchip/` where the kernel Makefile looks for them. Added `do_configure:append()` with `install -m 0644` for both `elevator-hmi-boardcon-em3566-v3.dts` and `elevator-hmi-lmt101sx006c-panel.dtsi`.
+1. **FIX 1 — `KERNEL_CONFIG:append` removed; replaced with `.cfg` fragment.**
+  `KERNEL_CONFIG:append` is not a valid Yocto mechanism for setting kernel config options on `linux-rockchip`. Replaced with `file://elevator-hmi-panel.cfg` in `SRC_URI:append`; the fragment is processed by `kernel_configme` / `merge_config.sh` during `do_kernel_configme`.
+2. **FIX 2 — `do_configure:append()` added to copy DTS/DTSI into kernel source tree.**
+  Non-patch `SRC_URI` files land in `WORKDIR`, not `${S}/arch/arm64/boot/dts/rockchip/` where the kernel Makefile looks for them. Added `do_configure:append()` with `install -m 0644` for both `elevator-hmi-boardcon-em3566-v3.dts` and `elevator-hmi-lmt101sx006c-panel.dtsi`.
 
 **Output notes (A1):**
+
 - `meta-hmi-platform/recipes-kernel/linux/linux-rockchip_%.bbappend` — updated.
 - `meta-hmi-platform/recipes-kernel/linux/files/elevator-hmi-panel.cfg` — created.
 - No community layer edits.
@@ -717,6 +832,7 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 ---
 
 ### TASK-108 — [Phase 1] RAUC skeleton — system.conf + key infra + bundle recipe stub *(archived — [DONE] 2026-04-16)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** TASK-103 ✓ (core-image-minimal + WKS layout)  
@@ -725,7 +841,7 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 **Spec:**
 
 1. **RAUC system config** — `meta-hmi-platform/recipes-images/files/system.conf`:
-   ```
+  ```
    [system]
    compatible=elevator-hmi
    bootloader=u-boot
@@ -739,79 +855,78 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
    device=/dev/mmcblk0p5
    type=ext4
    bootname=b
-   ```
-
-   **Historical fence only:** the **`p4` / `p5`** lines above are the original TASK-108 written spec (legacy six-partition story), **not** the RAUC slot paths on current **`develop`**. The **installed** `system.conf` is **`meta-hmi-platform/recipes-images/files/system.conf`**, corrected to **`/dev/mmcblk0p2`** / **`p3`** for A/B rootfs per **`elevator-hmi-emmc.wks.in`** (**TASK-111**). Do **not** copy slot devices from this archive block alone.
-
+  ```
+   **Historical fence only:** the `**p4` / `p5`** lines above are the original TASK-108 written spec (legacy six-partition story), **not** the RAUC slot paths on current `**develop`**. The **installed** `system.conf` is `**meta-hmi-platform/recipes-images/files/system.conf`**, corrected to `**/dev/mmcblk0p2**` / `**p3**` for A/B rootfs per `**elevator-hmi-emmc.wks.in**` (**TASK-111**). Do **not** copy slot devices from this archive block alone.
    Install to `/etc/rauc/system.conf` via a bbappend or new recipe — A2 chooses cleanest approach within `meta-hmi-platform`.
-
 2. **LAYERDEPENDS** — confirm `meta-hmi-platform/conf/layer.conf` includes `meta-rauc` in `LAYERDEPENDS`. Add it if missing.
-
 3. **Key infrastructure** (scripts only — no keys committed):
-   - `scripts/rauc-gen-keys.sh` — generates a dev CA + signing key pair (openssl; self-signed; outputs to `certs/` which is gitignored). Script header must warn: "Development keys only. Never commit certs/. Production keys must be generated offline and stored in HSM or secrets vault."
-   - `certs/README.md` — explains: dev keys generated by `rauc-gen-keys.sh`; production keys never in Git; bundle signing procedure TBD Phase 2.
-   - Verify `.gitignore` already excludes `*.pem`, `*.key`, `certs/*.pem`, `certs/*.key` — add entries if missing.
-
+  - `scripts/rauc-gen-keys.sh` — generates a dev CA + signing key pair (openssl; self-signed; outputs to `certs/` which is gitignored). Script header must warn: "Development keys only. Never commit certs/. Production keys must be generated offline and stored in HSM or secrets vault."
+  - `certs/README.md` — explains: dev keys generated by `rauc-gen-keys.sh`; production keys never in Git; bundle signing procedure TBD Phase 2.
+  - Verify `.gitignore` already excludes `*.pem`, `*.key`, `certs/*.pem`, `certs/*.key` — add entries if missing.
 4. **RAUC bundle recipe stub** — `meta-hmi-app/recipes-images/elevator-hmi-bundle.bb`:
-   - Minimal skeleton that inherits `bundle` from meta-rauc and sets `RAUC_BUNDLE_COMPATIBLE = "elevator-hmi"`.
-   - Mark clearly with a comment: `# PLACEHOLDER — Phase 2 implementation; do not bitbake this recipe until signing keys and rootfs image are complete.`
-   - Must parse without error (`bitbake -p` or `bitbake -e elevator-hmi-bundle` parse-only).
-
+  - Minimal skeleton that inherits `bundle` from meta-rauc and sets `RAUC_BUNDLE_COMPATIBLE = "elevator-hmi"`.
+  - Mark clearly with a comment: `# PLACEHOLDER — Phase 2 implementation; do not bitbake this recipe until signing keys and rootfs image are complete.`
+  - Must parse without error (`bitbake -p` or `bitbake -e elevator-hmi-bundle` parse-only).
 5. **RAUC in image** — add `rauc` to `IMAGE_INSTALL:append` in `core-image-minimal.bbappend` (or a new image bbappend).
 
 **Acceptance:**
+
 - `bitbake -p` (parse-only) on a configured host exits 0 with no new errors.
 - `system.conf` lands in `${sysconfdir}/rauc/` in the image rootfs (verify via `bitbake -e` variable trace or deploy artifact path).
 - `certs/` is gitignored; `rauc-gen-keys.sh` is executable and has the warning header.
 - No modifications to `meta-rauc` community layer.
 
 **Output notes (A2):**  
-- **`meta-hmi-platform/recipes-images/files/system.conf`** — per spec; installed by **`elevator-hmi-rauc-system-conf.bb`** → **`${sysconfdir}/rauc/system.conf`** (**`/etc/rauc/system.conf`** on target). **`meta-hmi-platform/conf/layer.conf`** — **`LAYERDEPENDS`** adds **`rauc`**.  
-- **`meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend`** — **`IMAGE_INSTALL:append = " rauc elevator-hmi-rauc-system-conf"`**. **`elevator-hmi-em3566.conf`** — **`DISTRO_FEATURES:append = " rauc"`** (clears meta-rauc README warning when layer is present).  
-- **`scripts/rauc-gen-keys.sh`** — executable; header matches required dev-only / production warning; **`certs/README.md`**. **`.gitignore`** — existing **`*.pem`**, **`*.key`**, **`certs/private/`**; added explicit **`certs/*.pem`**, **`certs/*.key`**. **`git add -A`** does **not** stage dummy **`certs/*.pem`** / **`certs/private/*.key`** (verified).  
-- **`meta-hmi-app/recipes-images/elevator-hmi-bundle.bb`** — **`inherit bundle`**, **`RAUC_BUNDLE_COMPATIBLE = "elevator-hmi"`**, PLACEHOLDER comment; **`meta-hmi-app/conf/layer.conf`** — **`LAYERDEPENDS`** **`rauc`** + **`BBFILES`** line for **`recipes-images/*.bb`** so the flat bundle path parses.  
-- **Smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p"`** — **exit 0**, **0 errors** (after **`rauc`** distro feature). **`bitbake -e core-image-minimal`** shows **`IMAGE_INSTALL`** includes **`rauc`** and **`elevator-hmi-rauc-system-conf`**. **`bitbake-layers show-recipes elevator-hmi-bundle`** — recipe **meta-hmi-app 1.0**.  
-- **No** edits under **`meta-rauc/`** (community layer).
+
+- `**meta-hmi-platform/recipes-images/files/system.conf`** — per spec; installed by `**elevator-hmi-rauc-system-conf.bb**` → `**${sysconfdir}/rauc/system.conf**` (`**/etc/rauc/system.conf**` on target). `**meta-hmi-platform/conf/layer.conf**` — `**LAYERDEPENDS**` adds `**rauc**`.  
+- `**meta-hmi-platform/recipes-core/images/core-image-minimal.bbappend**` — `**IMAGE_INSTALL:append = " rauc elevator-hmi-rauc-system-conf"**`. `**elevator-hmi-em3566.conf**` — `**DISTRO_FEATURES:append = " rauc"**` (clears meta-rauc README warning when layer is present).  
+- `**scripts/rauc-gen-keys.sh**` — executable; header matches required dev-only / production warning; `**certs/README.md**`. `**.gitignore**` — existing `***.pem**`, `***.key**`, `**certs/private/**`; added explicit `**certs/*.pem**`, `**certs/*.key**`. `**git add -A**` does **not** stage dummy `**certs/*.pem`** / `**certs/private/*.key**` (verified).  
+- `**meta-hmi-app/recipes-images/elevator-hmi-bundle.bb**` — `**inherit bundle**`, `**RAUC_BUNDLE_COMPATIBLE = "elevator-hmi"**`, PLACEHOLDER comment; `**meta-hmi-app/conf/layer.conf**` — `**LAYERDEPENDS**` `**rauc**` + `**BBFILES**` line for `**recipes-images/*.bb**` so the flat bundle path parses.  
+- **Smoke:** `**kas shell kas/elevator-hmi.yml -c "bitbake -p"`** — **exit 0**, **0 errors** (after `**rauc`** distro feature). `**bitbake -e core-image-minimal**` shows `**IMAGE_INSTALL**` includes `**rauc**` and `**elevator-hmi-rauc-system-conf**`. `**bitbake-layers show-recipes elevator-hmi-bundle**` — recipe **meta-hmi-app 1.0**.  
+- **No** edits under `**meta-rauc/`** (community layer).
 
 **A1 fix notes (2026-04-16 — supervisor-identified defect):**  
+
 - **DEFECT fixed:** `DISTRO_FEATURES:append = " rauc"` removed from `elevator-hmi-em3566.conf`. Machine conf sets hardware capabilities only; DISTRO_FEATURES belongs in a distro conf.  
 - **New file:** `meta-hmi-platform/conf/distro/elevator-hmi.conf` — `require conf/distro/poky.conf`; `DISTRO = "elevator-hmi"`; `DISTRO_VERSION = "0.1"`; `DISTRO_FEATURES:append = " rauc"`; `DISTRO_FEATURES:remove = "x11 wayland"`.  
-- **`kas/elevator-hmi.yml`** — `distro: poky` → `distro: elevator-hmi`; `local_conf_header` block added with `DISTRO = "elevator-hmi"`.  
-- **`kas dump`** smoke after fix: `distro: elevator-hmi` confirmed, exit 0, no errors.
+- `**kas/elevator-hmi.yml`** — `distro: poky` → `distro: elevator-hmi`; `local_conf_header` block added with `DISTRO = "elevator-hmi"`.  
+- `**kas dump**` smoke after fix: `distro: elevator-hmi` confirmed, exit 0, no errors.
 
 ---
 
 ### TASK-109 — [Phase 1] Qt 6.8 / EGLFS minimal image skeleton *(archived — [DONE] 2026-04-17)*
+
 **Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** TASK-108 `[DONE]` (ensures `meta-hmi-app` is building cleanly before adding Qt)  
 **Branch:** `task/TASK-109-qt-eglfs-image` (from `develop` 2026-04-17)
 
 **Output notes (A2):**
-- **`meta-hmi-app/conf/layer.conf`** — `BBFILE_PRIORITY_hmi-app` **9** (above `meta-hmi-platform` 8). **`LAYERDEPENDS_hmi-app`** remains **`core qt6-layer rauc`** (spec text listed only `core qt6-layer`; **`rauc`** kept so **`elevator-hmi-bundle.bb`** / **`inherit bundle`** stay valid when only app layer metadata is considered).
-- **`meta-hmi-app/recipes-images/elevator-hmi-image.bb`** — **`inherit core-image rockchip-image`**, **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** (same eMMC layout as **`core-image-minimal`**; not in one-line TASK text but required for Rockchip WIC images). **`IMAGE_INSTALL`** per TASK plus **`elevator-hmi-app`**. **`packagegroup-qt6-minimal`** from TASK text **does not exist** in pinned **meta-qt6** — substituted **`packagegroup-qt6-essentials`** (minimal qtbase+declarative set). **`DISTRO_FEATURES:remove = "x11 wayland"`** as specified. **`QT_QPA_PLATFORM=eglfs`** via **`ROOTFS_POSTPROCESS_COMMAND`**: **`/etc/profile.d/qt-eglfs.sh`** and **`/etc/environment.d/90-qt-eglfs.conf`** (no X11/Wayland compositors in **`IMAGE_INSTALL`**).
-- **`meta-hmi-app/recipes-images/files/COPYING`** — **`LICENSE = "CLOSED"`** checksum for image recipe.
-- **`meta-hmi-app/recipes-qt/elevator-hmi-app/elevator-hmi-app_0.1.bb`** + **`files/`** (`CMakeLists.txt`, **`main.cpp`** loader, **`main.qml`** Window stub, **`COPYING`**) — **`inherit qt6-cmake`**, **`DEPENDS = "qtbase qtdeclarative"`**, installs **`/usr/bin/elevator-hmi`** and **`/usr/share/elevator-hmi/main.qml`**, top comment PLACEHOLDER per spec.
-- **`kas/elevator-hmi.yml`** — **unchanged** (**`meta-hmi-app`** already present).
-- **Smoke:** **`kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — **exit 0**, **0 parse errors** (2586 recipes). **`bitbake-layers show-layers`** — **`hmi-app`** priority **9**.
-- **No** edits under **`meta-qt6`**, **`meta-rockchip`**, **`meta-rauc`**.
+
+- `**meta-hmi-app/conf/layer.conf*`* — `BBFILE_PRIORITY_hmi-app` **9** (above `meta-hmi-platform` 8). `**LAYERDEPENDS_hmi-app`** remains `**core qt6-layer rauc**` (spec text listed only `core qt6-layer`; `**rauc**` kept so `**elevator-hmi-bundle.bb**` / `**inherit bundle**` stay valid when only app layer metadata is considered).
+- `**meta-hmi-app/recipes-images/elevator-hmi-image.bb**` — `**inherit core-image rockchip-image**`, `**WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"**` (same eMMC layout as `**core-image-minimal**`; not in one-line TASK text but required for Rockchip WIC images). `**IMAGE_INSTALL**` per TASK plus `**elevator-hmi-app**`. `**packagegroup-qt6-minimal**` from TASK text **does not exist** in pinned **meta-qt6** — substituted `**packagegroup-qt6-essentials`** (minimal qtbase+declarative set). `**DISTRO_FEATURES:remove = "x11 wayland"**` as specified. `**QT_QPA_PLATFORM=eglfs**` via `**ROOTFS_POSTPROCESS_COMMAND**`: `**/etc/profile.d/qt-eglfs.sh**` and `**/etc/environment.d/90-qt-eglfs.conf**` (no X11/Wayland compositors in `**IMAGE_INSTALL**`).
+- `**meta-hmi-app/recipes-images/files/COPYING**` — `**LICENSE = "CLOSED"**` checksum for image recipe.
+- `**meta-hmi-app/recipes-qt/elevator-hmi-app/elevator-hmi-app_0.1.bb**` + `**files/**` (`CMakeLists.txt`, `**main.cpp**` loader, `**main.qml**` Window stub, `**COPYING**`) — `**inherit qt6-cmake**`, `**DEPENDS = "qtbase qtdeclarative"**`, installs `**/usr/bin/elevator-hmi**` and `**/usr/share/elevator-hmi/main.qml**`, top comment PLACEHOLDER per spec.
+- `**kas/elevator-hmi.yml**` — **unchanged** (`**meta-hmi-app`** already present).
+- **Smoke:** `**kas shell kas/elevator-hmi.yml -c "bitbake -p elevator-hmi-image"`** — **exit 0**, **0 parse errors** (2586 recipes). `**bitbake-layers show-layers`** — `**hmi-app**` priority **9**.
+- **No** edits under `**meta-qt6`**, `**meta-rockchip**`, `**meta-rauc**`.
 
 **A1 review fix (2026-04-17):**
+
 - **DEFECT fixed:** `DISTRO_FEATURES:remove = "x11 wayland"` removed from `elevator-hmi-image.bb`. Cannot be reliably modified in an image recipe; already correctly set in `meta-hmi-platform/conf/distro/elevator-hmi.conf` (TASK-108). Replaced with a comment citing the distro conf.
 - **Process note:** A2 left all changes uncommitted on the task branch (working tree only). A1 applied the fix and committed everything: `[phase1][meta-hmi-app] TASK-109 Qt 6.8 EGLFS image skeleton and placeholder app`.
 - **Parse smoke re-run after fix:** `bitbake -p elevator-hmi-image` — exit 0, 0 errors, 4481 targets.
 
 **Spec:**
 
-1. **`meta-hmi-app/conf/layer.conf`** — create if not exists:
-   - `BBFILE_COLLECTIONS += "hmi-app"`
-   - `BBFILE_PATTERN_hmi-app = "^${LAYERDIR}/"`
-   - `BBFILE_PRIORITY_hmi-app = "9"` (higher than `meta-hmi-platform` which should be 8)
-   - `LAYERSERIES_COMPAT_hmi-app = "scarthgap"`
-   - `LAYERDEPENDS_hmi-app = "core qt6-layer"`
-
-2. **`meta-hmi-app/recipes-images/elevator-hmi-image.bb`**:
-   ```bitbake
+1. `**meta-hmi-app/conf/layer.conf`** — create if not exists:
+  - `BBFILE_COLLECTIONS += "hmi-app"`
+  - `BBFILE_PATTERN_hmi-app = "^${LAYERDIR}/"`
+  - `BBFILE_PRIORITY_hmi-app = "9"` (higher than `meta-hmi-platform` which should be 8)
+  - `LAYERSERIES_COMPAT_hmi-app = "scarthgap"`
+  - `LAYERDEPENDS_hmi-app = "core qt6-layer"`
+2. `**meta-hmi-app/recipes-images/elevator-hmi-image.bb**`:
+  ```bitbake
    SUMMARY = "Elevator HMI Qt 6.8 / EGLFS image"
    LICENSE = "CLOSED"
    inherit core-image
@@ -826,19 +941,18 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
    "
    # No X11, no Wayland, no display manager — EGLFS only
    DISTRO_FEATURES:remove = "x11 wayland"
-   ```
-   - Add `/etc/environment` or `qt.conf` fragment setting `QT_QPA_PLATFORM=eglfs`.
-
-3. **`meta-hmi-app/recipes-qt/elevator-hmi-app_0.1.bb`** — placeholder app recipe:
-   - Minimal QML hello-world stub (a single `main.qml` with `Window { visible: true; Text { text: "elevator-hmi" } }`).
-   - Installs binary or launcher script to `/usr/bin/elevator-hmi`.
-   - `DEPENDS = "qtbase qtdeclarative"`.
-   - `LICENSE = "CLOSED"`.
-   - Comment at top: `# PLACEHOLDER — Phase 2 replaces this with the real application sources.`
-
-4. **`kas/elevator-hmi.yml`** — add `meta-hmi-app` to the layers list (if not already present) with a local path entry (no remote fetch needed for in-repo layer).
+  ```
+  - Add `/etc/environment` or `qt.conf` fragment setting `QT_QPA_PLATFORM=eglfs`.
+3. `**meta-hmi-app/recipes-qt/elevator-hmi-app_0.1.bb**` — placeholder app recipe:
+  - Minimal QML hello-world stub (a single `main.qml` with `Window { visible: true; Text { text: "elevator-hmi" } }`).
+  - Installs binary or launcher script to `/usr/bin/elevator-hmi`.
+  - `DEPENDS = "qtbase qtdeclarative"`.
+  - `LICENSE = "CLOSED"`.
+  - Comment at top: `# PLACEHOLDER — Phase 2 replaces this with the real application sources.`
+4. `**kas/elevator-hmi.yml**` — add `meta-hmi-app` to the layers list (if not already present) with a local path entry (no remote fetch needed for in-repo layer).
 
 **Acceptance:**
+
 - `bitbake -p elevator-hmi-image` on a configured host exits 0 (parse-only — full build deferred to lab).
 - `meta-hmi-app` layer shows up in `kas dump` / `bitbake-layers show-layers` output.
 - No X11 / Wayland packages pulled in.
@@ -847,114 +961,131 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 ---
 
 ### TASK-106 — [Phase 1] Bench: EM3566 v3 + LMT101 MIPI LCD (DSI / BLK-006)
+
 **Status:** `[IN PROGRESS]`  
 **Phase:** 1  
-**Depends on:** TASK-104 ✓, **LMT101SX006C** panel received and cabled to **`MIPI LCD`**, dev kit on hand ✓  
+**Depends on:** TASK-104 ✓, **LMT101SX006C** panel received and cabled to `**MIPI LCD`**, dev kit on hand ✓  
 
 **Spec (when unblocked):**  
+
 - Power/sequence per **LMT101** vendor doc (in repo when available).  
-- Capture **UART** boot + **`dmesg`** excerpts (DRM / panel / dsi).  
-- **BLK-006:** confirm display stable without **`reset-gpios`** or add **`reset-gpios`** with **cited** GPIO + update DTS + **`diary/BLOCKERS.md`**.  
-- Log results in **`diary/PROGRESS.md`**; no partition layout changes.
+- Capture **UART** boot + `**dmesg`** excerpts (DRM / panel / dsi).  
+- **BLK-006:** confirm display stable without `**reset-gpios`** or add `**reset-gpios**` with **cited** GPIO + update DTS + `**diary/BLOCKERS.md`**.  
+- Log results in `**diary/PROGRESS.md**`; no partition layout changes.
 
 **Output notes (2026-05-06 lab):**  
-- **`modetest -M rockchip -s 191:#0`** → **`setting mode 800x1280-60.22Hz on connectors 191, crtc 112`** (**DSI-1**).  
-- **`/sys/class/backlight/backlight`** and **`backlight1`** present; **`brightness`** **200** (confirm **`max`** / write **`max`** per **`docs/BRINGUP-CHECKLIST.md`**).  
-- **`/sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable`** → **1**.  
-- **`dmesg`:** early **`-517`** defer; **`pwm-backlight … dummy regulator`** — **DTS fix** in **`elevator-hmi-boardcon-em3566-v3.dts`** (**`power-supply = <&vcc3v3_lcd0_n>;`** on **`&backlight`** / **`&backlight1`**); **reflash** to validate.  
-- **`GPT`** touch errors on **`gt1x`** — ignore for LCD.  
-- **Update (2026-05-08):** **`cz101b4001_desc`** init ≠ **LMT101SX006C** — panel black with generic **`jadard`** path; **`BLK-011`** tracks vendor DCS table (see **`diary/PROGRESS.md`**).  
-- **Update (2026-05-08):** **`TASK-122`** tries **`simple-panel-dsi`** fallback (generic DCS only) — orthogonal to **`BLK-011`**; owner reflash + **`modetest`** to assess.  
-- **Next:** Vendor init → close **`BLK-011`** on **`jadard`** SKU path; or document simple-panel result; **`TASK-118`** (backlight PWM); photo **`PROGRESS`**; **`BLK-006`** per XRES validation.
+
+- `**modetest -M rockchip -s 191:#0`** → `**setting mode 800x1280-60.22Hz on connectors 191, crtc 112**` (**DSI-1**).  
+- `**/sys/class/backlight/backlight`** and `**backlight1**` present; `**brightness**` **200** (confirm `**max`** / write `**max**` per `**docs/BRINGUP-CHECKLIST.md**`).  
+- `**/sys/kernel/debug/regulator/vcc3v3_lcd0_n/enable**` → **1**.  
+- `**dmesg`:** early `**-517`** defer; `**pwm-backlight … dummy regulator**` — **DTS fix** in `**elevator-hmi-boardcon-em3566-v3.dts`** (`**power-supply = <&vcc3v3_lcd0_n>;**` on `**&backlight**` / `**&backlight1**`); **reflash** to validate.  
+- `**GPT`** touch errors on `**gt1x**` — ignore for LCD.  
+- **Update (2026-05-08):** `**cz101b4001_desc`** init ≠ **LMT101SX006C** — panel black with generic `**jadard`** path; **`BLK-011`** tracked vendor DCS until **TASK-125**.  
+- **Update (2026-05-08):** `**TASK-122`** **`simple-panel-dsi`** fallback — lab-only; product path restored with **TASK-125** **`jadard`** + vendor init.  
+- **Update (2026-05-09):** **TASK-125** ports LCD Mall **`library/LMT101/LMT101SX006C initial codes.txt`** (**3-lane**, vendor timings); **`BLK-011`** closed — **owner flash + bench** pending to confirm visible image vs prior black panel.  
+- **Next:** Reflash WIC with **TASK-125** kernel/DTB; **`modetest`** / photo → **`diary/PROGRESS.md`**; **`TASK-118`** (PWM); **`BLK-006`** per XRES validation if needed.
 
 ---
 
 ### TASK-107 — [Phase 1] Bring-up checklist doc (flash + UART + kas) *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-105-107-lab-handoff` (merged to `develop` 2026-04-15; combined with TASK-105 — **prefer one task per branch next time**).  
 
-**Output notes (A2):** *(summary)* **`docs/BRINGUP-CHECKLIST.md`**; **`README.md`** Documentation link; **`library/EM3566/README.md`** link; in-repo flash doc pointers only.
+**Output notes (A2):** *(summary)* `**docs/BRINGUP-CHECKLIST.md*`*; `**README.md**` Documentation link; `**library/EM3566/README.md**` link; in-repo flash doc pointers only.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** Single canonical checklist; links from **`README.md`** and **`library/EM3566/README.md`**; cited paths exist under **`library/EM3566/`** (UART §2.14, Linux6.1 user manual, RKDevTool manual).  
-- **PASS:** No **`.wks`** edits; flash section explicitly avoids invented **`rkdeveloptool`** offsets — owner to record first working command in **`diary/PROGRESS.md`**.  
-- **PASS:** TASK-105 script cross-linked; **`kas dump`** / deploy path guidance matches project layout.  
-- **Process:** Combined **TASK-105 + TASK-107** on one branch — acceptable for this handoff; follow **`task/TASK-NNN-…`** per task for future work.
+
+- **PASS:** Single canonical checklist; links from `**README.md`** and `**library/EM3566/README.md**`; cited paths exist under `**library/EM3566/**` (UART §2.14, Linux6.1 user manual, RKDevTool manual).  
+- **PASS:** No `**.wks`** edits; flash section explicitly avoids invented `**rkdeveloptool**` offsets — owner to record first working command in `**diary/PROGRESS.md**`.  
+- **PASS:** TASK-105 script cross-linked; `**kas dump`** / deploy path guidance matches project layout.  
+- **Process:** Combined **TASK-105 + TASK-107** on one branch — acceptable for this handoff; follow `**task/TASK-NNN-…`** per task for future work.
 
 ---
 
 ### TASK-105 — [Phase 1] Green `kas build` + smoke logs on TASK-002 host *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-105-107-lab-handoff` (merged to `develop` 2026-04-15).  
 
-**Output notes (A2):** *(summary)* **`scripts/kas-build-task-105.sh`** + **`scripts/README.md`**; three **`kas build`** runs; HOSTTOOLS **`lz4c`** failure on agent host without full **`setup-build-host.sh`** (missing **`liblz4-tool`**, not an Ubuntu **24.04** limitation); failure tails + expected deploy dir documented.
+**Output notes (A2):** *(summary)* `**scripts/kas-build-task-105.sh*`* + `**scripts/README.md**`; three `**kas build**` runs; HOSTTOOLS `**lz4c**` failure on agent host without full `**setup-build-host.sh**` (missing `**liblz4-tool**`, not an Ubuntu **24.04** limitation); failure tails + expected deploy dir documented.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** **`scripts/kas-build-task-105.sh`** uses **`set -euo pipefail`**, repo-root **`cd`**, ordered **`u-boot-rockchip`** → **`virtual/kernel`** → **`core-image-minimal`**, **`tee`** to **`build-logs/`** — matches TASK-105 intent (**`u-boot-rockchip`** post-**2026-04-15** fix for Rockchip bootloader provider).  
-- **PASS:** **`scripts/README.md`** documents prerequisites (Ubuntu **22.04** or **24.04** / **`setup-build-host.sh`** / **`lz4c`**).  
+
+- **PASS:** `**scripts/kas-build-task-105.sh`** uses `**set -euo pipefail**`, repo-root `**cd**`, ordered `**u-boot-rockchip**` → `**virtual/kernel**` → `**core-image-minimal**`, `**tee**` to `**build-logs/**` — matches TASK-105 intent (`**u-boot-rockchip**` post-**2026-04-15** fix for Rockchip bootloader provider).  
+- **PASS:** `**scripts/README.md`** documents prerequisites (Ubuntu **22.04** or **24.04** / `**setup-build-host.sh`** / `**lz4c**`).  
 - **PASS:** No community-layer edits.  
-- **Deferred acceptance (explicit in spec):** **Green full image `exit 0`** on a host with **`setup-build-host.sh`** applied (**Ubuntu 22.04 or 24.04 LTS**) — re-run **`./scripts/kas-build-task-105.sh`** and append success log tails + **`deploy/images/elevator-hmi-em3566/`** listing to **`diary/PROGRESS.md`** (or a follow-on diary entry); not a recipe **REWORK**.
+- **Deferred acceptance (explicit in spec):** **Green full image `exit 0`** on a host with `**setup-build-host.sh**` applied (**Ubuntu 22.04 or 24.04 LTS**) — re-run `**./scripts/kas-build-task-105.sh`** and append success log tails + `**deploy/images/elevator-hmi-em3566/**` listing to `**diary/PROGRESS.md**` (or a follow-on diary entry); not a recipe **REWORK**.
 
 ---
 
 ### TASK-103 — [Phase 1] Minimal kernel image recipe (core-image-minimal, RK3566) *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-103-core-image-minimal` (merged to `develop` after A1 review in this session).  
 **Depends on:** TASK-001 ✓, TASK-002 ✓ (build host script + deps installed on the machine used for `kas`/`bitbake`), **Boardcon EM3566 v3 dev kit on hand** ✓ (owner 2026-04-15)  
 
-**Output notes (A2):** *(summary)* **`core-image-minimal.bbappend`**: **`inherit rockchip-image`** + **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** (TASK-003 WIC vs BSP **`generic-gptdisk.wks.in`**); **`kas dump`** OK; **`kas build`** not run on agent host (`lz4c`). See branch for full bullets.
+**Output notes (A2):** *(summary)* `**core-image-minimal.bbappend`**: `**inherit rockchip-image**` + `**WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"**` (TASK-003 WIC vs BSP `**generic-gptdisk.wks.in**`); `**kas dump**` OK; `**kas build**` not run on agent host (`lz4c`). See branch for full bullets.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** Changes confined to **`meta-hmi-platform/recipes-core/images/`**; no edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.  
-- **PASS:** **`inherit rockchip-image`** matches **`meta-rockchip/classes/rockchip-image.bbclass`** (ext4 + WIC, **`ROCKCHIP_KERNEL_IMAGES`**, postprocess hooks).  
-- **PASS:** **`WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** overrides the class’s weak **`WKS_FILE ?=`** default and points at **`layer.conf`**-defined **`elevator-hmi-emmc.wks.in`** (TASK-003) — correct wiring for the fixed A/B + **`/data`** layout.  
-- **PASS:** **`kas dump`** is an appropriate minimal smoke when BitBake cannot run on the review host.  
-- **Deferred acceptance:** Full **`kas build kas/elevator-hmi.yml`** (image + **`virtual/kernel`** + **`u-boot`**) remains **owner / TASK-002 host** — capture logs there when ready (see **Optional A1 log collection** in `diary/PROGRESS.md`).  
-- **Caveat:** First flash must still match **SPL + partition table + WIC** on real **EM3566 v3**; validate boot and **`/data`** persistence vs OTA story when hardware images exist.
+
+- **PASS:** Changes confined to `**meta-hmi-platform/recipes-core/images/`**; no edits under `**meta-rockchip**` / `**meta-qt6**` / `**meta-rauc**`.  
+- **PASS:** `**inherit rockchip-image`** matches `**meta-rockchip/classes/rockchip-image.bbclass**` (ext4 + WIC, `**ROCKCHIP_KERNEL_IMAGES**`, postprocess hooks).  
+- **PASS:** `**WKS_FILE = "${ELEVATOR_HMI_EMMC_WKS}"`** overrides the class’s weak `**WKS_FILE ?=**` default and points at `**layer.conf**`-defined `**elevator-hmi-emmc.wks.in**` (TASK-003) — correct wiring for the fixed A/B + `**/data**` layout.  
+- **PASS:** `**kas dump`** is an appropriate minimal smoke when BitBake cannot run on the review host.  
+- **Deferred acceptance:** Full `**kas build kas/elevator-hmi.yml`** (image + `**virtual/kernel**` + `**u-boot**`) remains **owner / TASK-002 host** — capture logs there when ready (see **Optional A1 log collection** in `diary/PROGRESS.md`).  
+- **Caveat:** First flash must still match **SPL + partition table + WIC** on real **EM3566 v3**; validate boot and `**/data`** persistence vs OTA story when hardware images exist.
 
 ---
 
 ### TASK-102 — [Phase 1] U-Boot eMMC boot recipe *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-102-uboot-emmc` (merged to `develop` 2026-04-15).  
 
-**Output notes (A2):** *(summary)* `u-boot-rockchip.bbappend` + **`elevator-hmi-emmc-boot.cfg`** Kconfig fragment; **`UBOOT_LOCALVERSION`**; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on **`lz4c`**. See branch history for full bullets.
+**Output notes (A2):** *(summary)* `u-boot-rockchip.bbappend` + `**elevator-hmi-emmc-boot.cfg*`* Kconfig fragment; `**UBOOT_LOCALVERSION**`; machine conf comments (eMMC / WIC / `rk3568_defconfig`); smoke blocked on `**lz4c**`. See branch history for full bullets.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** All changes under **`meta-hmi-platform`**; **`u-boot-rockchip.bbappend`** uses Scarthgap **`SRC_URI:append`** / **`FILESEXTRAPATHS:prepend`**; no **`meta-rockchip`** edits; Rockchip **`make.sh`** / SPL flow untouched.  
-- **PASS:** **`elevator-hmi-emmc-boot.cfg`** is a standard Poky **`*.cfg`** fragment; **`u-boot.inc`** pulls **`u-boot-configure.inc`**, which runs **`merge_config.sh`** after **`${UBOOT_MACHINE}`** (`rk3568_defconfig` per **`rockchip-rk3566-evb`**) — mechanism is correct for Scarthgap. Fragment is **documenting / idempotent** vs vendor defconfig (acceptable).  
-- **PASS:** **`UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`** aids traceability on serial / binaries.  
+
+- **PASS:** All changes under `**meta-hmi-platform`**; `**u-boot-rockchip.bbappend**` uses Scarthgap `**SRC_URI:append**` / `**FILESEXTRAPATHS:prepend**`; no `**meta-rockchip**` edits; Rockchip `**make.sh**` / SPL flow untouched.  
+- **PASS:** `**elevator-hmi-emmc-boot.cfg`** is a standard Poky `***.cfg**` fragment; `**u-boot.inc**` pulls `**u-boot-configure.inc**`, which runs `**merge_config.sh**` after `**${UBOOT_MACHINE}**` (`rk3568_defconfig` per `**rockchip-rk3566-evb**`) — mechanism is correct for Scarthgap. Fragment is **documenting / idempotent** vs vendor defconfig (acceptable).  
+- **PASS:** `**UBOOT_LOCALVERSION = "-elevator-hmi-emmc"`** aids traceability on serial / binaries.  
 - **PASS:** Machine comment ties **mmcblk0** to WIC / TASK-003 narrative without changing partition layout.  
-- **Deferred acceptance:** **`kas build … --target u-boot-rockchip`** did not reach BitBake on review host (**`lz4c`**). Same as TASK-104 — confirm on TASK-002 host or as part of **TASK-103**.  
+- **Deferred acceptance:** `**kas build … --target u-boot-rockchip`** did not reach BitBake on review host (`**lz4c**`). Same as TASK-104 — confirm on TASK-002 host or as part of **TASK-103**.  
 - **Caveat:** Raw-mode / GPT options must still match **actual SPL + image layout** after first flash; validate on **EM3566 v3** when images exist.
 
 ---
 
 ### TASK-104 — [Phase 1] Boardcon EM3566 machine DTS — integrate LMT101 panel fragment *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-104-boardcon-machine-dts` (merged to `develop` 2026-04-15).  
 
-**Output notes (A2):** *(summary)* BSP-pinned `rk3566-evb2-lp4x-v10-linux` baseline; **`elevator-hmi-em3566`** machine + **`elevator-hmi-boardcon-em3566-v3.dts`**; panel on **`&dsi0`** with `/delete-node/` merge; phandles `vcc3v3_lcd0_n`, `vcca_1v8`, `backlight`; kas `machine: elevator-hmi-em3566`; smoke blocked on review host **`lz4c`**. Full bullets were in `[REVIEW]` state — see git history on task branch if needed.
+**Output notes (A2):** *(summary)* BSP-pinned `rk3566-evb2-lp4x-v10-linux` baseline; `**elevator-hmi-em3566`** machine + `**elevator-hmi-boardcon-em3566-v3.dts**`; panel on `**&dsi0**` with `/delete-node/` merge; phandles `vcc3v3_lcd0_n`, `vcca_1v8`, `backlight`; kas `machine: elevator-hmi-em3566`; smoke blocked on review host `**lz4c**`. Full bullets were in `[REVIEW]` state — see git history on task branch if needed.
 
 **A1 review notes (2026-04-15):**  
-- **PASS:** Implementation stays in **`meta-hmi-platform`**; no community-layer edits; machine inherits **`rockchip-rk3566-evb`** and overrides **`KERNEL_DEVICETREE`** only — appropriate minimal delta.  
-- **PASS:** Board DTS include chain and **`&dsi0`** overlay match pinned **meta-rockchip** EVB2 layout; phandle names match BSP narrative; **BLK-006** respected (no invented `reset-gpios`).  
-- **PASS:** **`kas/elevator-hmi.yml`** default **machine** updated for reproducible builds.  
-- **Deferred acceptance (documented):** **`kas build … virtual/kernel`** did not reach BitBake on the review host (**`lz4c` / HOSTTOOLS**). Treated as **environment gap**, not DTS rework — confirm on TASK-002 host or fold into **TASK-103** acceptance.  
+
+- **PASS:** Implementation stays in `**meta-hmi-platform`**; no community-layer edits; machine inherits `**rockchip-rk3566-evb**` and overrides `**KERNEL_DEVICETREE**` only — appropriate minimal delta.  
+- **PASS:** Board DTS include chain and `**&dsi0`** overlay match pinned **meta-rockchip** EVB2 layout; phandle names match BSP narrative; **BLK-006** respected (no invented `reset-gpios`).  
+- **PASS:** `**kas/elevator-hmi.yml`** default **machine** updated for reproducible builds.  
+- **Deferred acceptance (documented):** `**kas build … virtual/kernel`** did not reach BitBake on the review host (`**lz4c` / HOSTTOOLS**). Treated as **environment gap**, not DTS rework — confirm on TASK-002 host or fold into **TASK-103** acceptance.  
 - **Bench:** DSI0 vs DSI1 caveat remains until **EM3566 v3 + LMT101** on **MIPI LCD** is exercised (**BLK-006** path unchanged).
 
 ---
 
 ### TASK-101 — [Phase 1] DTS node for JD9365D / LMT101SX006C *(archived — [DONE] 2026-04-15)*
+
 **Status:** `[DONE]`  
 **Branch:** `task/TASK-101-lmt101-dts` (merge at owner discretion after artifacts are **committed** on branch).  
 
 **Output notes (A2):**  
+
 - `0002-drm-panel-jadard-lmt101sx006c-compatible-optional-reset.patch` (after 0001): product `compatible`, optional `reset-gpios`, `devm_gpiod_get_optional`, 135 ms delay path when no reset GPIO.  
 - `elevator-hmi-lmt101sx006c-panel.dtsi`: `&dsi` / `panel@0` / `ports/port@1` graph; placeholder phandles per Rockchip BSP conventions.  
-- `linux-rockchip_%.bbappend`: `SRC_URI` + `CONFIG_DRM_PANEL_JADARD_JD9365DA_H3=y`.  
+- `linux-rockchip_%.bbappend`: `SRC_URI` + `CONFIG_DRM_PANEL_JADARD_JD9365DA_H3=y`.
 
 **A1 review notes (2026-04-15):**  
+
 - **PASS:** Patch 0002 is minimal, ordered after 0001, uses Scarthgap bitbake syntax; binding change matches driver; `prepare`/`unprepare`/`probe` handle `NULL` reset safely — **aligned with BLK-006** (no invented XRES GPIO).  
 - **PASS:** Reference `.dtsi` documents CON1 sources, merge hazard for `ports`, and defers `reset-gpios` until bench/trace.  
 - **PASS:** No modifications under community layers (`meta-rockchip` / `meta-qt6` / `meta-rauc`).  
@@ -965,24 +1096,26 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 
 ## Completed Tasks
 
-| Task | Description | Completed |
-|---|---|---|
-| TASK-001 | kas manifest + layer skeletons (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-002 | Ubuntu 22.04/24.04 build host setup script (A2 impl, A1 reviewed; 24.04 allowed in script 2026-04-15) | 2026-04-15 |
-| TASK-003 | eMMC partition layout WKS file (A2 impl, A1 reviewed — A1 fixed duplicate WICVARS) | 2026-04-15 |
-| TASK-004 | JD9365D panel driver backport patch 6.2→6.1.99 (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-005 | Convert vendor PDF library to Markdown | 2026-04-15 |
-| TASK-101 | LMT101 / JD9365 DSI fragment + optional-reset kernel patch (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed) | 2026-04-15 |
-| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed; green full sequence verified **TASK-113** 2026-04-19 Ubuntu 24.04 TASK-002-class host) | 2026-04-15 |
-| TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed) | 2026-04-15 |
+
+| Task     | Description                                                                                                                             | Completed  |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| TASK-001 | kas manifest + layer skeletons (A2 impl, A1 reviewed)                                                                                   | 2026-04-15 |
+| TASK-002 | Ubuntu 22.04/24.04 build host setup script (A2 impl, A1 reviewed; 24.04 allowed in script 2026-04-15)                                   | 2026-04-15 |
+| TASK-003 | eMMC partition layout WKS file (A2 impl, A1 reviewed — A1 fixed duplicate WICVARS)                                                      | 2026-04-15 |
+| TASK-004 | JD9365D panel driver backport patch 6.2→6.1.99 (A2 impl, A1 reviewed)                                                                   | 2026-04-15 |
+| TASK-005 | Convert vendor PDF library to Markdown                                                                                                  | 2026-04-15 |
+| TASK-101 | LMT101 / JD9365 DSI fragment + optional-reset kernel patch (A2 impl, A1 reviewed)                                                       | 2026-04-15 |
+| TASK-104 | Boardcon EM3566 machine DTS + LMT101 on DSI0 + kas machine (A2 impl, A1 reviewed)                                                       | 2026-04-15 |
+| TASK-102 | U-Boot eMMC Kconfig fragment + bbappend (A2 impl, A1 reviewed)                                                                          | 2026-04-15 |
+| TASK-103 | core-image-minimal + rockchip-image + project WIC (A2 impl, A1 reviewed)                                                                | 2026-04-15 |
+| TASK-105 | kas smoke script + logs (A2 impl, A1 reviewed; green full sequence verified **TASK-113** 2026-04-19 Ubuntu 24.04 TASK-002-class host)   | 2026-04-15 |
+| TASK-107 | BRINGUP-CHECKLIST.md + README/library links (A2 impl, A1 reviewed)                                                                      | 2026-04-15 |
 | TASK-110 | Fix linux-rockchip_%.bbappend: cfg fragment (replaces KERNEL_CONFIG:append) + do_configure DTS placement (A1 impl, supervisor approved) | 2026-04-16 |
-| TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1) | 2026-04-16 |
-| TASK-109 | Qt 6.8 EGLFS image skeleton + placeholder app (A2 impl; A1 fixed DISTRO_FEATURES defect + committed uncommitted A2 work; parse clean) | 2026-04-17 |
-| TASK-113 | Green `kas-build-task-105.sh` + deploy evidence in `diary/PROGRESS.md` (A2 impl, A1 reviewed; Ubuntu 24.04 TASK-002-class host) | 2026-04-19 |
-| TASK-114 | BRINGUP §8 “Lab without LCD” + cross-links (A2 impl, A1 reviewed) | 2026-04-19 |
+| TASK-108 | RAUC skeleton: system.conf, distro conf, key script, bundle stub (A2 impl, A1+supervisor reviewed; DISTRO_FEATURES fix by A1)           | 2026-04-16 |
+| TASK-109 | Qt 6.8 EGLFS image skeleton + placeholder app (A2 impl; A1 fixed DISTRO_FEATURES defect + committed uncommitted A2 work; parse clean)   | 2026-04-17 |
+| TASK-113 | Green `kas-build-task-105.sh` + deploy evidence in `diary/PROGRESS.md` (A2 impl, A1 reviewed; Ubuntu 24.04 TASK-002-class host)         | 2026-04-19 |
+| TASK-114 | BRINGUP §8 “Lab without LCD” + cross-links (A2 impl, A1 reviewed)                                                                       | 2026-04-19 |
+
 
 ---
 
@@ -996,3 +1129,4 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 - Commit format: `[phaseN][component] short description` — e.g., `[phase0][kas] pin layer SHASUMs`
 - **Branch naming:** create a branch named `task/TASK-NNN-short-description` for every task. Never commit directly to `main` or `develop`.
 - Merge to `develop` only after A1 sets status to `[DONE]`.
+
