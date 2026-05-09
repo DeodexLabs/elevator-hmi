@@ -17,7 +17,7 @@
  *
  * BLK-006 / TASK-121: reset-gpios on gpio0 RK_PB6 (CON1 TOUCH_RST repurposed as
  * panel XRES; `gt1x` disabled in board DTS).
- * TASK-125: vendor init — **3-lane DSI** (`library/LMT101/LMT101SX006C initial codes.txt`).
+ * TASK-125: vendor init — **4-lane DSI** (`{0x80,0x03}` CMD_DSI_INT0 bits[1:0]=11; `library/LMT101/LMT101SX006C initial codes.txt`).
  */
 
 #include <dt-bindings/gpio/gpio.h>
@@ -40,7 +40,7 @@
 	panel_lmt101: panel@0 {
 		compatible = "elevator-hmi,lmt101sx006c", "jadard,jd9365da-h3";
 		reg = <0>;
-		dsi-lanes = <3>;
+		dsi-lanes = <4>;
 		dsi-format = <0>;
 		vdd-supply = <&vcc3v3_lcd0_n>;
 		vccio-supply = <&vcca_1v8>;
