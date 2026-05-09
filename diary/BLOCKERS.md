@@ -26,8 +26,7 @@ Public **EM3566 v3** materials (`library/EM3566/Usermanual/EM3566_hardware_manua
 **Opened:** 2026-05-08 — **Closed:** 2026-05-09  
 **Severity was:** HIGH  
 **Resolution:**  
-LCD Mall supplied the authoritative register table in-repo as **`library/LMT101/LMT101SX006C initial codes.txt`**. **TASK-125** ports it to **`jadard`** as **`0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`**: **`lmt101sx006c_init_cmds[]`** (**196** two-byte writes, vendor order through **`0xE7,0x0C`**, excluding **`0x11` / `0x29`** and delays — handled by **`jadard_panel_enable()`**). Descriptor uses vendor timings + **`.lanes = 3`**; DTS **`dsi-lanes = <3>`**. On-target visible image remains **TASK-106** / owner reflash validation.  
-**Follow-up:** Full command list reference: **`diary/TASK-125-lmt101sx006c-init_cmds.txt`**.
+LCD Mall supplied the authoritative register table as **`library/LMT101/LMT101SX006C initial codes.txt`**. **TASK-125** ports it to **`jadard`** via **`0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`**: **`lmt101sx006c_init_cmds[]`** (**196** two-byte writes through **`0xE7,0x0C`**, excluding **`0x11` / `0x29`** vendor delays — handled by **`jadard_panel_enable()`**). Descriptor **`lmt101sx006c_desc`** uses vendor DPI timings (**~70 MHz** mode) + **`.lanes = 4`** matching **`CMD_DSI_INT0 {0x80,0x03}`** (**bits[1:0]** = **11**). DTS **`elevator-hmi-lmt101sx006c-panel.dtsi`**: **`dsi-lanes = <4>`**. **TASK-124**’s **`{0x80, 0x11}`** mistakenly selected **two** lanes via **CMD_DSI_INT0** bits **`01`**. On-target validation remains **TASK-106**.  
 
 ---
 

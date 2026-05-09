@@ -1,12 +1,12 @@
 # LMT101 class panel — library notes (Elevator HMI)
 
-Project product panel is **LMT101SX006C** (portrait 800×1280; **3‑lane DSI** MIPI mode per vendor JD9365 init), JD9365D per [`CLAUDE.md`](../../CLAUDE.md). This folder holds **vendor connector and electrical notes** extracted from datasheets when available.
+Project product panel is **LMT101SX006C** (portrait **800×1280**; **MIPI DSI** routed as **four** lanes on CON1 harness; **`{0x80,0x03}`** in vendor init sets **JD9365D CMD_DSI_INT0** to **four** lanes), JD9365D per [`CLAUDE.md`](../../CLAUDE.md). This folder holds **vendor connector and electrical notes** extracted from datasheets when available.
 
 | File | Contents |
 |------|----------|
 | [`LMT101-40pin-FPC-input-terminals.md`](LMT101-40pin-FPC-input-terminals.md) | Section 3 pin list (40-pin FPC) + §8.1 DC characteristics (summary) |
 | [`EM3566-CON1-to-panel-40pin-mapping.md`](EM3566-CON1-to-panel-40pin-mapping.md) | **FPC pin ↔ CON1 pin** signal map (MIPI, 3.3 V, GND) + reset/backlight notes |
-| [`LMT101SX006C initial codes.txt`](LMT101SX006C%20initial%20codes.txt) | **LCD Mall** JD9365D MIPI DCS init (authoritative; **TASK-125** kernel port — **3-lane**) |
+| [`LMT101SX006C initial codes.txt`](LMT101SX006C%20initial%20codes.txt) | **LCD Mall** JD9365D MIPI DCS init (authoritative **TASK-125** kernel port; **`{0x80,0x03}`** = **4** lanes CMD_DSI_INT0) |
 
 **Original PDF (owner):** place a copy here as `1756115401449443.pdf` (or symlink) if you want it versioned with the repo; otherwise keep under your vault and cite path in commits when wiring changes.
 

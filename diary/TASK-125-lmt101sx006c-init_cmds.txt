@@ -1,6 +1,6 @@
-# TASK-125 — lmt101sx006c_init_cmds[] (196 entries)
+# TASK-125 — lmt101sx006c_init_cmds[] (196 entries); vendor {0x80,0x03} = CMD_DSI_INT0 4-lane decode
 # Source: meta-hmi-platform/recipes-kernel/linux/files/0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch
-# Vendor: library/LMT101/LMT101SX006C initial codes.txt (0x11/0x29 omitted — jadard_panel_enable)
+# Vendor: library/LMT101/LMT101SX006C initial codes.txt (omit 0x11/0x29; sequencing in jadard_panel_enable())
 
 	{ .data = { 0xE0, 0x00 } },
 	{ .data = { 0xE1, 0x93 } },

@@ -37,7 +37,7 @@
 Tasks are sorted by dependency order. Do not reorder.
 
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → `**MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
-**Closed 2026-05-09:** **BLK-011** — LCD Mall vendor init (`**library/LMT101/LMT101SX006C initial codes.txt**`) ported via **TASK-125** (see **`diary/BLOCKERS.md`**).  
+**[RESOLVED] 2026-05-09 — BLK-011:** LCD Mall vendor init (`**library/LMT101/LMT101SX006C initial codes.txt**`) ported via **TASK-125** (**`jadard`** + **`CMD_DSI_INT0` / vendor `0x80=0x03` ⇒ 4 lanes**; see **`diary/BLOCKERS.md`**).  
 **Open:** **BLK-006** (JD9365 `reset-gpios` / XRES — medium; `**TASK-121`** `**[DONE]**`). **Closed 2026-05-06:** **BLK-010** (Jadard probe narrative — on-target **DSI**/`modetest` OK; see `**diary/BLOCKERS.md`**). **Closed 2026-05-06:** **BLK-008** (DTS phandles / bench — `**vcc3v3_lcd0_n`**, `**modetest**` verified; `**pwm-backlight**` `**power-supply**` in `**elevator-hmi-boardcon-em3566-v3.dts**`). **Closed 2026-04-18:** **BLK-009** (RAUC `**system.conf`** vs WIC — `**TASK-111**` merged). **BLK-007** (Noble `**libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** `**[IN PROGRESS]`** (**LMT101** bench); **TASK-118** (**LCD_BL_PWM**) `**[DEFERRED]`** — owner prioritized **TASK-115** (`**elevator-hmi-image`** parse / app layer) ahead of backlight DTS; revisit **TASK-118** when display bring-up scheduling allows. Production carrier + formal −20°C acceptance before shipping hardware.  
 **A2 sprint queue (2026-05-09):** **TASK-125** `**[REVIEW]**` (vendor LMT101 init; branch `**task/TASK-125-vendor-lmt101-init**`). Next `**[READY]**`: `**TASK-115`** (`**elevator-hmi-image**` parse; `**task/TASK-115-qt-image-parse**`) → `**TASK-116**` (RAUC / systemd). `**TASK-118**` (**backlight PWM**) is `**[DEFERRED]**`. `**TASK-123`** / `**TASK-124**` **`[SUPERSEDED]`** by **TASK-125**. Pick **one** task at a time. `**TASK-122`**, `**TASK-121**`, `**TASK-113**` / `**TASK-114**` `**[DONE]**`. `**TASK-106**` `**[IN PROGRESS]**`. **Owner / lab:** `**CLAUDE.md`** §2.1 and `**docs/BRINGUP-CHECKLIST.md**` (**§5** display, **§8** no-LCD) — `**lsblk`**, `**dmesg`**, `**rauc status**`, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
@@ -50,21 +50,21 @@ Tasks are sorted by dependency order. Do not reorder.
 **Depends on:** Vendor file in-repo (`**library/LMT101/LMT101SX006C initial codes.txt**`)  
 **Branch:** `task/TASK-125-vendor-lmt101-init` (A2)
 
-**Summary:** Replaces **TASK-123 / TASK-124** ESP32-derived **`lmt101sx006c_init_cmds[]`** with the **official vendor** sequence. **Critical:** vendor **`0x80, 0x03`** → **3 MIPI lanes** (not 4). **`0x11` / `0x29`** and post-command delays are **not** in the init array — **`jadard_panel_enable()`** already performs sleep-out + **120 ms** + display on.
+**Summary:** Replaces **TASK-123 / TASK-124** ESP32-derived **`lmt101sx006c_init_cmds[]`** with the **official vendor** sequence. **`0x80, 0x03`** configures **JD9365D CMD_DSI_INT0** bits[1:0]=**11** ⇒ **4** MIPI lanes (matches board wiring **`dsi-lanes = <4>`**). TASK-124’s **`{0x80,0x11}`** wrongly selected **2** lanes via bits **01**. **`0x11` / `0x29`** and vendor delays — **not** in the array; **`jadard_panel_enable()`** issues sleep-out + **120 ms** + display on.
 
 **Delivered in tree:**
 
-- **`meta-hmi-platform/recipes-kernel/linux/files/0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`** — **`lmt101sx006c_init_cmds[]`**: **196** `{ .data = { reg, val } }` entries (**`0xE0,0x00`** … **`0xE7,0x0C`**, stops before vendor **`0x11`**). **`lmt101sx006c_desc`**: **800×1280**, **70 MHz** **`clock`**, timings **H** hfp**40** / hs**20** / hb**20**; **V** vfp**30** / vs**4** / vb**10**; **`.lanes = 3`**, **`MIPI_DSI_FMT_RGB888`**. **`of_match`:** **`elevator-hmi,lmt101sx006c`** → **`&lmt101sx006c_desc`**.
-- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`dsi-lanes = <3>`** + product **`jadard`** compatible (revert simple-panel path).
+- **`meta-hmi-platform/recipes-kernel/linux/files/0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch`** — **`lmt101sx006c_init_cmds[]`**: **196** `{ .data = { reg, val } }` entries (**`0xE0,0x00`** … **`0xE7,0x0C`**, stops before vendor **`0x11`**). Comment block cites vendor + **CMD_DSI_INT0**. **`lmt101sx006c_desc`**: **800×1280**, **70 MHz** **`clock`**, timings **H** hfp**40** / hs**20** / hb**20**; **V** vfp**30** / vs**4** / vb**10**; **`.lanes = 4`**, **`MIPI_DSI_FMT_RGB888`**. **`of_match`:** **`elevator-hmi,lmt101sx006c`** → **`&lmt101sx006c_desc`**.
+- **`elevator-hmi-lmt101sx006c-panel.dtsi`:** **`dsi-lanes = <4>`** + product **`jadard`** compatible (simple-panel revert).
 - **`elevator-hmi-panel.cfg`:** **`CONFIG_DRM_PANEL_SIMPLE`** removed (jadard product path).
 - **`linux-rockchip_%.bbappend`:** **`SRC_URI`** **`0003`** after **`0002`**.
 
 **Output notes (A2):**
 
 - Full **`lmt101sx006c_init_cmds[]`** as committed: **`diary/TASK-125-lmt101sx006c-init_cmds.txt`** (**196** `{ .data = { … } }` pairs plus short file header — extracted from **`0003`**).
-- **`dsi-lanes = <3>`** confirmed in **`elevator-hmi-lmt101sx006c-panel.dtsi`**.
-- **Kernel:** `**kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f"`** → **exit 0** (BitBake **`-f`** taint warnings only).
-- **WIC:** `**kas shell … -c "bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** → **exit 0**; artefact **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509065530.wic`** (+ symlink **`…rootfs.wic`**).
+- **`dsi-lanes = <4>`** confirmed in **`elevator-hmi-lmt101sx006c-panel.dtsi`** (`reset-gpios` RK_PB6 unchanged).
+- **Kernel:** `**linux-rockchip -c cleansstate**` once, then **`bitbake virtual/kernel -c compile -f && … -c deploy -f`** (`**kas shell …`**) → **exit 0** (BitBake **`-f`** taint warnings only; **`0003`** regenerated as valid unified diff after lane correction).
+- **WIC (2026-05-09 rebuild):** **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509072359.wic`** → symlink **`core-image-minimal-elevator-hmi-em3566.rootfs.wic`**
 - **No** edits under **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`**.
 
 **A1 review notes:** [to be filled]
@@ -110,7 +110,7 @@ Tasks are sorted by dependency order. Do not reorder.
 
 ### TASK-124 — [SUPERSEDED by TASK-125] [Phase 1] Fix JD9365D Missing Lane & Color Configuration
 
-**Status:** `[SUPERSEDED]` *(vendor **TASK-125** supersedes ESP32 **4-lane** **`0x80,0x11`** experiment; LMT101SX006C is **3-lane** **`0x80,0x03`** per LCD Mall init)*  
+**Status:** `[SUPERSEDED]` *(**TASK-125**: vendor **`0x80,0x03`** ⇒ **4** lanes per **CMD_DSI_INT0**; **TASK-124** **`0x80,0x11`** wrongly forced **2** lanes — superseded entirely by LCD Mall table)*  
 **Phase:** 1  
 **Priority:** CRITICAL — The ESP32 array missed the dynamic lane configurations.  
 **Depends on:** TASK-123  
@@ -982,7 +982,7 @@ driver at 9V. The PWM signal from `LCD_BL_PWM` controls the driver.
 - `**GPT`** touch errors on `**gt1x**` — ignore for LCD.  
 - **Update (2026-05-08):** `**cz101b4001_desc`** init ≠ **LMT101SX006C** — panel black with generic `**jadard`** path; **`BLK-011`** tracked vendor DCS until **TASK-125**.  
 - **Update (2026-05-08):** `**TASK-122`** **`simple-panel-dsi`** fallback — lab-only; product path restored with **TASK-125** **`jadard`** + vendor init.  
-- **Update (2026-05-09):** **TASK-125** ports LCD Mall **`library/LMT101/LMT101SX006C initial codes.txt`** (**3-lane**, vendor timings); **`BLK-011`** closed — **owner flash + bench** pending to confirm visible image vs prior black panel.  
+- **Update (2026-05-09):** **TASK-125** ports LCD Mall init; **`BLK-011`** closed — **A1 correction**: **`{0x80,0x03}`** ⇒ **4** lanes (**CMD_DSI_INT0**), **`dsi-lanes = <4>`** + **`.lanes = 4`**; owner reflash pending.  
 - **Next:** Reflash WIC with **TASK-125** kernel/DTB; **`modetest`** / photo → **`diary/PROGRESS.md`**; **`TASK-118`** (PWM); **`BLK-006`** per XRES validation if needed.
 
 ---

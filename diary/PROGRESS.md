@@ -4,23 +4,33 @@
 
 ---
 
-## 2026-05-09 — TASK-125: LCD Mall vendor JD9365 init — 3-lane LMT101SX006C (A2)
+## 2026-05-09 — TASK-125: vendor LMT101SX006C init ported (A2)
 
 **Agent:** A2 (Cursor)  
 **Phase:** 1  
 
 ### Summary
 
-- **Authoritative init:** `library/LMT101/LMT101SX006C initial codes.txt` → kernel patch `0003-drm-panel-jadard-lmt101sx006c-vendor-init.patch` — **`lmt101sx006c_init_cmds[]`** **196** writes (ends **`0xE7,0x0C`**; no **`0x11`/`0x29`** — **`jadard_panel_enable()`**). **`.lanes = 3`** (**`0x80,0x03`**).
-- **Timings / mode:** 800×1280, **70 MHz** **`clock`**, H hfp 40 hs 20 hb 20; V vfp 30 vs 4 vb 10.
-- **DTS:** `elevator-hmi-lmt101sx006c-panel.dtsi` — **`dsi-lanes = <3>`**, **`elevator-hmi,lmt101sx006c`** + **`jadard,jd9365da-h3`**; **`CONFIG_DRM_PANEL_SIMPLE`** removed from `elevator-hmi-panel.cfg`.
-- **Diary reference:** full command list — `diary/TASK-125-lmt101sx006c-init_cmds.txt`.
-- **Build:** `bitbake virtual/kernel -c compile -f && -c deploy -f` → exit **0**; WIC `bitbake core-image-minimal -c image_wic -f && -c image_complete -f` → exit **0** → `build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509065530.wic`.
-- **Status:** **`diary/BLOCKERS.md`** **BLK-011** → **Closed**; **`AGENTS.md`** **TASK-125** → **`[REVIEW]`**; **TASK-123/124** **`[SUPERSEDED]`**.
+- **Source:** **`library/LMT101/LMT101SX006C initial codes.txt`** (LCD Mall official JD9365D init).
+- **`{0x80, 0x03}`** = **4** MIPI lanes: **JD9365D CMD_DSI_INT0** bits[1:0] **11** (**not** three lanes — earlier TASK-125 draft text was incorrect). Matches **four** routed data lanes (**D0–D3**) + clock on CON1 harness.
+- **TASK-124** injected **`{0x80, 0x11}`** ⇒ bits **01** ⇒ **2** lanes — contradictory to carrier **4-lane** video and vendor table.
+- **`lmt101sx006c_init_cmds[]`:** **196** `{ reg, val }` pairs (**`jadard`** format); ends **`0xE6,0x02`**, **`0xE7,0x0C`** after page-0 **`0xE0,0x00`**; **no `0x11` / delays / `0x29`** (**`jadard_panel_enable()`**).
+- **Timings / clock:** vsync 4, vbp 10, vfp 30, hsync 20, hbp 20, hfp 40; **PLL_CLOCK=420** → **~69.9 MHz** ⇒ **`.clock = 70000`** (**70 MHz** mode line in **`lmt101sx006c_desc`**).
+- **Integration:** **`0003`** comment block + **`.lanes = 4`**; DTS **`dsi-lanes = <4>`**, **`compatible = "elevator-hmi,lmt101sx006c"`**, **`reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_LOW>`** unchanged besides lane count revert.
+- **BLK-011:** **[RESOLVED]** — vendor init in-tree (**2026-05-09**).
+
+### Builds
+
+- `kas shell … "bitbake linux-rockchip -c cleansstate"` then `bitbake virtual/kernel -c compile -f && … -c deploy -f` → **exit 0** (2026-05-09 rebuild after regenerating **`0003`**; BitBake **`-f`** taint warnings only).
+
+### WIC
+
+- `bitbake core-image-minimal -c image_wic -f && -c image_complete -f` → **exit 0**.
+- Artefact: **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509072359.wic`** (symlink **`…rootfs.wic`**).
 
 ### Next
 
-- Owner: reflash WIC; **`modetest`** + photo for **TASK-106**; confirm **DSI host lane count** matches **3** on hardware.
+- Owner: flash WIC → **`modetest`** / photo for **TASK-106**.
 
 ---
 
