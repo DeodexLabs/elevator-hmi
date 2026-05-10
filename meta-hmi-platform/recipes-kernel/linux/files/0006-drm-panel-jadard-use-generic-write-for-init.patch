@@ -1,0 +1,65 @@
+From: Elevator HMI meta-hmi-platform
+Subject: [PATCH] drm: panel: jadard — generic short write for vendor init table
+
+Vendor DCS register/value pairs use MIPI Generic Short Write 2 params (type 0x23)
+for the bulk init burst; log mipi_dsi_generic_write failures in dmesg.
+
+---
+diff --git a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+index 8b0827b2f2e1..ef90b8e118e5 100644
+--- a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
++++ b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+@@ -15,6 +15,7 @@
+ 
+ #include <linux/gpio/consumer.h>
+ #include <linux/delay.h>
++#include <linux/kernel.h>
+ #include <linux/module.h>
+ #include <linux/of_device.h>
+ #include <linux/regulator/consumer.h>
+@@ -60,13 +61,29 @@ static inline struct jadard *panel_to_jadard(struct drm_panel *panel)
+ 	return container_of(panel, struct jadard, panel);
+ }
+ 
++static void jadard_init_sequence(struct jadard *jadard)
++{
++	const struct jadard_panel_desc *desc = jadard->desc;
++	struct mipi_dsi_device *dsi = jadard->dsi;
++	unsigned int i;
++	ssize_t ret;
++
++	for (i = 0; i < desc->num_init_cmds; i++) {
++		const struct jadard_init_cmd *cmd = &desc->init_cmds[i];
++
++		ret = mipi_dsi_generic_write(dsi, cmd->data, ARRAY_SIZE(cmd->data));
++		if (ret < 0)
++			dev_err(&jadard->dsi->dev, "init cmd 0x%02x failed: %zd\n",
++				cmd->data[0], ret);
++	}
++}
++
+ static int jadard_enable(struct drm_panel *panel)
+ {
+ 	struct device *dev = panel->dev;
+ 	struct jadard *jadard = panel_to_jadard(panel);
+ 	const struct jadard_panel_desc *desc = jadard->desc;
+ 	struct mipi_dsi_device *dsi = jadard->dsi;
+-	unsigned int i;
+ 	int err;
+ 
+ 	if (desc->enable_seq != JADARD_ENABLE_SEQ_LMT101) {
+@@ -75,13 +92,7 @@ static int jadard_enable(struct drm_panel *panel)
+ 		msleep(desc->sleep_mode_delay);
+ 	}
+ 
+-	for (i = 0; i < desc->num_init_cmds; i++) {
+-		const struct jadard_init_cmd *cmd = &desc->init_cmds[i];
+-
+-		err = mipi_dsi_dcs_write_buffer(dsi, cmd->data, JD9365DA_INIT_CMD_LEN);
+-		if (err < 0)
+-			return err;
+-	}
++	jadard_init_sequence(jadard);
+ 
+ 	if (desc->enable_seq == JADARD_ENABLE_SEQ_LMT101) {
+ 		u8 e0_page0[JD9365DA_INIT_CMD_LEN] = { 0xE0, 0x00 };
