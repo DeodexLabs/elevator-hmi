@@ -1,0 +1,30 @@
+From: Elevator HMI meta-hmi-platform
+Subject: [PATCH] drm: panel: jadard — LMT101 RESX timing after power-up
+
+Vendor sequence: 10 ms after rails stable; 20 ms XRES assert (active low) width.
+
+---
+diff --git a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+index ef90b8e118e5..6cc5d8409ee5 100644
+--- a/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
++++ b/drivers/gpu/drm/panel/panel-jadard-jd9365da-h3.c
+@@ -159,12 +159,18 @@ static int jadard_prepare(struct drm_panel *panel)
+ 	if (ret)
+ 		return ret;
+ 
++	/*
++	 * Vendor power-on: wait ~10 ms after rails so internal LDO / OSC can
++	 * stabilize before the RESX pulse (LMT101SX006C bring-up).
++	 */
++	msleep(10);
++
+ 	if (jadard->reset) {
+ 		gpiod_set_value(jadard->reset, 1);
+ 		msleep(5);
+ 
+ 		gpiod_set_value(jadard->reset, 0);
+-		msleep(10);
++		msleep(20); /* vendor spec: 20ms XRES pulse width */
+ 
+ 		gpiod_set_value(jadard->reset, 1);
+ 		msleep(jadard->desc->post_reset_delay ?

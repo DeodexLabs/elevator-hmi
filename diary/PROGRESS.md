@@ -2,6 +2,45 @@
 
 **Format:** One entry per session. Most recent entry first.
 
+## 2026-05-11 — TASK-128: `jadard_prepare` 10ms post-rail + 20ms RESX low (`0007`)
+
+**Agent:** A2 (Cursor)  
+**Phase:** 1  
+
+### Summary
+
+- **`0007-drm-panel-jadard-lmt101sx006c-reset-powerup-delay.patch`:** after **`regulator_enable(vccio)`** and **`vdd`**, **`msleep(10)`** before reset GPIO; **`msleep(20)`** with vendor comment for XRES active-low width (was 10ms).
+- **`linux-rockchip_%.bbappend`:** **`0007`** in **`SRC_URI`** after **`0006`**.
+- **Build:** kernel compile/deploy + **`core-image-minimal`** WIC — exit **0**.
+
+### Owner
+
+- **Vendor Q1 alignment:** full **[rail-delay → RESX sequence]** per LCD Mall; **multimeter** checks **(FPC 2–4, 5–4)** before flash (see project connection table).
+
+---
+
+## 2026-05-10 — A1: TASK-125 + TASK-126 + TASK-127 `[DONE]` — corrected BLK-012 diagnosis
+
+**Agent:** A1  
+**Phase:** 1
+
+### Review verdicts
+
+- **TASK-125 `[DONE]`** — Vendor init array (196 pairs from LCD Mall), 4-lane CMD_DSI_INT0, descriptor timings, DTS `dsi-lanes = <4>`, clean build.
+- **TASK-126 `[DONE]`** — Descriptor-driven timing fields in `jadard_panel_desc`; `lmt101sx006c_desc` = 120/0/120/5 ms matching vendor tail. Architecturally correct.
+- **TASK-127 `[DONE]`** — `jadard_init_sequence()` replaces old `mipi_dsi_dcs_write_buffer` loop with `mipi_dsi_generic_write()` (MIPI packet type 0x23). Verified via `grep -n "^+" 0006-*.patch | grep mipi_dsi` — only `mipi_dsi_generic_write` in addition lines; `mipi_dsi_dcs_write_buffer` only in deletion lines. `dev_err` on failure gives dmesg visibility. Sleep Out / Display On / `0xE0` page-select remain DCS writes (correct).
+
+### BLK-012 corrected root cause
+
+TASK-126's A2 output note confirms timing values were **already in effect** during the backlit-black bench test. **BLK-012 is NOT a timing defect.** Narrowed to: (1) DCS command acceptance — look for `DRM_DEV_ERROR` / `init cmd 0x.. failed` in dmesg after TASK-127 flash; (2) `reset-gpios` polarity (BLK-006); (3) hardware.
+
+### Next
+
+- **Owner: flash immediately** — the 2026-05-10 WIC with `0006` is the first image that will report individual init command failures in `dmesg` (via `jadard_init_sequence()` → `dev_err`). Run `modetest -M rockchip -s 191:#0` and capture **full `dmesg`**.
+- A2: pick up **TASK-115** (Qt image parse smoke).
+
+---
+
 ## 2026-05-10 — TASK-127: `jadard` init table via `mipi_dsi_generic_write` (`0006`)
 
 **Agent:** A2 (Cursor)  

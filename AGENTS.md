@@ -1,7 +1,7 @@
 # AGENTS.md — Multi-Agent Coordination Protocol
 
 **Owner:** Claude Code (lead agent)  
-**Last updated:** 2026-05-10 (**TASK-127** `**[REVIEW]**` — **`jadard`** **`0006`** generic init write; **TASK-126** `**[REVIEW]**`)  
+**Last updated:** 2026-05-11 (**TASK-128** `**[REVIEW]**` — **`jadard`** **`0007`** RESX timing; **TASK-127** `**[DONE]**`; **TASK-118** `**[DEFERRED]**`)  
 
 ---
 
@@ -39,13 +39,33 @@ Tasks are sorted by dependency order. Do not reorder.
 **Phase 0 gate status:** All A2 tasks complete. **BLK-001–004 closed** 2026-04-15 (vendor temp note, MIPI/LVDS mux clarification, backlight IC deferred, protocol hardware deferred). **Reference hardware:** **Boardcon EM3566 v3** dev kit (**CM3566**) — **on hand** (owner 2026-04-15); **LMT101** → `**MIPI LCD`** connector (muxed bus; see `CLAUDE.md` / BLK-002). **Interim SoM link:** **UART console** (host ↔ board) for boot / image / RAUC diagnostics until fieldbus returns (see `CLAUDE.md` §8 PAL).  
 **[RESOLVED] 2026-05-09 — BLK-011:** LCD Mall vendor init (`**library/LMT101/LMT101SX006C initial codes.txt`**) ported via TASK-125 (`**jadard`** + `**CMD_DSI_INT0` / vendor `0x80=0x03` ⇒ 4 lanes**; see `**diary/BLOCKERS.md`**).**  
 **Open: BLK-006 (JD9365 `reset-gpios` / XRES — medium; `**TASK-121`** `**[DONE]`**). Closed 2026-05-06: BLK-010 (Jadard probe narrative — on-target DSI/`modetest` OK; see `**diary/BLOCKERS.md`**). Closed 2026-05-06: BLK-008 (DTS phandles / bench — `**vcc3v3_lcd0_n`**, `**modetest`** verified; `**pwm-backlight**` `**power-supply**` in `**elevator-hmi-boardcon-em3566-v3.dts**`). Closed 2026-04-18: BLK-009 (RAUC `**system.conf**` vs WIC — `**TASK-111`** merged). **BLK-007** (Noble `**libegl1-mesa`** / TASK-002). **BLK-005** closed 2026-04-15 (OV13850). Phase 1: **TASK-106** `**[IN PROGRESS]`** (**LMT101** bench); **TASK-118** (**LCD_BL_PWM**) `**[DEFERRED]`** — owner prioritized **TASK-115** (`**elevator-hmi-image`** parse / app layer) ahead of backlight DTS; revisit **TASK-118** when display bring-up scheduling allows. Production carrier + formal −20°C acceptance before shipping hardware.  
-**A2 sprint queue (2026-05-10):** **TASK-127** `**[REVIEW]**` (**`0006`** generic write — **`task/TASK-127-jadard-generic-write`**); **TASK-126** `**[REVIEW]**`; **TASK-125** `**[REVIEW]**`. Next `**[READY]**`: `**TASK-115`** (`**elevator-hmi-image`** parse; `**task/TASK-115-qt-image-parse`**) → `**TASK-116**` (RAUC / systemd). `**TASK-118**` (**backlight PWM**) is `**[DEFERRED]`**. `**TASK-123`** / `**TASK-124`** `**[SUPERSEDED]`** by **TASK-125**. Pick **one** task at a time. `**TASK-122`**, `**TASK-121`**, `**TASK-113**` / `**TASK-114**` `**[DONE]**`. `**TASK-106**` `**[IN PROGRESS]**`. Owner / lab: `**CLAUDE.md**` §2.1 and `**docs/BRINGUP-CHECKLIST.md**` (**§5** display, **§8** no-LCD) — `**lsblk`**, `**dmesg`**, `**rauc status**`, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
+**A2 sprint queue (2026-05-11):** **TASK-128** `**[REVIEW]**` (**`0007`** reset / power-up delay — **`task/TASK-128-jadard-reset-timing-fix`**). **TASK-125** / **TASK-126** / **TASK-127** `**[DONE]**` (merged). Next `**[READY]**`: `**TASK-115`** (`**elevator-hmi-image`** parse; `**task/TASK-115-qt-image-parse`**) → `**TASK-116**` (RAUC / systemd). `**TASK-118**` (**backlight PWM**) is `**[DEFERRED]`**. `**TASK-123`** / `**TASK-124`** `**[SUPERSEDED]`** by **TASK-125**. Pick **one** task at a time. `**TASK-122`**, `**TASK-121`**, `**TASK-113**` / `**TASK-114**` `**[DONE]**`. `**TASK-106**` `**[IN PROGRESS]**` — **BLK-012** corrected diagnosis (timing not root cause; see **`diary/BLOCKERS.md`**). Owner / lab: `**CLAUDE.md`** §2.1 and `**docs/BRINGUP-CHECKLIST.md`** (**§5** display, **§8** no-LCD) — `**lsblk`**, `**dmesg`**, `**rauc status`**, optional **eth/USB**, **U-Boot bootdelay** if still **0**.
 
 ---
 
-### TASK-125 — [Phase 1] Vendor LMT101SX006C JD9365 init (LCD Mall authoritative table)
+### TASK-128 — [Phase 1] `jadard_prepare()` vendor power-up delay + RESX low width
 
 **Status:** `[REVIEW]`  
+**Phase:** 1  
+**Depends on:** **TASK-126** / **0005** in-tree (descriptor timing); stacks on **0001**–**0006**  
+**Branch:** `task/TASK-128-jadard-reset-timing-fix` (A2)
+
+**Spec:** In **`jadard_prepare()`** only: **(1)** **`msleep(10)`** after **`vccio`** and **`vdd`** are enabled, before any RESX GPIO; **(2)** extend XRES active-low **`msleep(10)`** → **`msleep(20)`** with vendor comment. **No** DTS, descriptors, or other functions.
+
+**Output notes (A2):**
+
+- **`meta-hmi-platform/recipes-kernel/linux/files/0007-drm-panel-jadard-lmt101sx006c-reset-powerup-delay.patch`**
+- **`linux-rockchip_%.bbappend`:** **`SRC_URI`** **`0007`** after **`0006`**
+- **Build:** **`kas shell kas/elevator-hmi.yml -c "bitbake virtual/kernel -c compile -f && bitbake virtual/kernel -c deploy -f && bitbake core-image-minimal -c image_wic -f && bitbake core-image-minimal -c image_complete -f"`** → exit **0** (BitBake **`‑f`** taint).
+- **No** **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`** edits.
+
+**A1 review notes:** [to be filled]
+
+---
+
+### TASK-125 — [Phase 1] Vendor LMT101SX006C JD9365 init (LCD Mall authoritative table) *(archived — [DONE] 2026-05-10)*
+
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** Vendor file in-repo (`**library/LMT101/LMT101SX006C initial codes.txt`**)  
 **Branch:** `task/TASK-125-vendor-lmt101-init` (A2)
@@ -65,15 +85,22 @@ Tasks are sorted by dependency order. Do not reorder.
 - `**dsi-lanes = <4>`** confirmed in `**elevator-hmi-lmt101sx006c-panel.dtsi**` (`reset-gpios` RK_PB6 unchanged).
 - **Kernel:** `**linux-rockchip -c cleansstate`** once, then `**bitbake virtual/kernel -c compile -f && … -c deploy -f`** (`**kas shell …`**) → exit 0 (BitBake `**-f`** taint warnings only; `**0003**` regenerated as valid unified diff after lane correction).
 - **WIC (2026-05-09 rebuild):** `**build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260509072359.wic`** → symlink `**core-image-minimal-elevator-hmi-em3566.rootfs.wic`**
-- **No** edits under `**meta-rockchip`** / `**meta-qt6`** / `**meta-rauc**`.
+- **No** edits under `**meta-rockchip`** / `**meta-qt6`** / `**meta-rauc`**.
 
-**A1 review notes:** [to be filled]
+**A1 review notes (`[DONE]` 2026-05-10):**
+
+- **PASS** — `**lmt101sx006c_init_cmds[]`** matches vendor file byte-for-byte (196 pairs verified by A2 cross-check).
+- **PASS** — `**{0x80, 0x03}`** correctly selects 4 MIPI lanes via CMD_DSI_INT0.
+- **PASS** — `**lmt101sx006c_desc`** mode, timings, and `.lanes = 4` are consistent with vendor PLL_CLOCK=420.
+- **PASS** — DTS `**dsi-lanes = <4>`**, `**reset-gpios`** RK_PB6 intact from TASK-121.
+- **PASS** — No community-layer edits; clean kernel build.
+- **Merge approved.**
 
 ---
 
-### TASK-126 — [Phase 1] JD9365D (`jadard`) LMT101 init timing — descriptor delays
+### TASK-126 — [Phase 1] JD9365D (`jadard`) LMT101 init timing — descriptor delays *(archived — [DONE] 2026-05-10)*
 
-**Status:** `[REVIEW]`  
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** **TASK-125** (**`0003`** + **`0004`** in-tree)  
 **Branch:** `task/TASK-126-jd9365-init-timing` (A2)
@@ -90,13 +117,20 @@ Tasks are sorted by dependency order. Do not reorder.
 - **WIC (host build):** **`build/tmp/deploy/images/elevator-hmi-em3566/core-image-minimal-elevator-hmi-em3566.rootfs-20260510140051.wic`** (symlink **`…rootfs.wic`**).
 - **`diary/BLOCKERS.md`:** **BLK-012** — **TASK-126** reflash trial.
 
-**A1 review notes:** [to be filled]
+**A1 review notes (`[DONE]` 2026-05-10):**
+
+- **PASS** — Descriptor-driven timing is the correct architecture; all four fields added cleanly to `**jadard_panel_desc`** with appropriate fallbacks.
+- **PASS** — `**cz101b4001_desc`** explicitly sets `.post_reset_delay = 120` to preserve Radxa legacy behavior.
+- **PASS** — `**lmt101sx006c_desc`** values **120/0/120/5** match vendor init tail precisely.
+- **PASS** — No community-layer edits; clean kernel + WIC build.
+- **PASS — CRITICAL FINDING — BLK-012:** A2's output note confirms timing values were already in effect during prior bench tests. **BLK-012 is NOT a timing defect.** See `**diary/BLOCKERS.md`** corrected diagnosis.
+- **Merge approved.**
 
 ---
 
-### TASK-127 — [Phase 1] `jadard` vendor init uses `mipi_dsi_generic_write` + dmesg errors
+### TASK-127 — [Phase 1] `jadard` vendor init uses `mipi_dsi_generic_write` + dmesg errors *(archived — [DONE] 2026-05-10)*
 
-**Status:** `[REVIEW]`  
+**Status:** `[DONE]`  
 **Phase:** 1  
 **Depends on:** **TASK-126** (**`0005`** in-tree)  
 **Branch:** `task/TASK-127-jadard-generic-write` (A2)
@@ -111,7 +145,14 @@ Tasks are sorted by dependency order. Do not reorder.
 - **Owner:** cold power cycle + **`modetest -M rockchip -s 191:#0`**; **`dmesg | grep -i jadard`** if still black.
 - **No** **`meta-rockchip`** / **`meta-qt6`** / **`meta-rauc`** edits.
 
-**A1 review notes:** [to be filled]
+**A1 review notes (`[DONE]` 2026-05-10):**
+
+- **PASS** — `grep -n "^+" 0006-*.patch | grep mipi_dsi` shows **only** `mipi_dsi_generic_write` in addition lines. `mipi_dsi_dcs_write_buffer` appears **only** in `-` (deletion) lines — confirmed the old DCS write loop is fully replaced.
+- **PASS** — New `jadard_init_sequence()` sends 2-byte `cmd->data` via `mipi_dsi_generic_write()` → MIPI packet type **0x23** (Generic Short Write, 2 parameters). This is correct for JD9365 vendor register writes that are **not** standard DCS commands.
+- **PASS** — `dev_err()` on failure provides `dmesg` visibility for init failures (critical for BLK-012 diagnosis on next flash).
+- **PASS** — Sleep Out (`mipi_dsi_dcs_exit_sleep_mode`), Display On (`mipi_dsi_dcs_set_display_on`), and post-sleep-out `0xE0` page-select (`mipi_dsi_dcs_write_buffer`) remain **unchanged** — these are genuine DCS commands and must stay as DCS writes.
+- **PASS** — No community-layer edits; clean kernel + WIC build.
+- **Merge approved. Flash immediately.**
 
 ---
 
